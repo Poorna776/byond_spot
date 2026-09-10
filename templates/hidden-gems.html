@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BYOND Spot | Hidden Gems</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Segoe UI",Arial,sans-serif;background:#FAF9F6;color:#263238}button{font:inherit;cursor:pointer}a{text-decoration:none;color:inherit}
+.navbar{height:68px;background:#fff;border-bottom:1px solid #E7E5E1;display:flex;align-items:center;justify-content:space-between;padding:0 4.8%;position:sticky;top:0;z-index:1000}.logo img{height:50px}.nav-links{display:flex;gap:34px}.nav-links a{font-size:13px;font-weight:600}.nav-links a:hover,.nav-links a.active{color:#0B6869}.profile-button{width:40px;height:40px;border:0;border-radius:50%;background:#E8F6F5;color:#0B6869;font-weight:700}
+.page{max-width:1180px;margin:auto;padding:52px 5% 70px}.eyebrow{font-size:11px;letter-spacing:1.8px;font-weight:800;color:#159A9C;margin-bottom:10px}.title{font-size:42px;line-height:1.08;color:#0B6869}.subtitle{max-width:700px;color:#718096;font-size:15px;margin-top:12px}
+.gems-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px}.gem-card{background:#fff;border:1px solid #E7E5E1;border-radius:20px;overflow:hidden;cursor:pointer;transition:.25s;box-shadow:0 8px 28px rgba(38,50,56,.05)}.gem-card:hover{transform:translateY(-5px);box-shadow:0 15px 35px rgba(38,50,56,.1)}.gem-image{height:205px;background-size:cover;background-position:center;position:relative}.gem-image:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.45),transparent 60%)}.activity{position:absolute;top:14px;right:14px;z-index:2;background:#E8F6F5;color:#0B6869;padding:6px 10px;border-radius:30px;font-size:11px;font-weight:800}.gem-body{padding:20px}.gem-body h3{font-size:19px;color:#0B6869}.gem-body p{font-size:13px;color:#718096;margin-top:6px;min-height:42px}.meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:11px;color:#718096}.meta i{color:#159A9C}.tags{display:flex;gap:6px;margin-top:14px}.tag{font-size:10px;background:#F3E7D3;padding:5px 8px;border-radius:7px;font-weight:700;color:#5e5548}.open{border-top:1px solid #eee;margin-top:15px;padding-top:13px;color:#0B6869;font-size:12px;font-weight:800;display:flex;justify-content:space-between}
+.detail{display:none}.detail.active{display:block}.listing.hidden{display:none}.back{border:0;background:transparent;color:#0B6869;font-weight:700;font-size:14px;margin-bottom:22px}.detail-head{display:flex;justify-content:space-between;gap:20px;margin-bottom:22px}.detail-head h1{font-size:38px;color:#0B6869;line-height:1.1}.location{font-size:13px;color:#718096;margin-top:8px}.location i{color:#159A9C}.actions{display:flex;gap:9px}.btn{border:1px solid #D8E5E4;background:#fff;color:#0B6869;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:700}.btn.primary{background:#159A9C;color:#fff}
+.layout{display:grid;grid-template-columns:1.18fr .82fr;gap:22px}.map{height:570px;background:#fff;border:1px solid #E7E5E1;border-radius:22px;overflow:hidden;position:relative}.map-label{position:absolute;top:15px;left:15px;z-index:500;background:rgba(255,255,255,.95);padding:9px 12px;border-radius:10px;color:#0B6869;font-size:11px;font-weight:800;box-shadow:0 4px 15px #0002}.map-controls{position:absolute;right:15px;bottom:15px;z-index:500;display:flex;gap:7px}.map-controls button{width:38px;height:38px;border:0;border-radius:10px;background:#fff;color:#0B6869;box-shadow:0 4px 14px #0002}
+.ai{height:570px;border-radius:22px;overflow:hidden;position:relative;background:linear-gradient(145deg,#0B6869,#159A9C);color:#fff;box-shadow:0 18px 45px rgba(11,104,105,.2)}.ai:before,.ai:after{content:"";position:absolute;border-radius:50%;background:#fff1}.ai:before{width:260px;height:260px;right:-80px;top:-80px}.ai:after{width:190px;height:190px;left:-60px;bottom:-70px}.ai-inner{position:relative;z-index:2;height:100%;padding:26px;display:flex;flex-direction:column}.ai-top{display:flex;align-items:center;gap:12px}.ai-icon{width:40px;height:40px;border-radius:12px;background:#ffffff2a;display:grid;place-items:center}.ai-top h3{font-size:17px}.ai-top span{font-size:10px;opacity:.75}.ai-intro{margin-top:24px}.ai-intro h2{font-size:27px;line-height:1.15}.ai-intro p{font-size:12px;line-height:1.7;color:#fffc;margin-top:9px}.ai-scroll{overflow:auto;margin-top:20px;flex:1}.ai-card{background:#ffffff1f;border:1px solid #ffffff2a;border-radius:15px;padding:15px;margin-bottom:10px;backdrop-filter:blur(8px)}.ai-card h4{font-size:12px}.ai-card p{font-size:11px;line-height:1.6;color:#fffc;margin-top:5px}.ai-input{display:flex;gap:7px;background:#ffffff1f;border:1px solid #ffffff2a;padding:7px;border-radius:13px;margin-top:12px}.ai-input input{flex:1;background:transparent;border:0;outline:0;color:#fff;font-size:11px;padding:8px}.ai-input input::placeholder{color:#fffa}.send{width:36px;border:0;border-radius:9px;background:#F3E7D3;color:#0B6869}
+.info{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.info-box{background:#fff;border:1px solid #E7E5E1;border-radius:14px;padding:14px}.info-box i{color:#159A9C}.info-box small{display:block;color:#718096;font-size:10px;margin-top:5px}.info-box strong{display:block;color:#0B6869;font-size:13px}
+footer{background:#0B6869;color:#fffc;text-align:center;padding:24px;font-size:11px}
+.back-link {
+            display: inline-block;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .back-link:hover {
+            color: #0B6869;
+        }
+
+@media(max-width:900px){.gems-grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.map,.ai{height:480px}}
+@media(max-width:650px){.nav-links{display:none}.title{font-size:34px}.gems-grid{grid-template-columns:1fr}.detail-head{flex-direction:column}.detail-head h1{font-size:31px}.actions{width:100%}.btn{flex:1}.info{grid-template-columns:repeat(2,1fr)}.map,.ai{height:420px}}
+</style>
+</head>
+<body>
+<nav class="navbar">
+<a href="index.html" class="logo"><img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html#explore">Explore</a>
+            <a href="index.html#hidden-gems" class="active">Hidden Gems</a>
+            <a href="index.html#plan-trip">Plan Trip</a>
+            <a href="index.html#safety">Safety</a>
+        </div>
+
+        <button class="profile-button" onclick="location.href='profile.html'">P</button>
+    </nav>
+
+<main class="page">
+<section id="listing" class="listing">
+        <a href="index.html" class="back-link">
+            ← Back to Explore
+        </a>
+<div class="eyebrow">DISCOVER DIFFERENTLY</div><h1 class="title">Hidden Gems</h1>
+<p class="subtitle">Explore lesser-known places that match your interests, offer a calmer experience, and create opportunities for local communities.</p>
+<div class="gems-grid">
+<article class="gem-card" onclick="showGem('tungabhadra')"><div class="gem-image" style="background-image:url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1000&q=80')"><span class="activity">● Low activity</span></div><div class="gem-body"><h3>Tungabhadra Hidden Village</h3><p>A quiet cultural escape with village heritage, nature and authentic local food.</p><div class="meta"><span><i class="fa-solid fa-location-dot"></i> 42 km</span><span><i class="fa-solid fa-cloud-sun"></i> 28°C</span><span>₹800–₹1,200</span></div><div class="tags"><span class="tag">Culture</span><span class="tag">Nature</span><span class="tag">Local Food</span></div><div class="open">Explore this gem <i class="fa-solid fa-arrow-right"></i></div></div></article>
+<article class="gem-card" onclick="showGem('heritage')"><div class="gem-image" style="background-image:url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1000&q=80')"><span class="activity">● Moderate activity</span></div><div class="gem-body"><h3>Quiet Heritage Quarter</h3><p>Historic streets, local craft traditions and stories away from the busiest routes.</p><div class="meta"><span><i class="fa-solid fa-location-dot"></i> 31 km</span><span><i class="fa-solid fa-sun"></i> 27°C</span><span>₹600–₹1,000</span></div><div class="tags"><span class="tag">History</span><span class="tag">Culture</span><span class="tag">Crafts</span></div><div class="open">Explore this gem <i class="fa-solid fa-arrow-right"></i></div></div></article>
+<article class="gem-card" onclick="showGem('nature')"><div class="gem-image" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80')"><span class="activity">● Low activity</span></div><div class="gem-body"><h3>Hidden Forest Retreat</h3><p>A peaceful nature destination suited to travelers looking for slower experiences.</p><div class="meta"><span><i class="fa-solid fa-location-dot"></i> 54 km</span><span><i class="fa-solid fa-cloud"></i> 25°C</span><span>₹900–₹1,400</span></div><div class="tags"><span class="tag">Nature</span><span class="tag">Relaxed</span><span class="tag">Photography</span></div><div class="open">Explore this gem <i class="fa-solid fa-arrow-right"></i></div></div></article>
+</div></section>
+
+<section id="detail" class="detail">
+<button class="back" onclick="showListing()"><i class="fa-solid fa-arrow-left"></i> Back to Hidden Gems</button>
+<div class="detail-head"><div><div class="eyebrow">HIDDEN GEM · AI GUIDED</div><h1 id="detailTitle">Tungabhadra Hidden Village</h1><div class="location" id="detailLocation"></div></div><div class="actions"><button class="btn" onclick="getDirections()"><i class="fa-solid fa-route"></i> Get Directions</button><button class="btn primary" onclick="planVisit()"><i class="fa-solid fa-wand-magic-sparkles"></i> Plan My Visit</button></div></div>
+<div class="layout">
+<div class="map"><div class="map-label"><i class="fa-solid fa-location-dot"></i> Selected hidden gem</div><div id="gemMap" style="height:100%"></div><div class="map-controls"><button onclick="gemMap.zoomIn()"><i class="fa-solid fa-plus"></i></button><button onclick="gemMap.zoomOut()"><i class="fa-solid fa-minus"></i></button><button onclick="centerGem()"><i class="fa-solid fa-crosshairs"></i></button></div></div>
+<aside class="ai"><div class="ai-inner"><div class="ai-top"><div class="ai-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div><h3>BYOND AI Guide</h3><span>Context-aware travel companion</span></div></div><div class="ai-intro"><h2 id="aiHeading"></h2><p id="aiIntro"></p></div><div class="ai-scroll"><div class="ai-card"><h4><i class="fa-solid fa-clock"></i> Why visit?</h4><p id="why"></p></div><div class="ai-card"><h4><i class="fa-solid fa-route"></i> Smart suggestion</h4><p id="suggestion"></p></div><div class="ai-card"><h4><i class="fa-solid fa-people-group"></i> Local impact</h4><p>Choosing lesser-known destinations helps spread visitor demand and creates opportunities for local communities.</p></div></div><div class="ai-input"><input id="question" placeholder="Ask about this hidden gem..."><button class="send" onclick="askAI()"><i class="fa-solid fa-arrow-up"></i></button></div></div></aside>
+</div>
+<div class="info"><div class="info-box"><i class="fa-solid fa-chart-simple"></i><small>Tourism activity</small><strong id="activityInfo"></strong></div><div class="info-box"><i class="fa-solid fa-cloud-sun"></i><small>Current weather</small><strong id="weatherInfo"></strong></div><div class="info-box"><i class="fa-solid fa-wallet"></i><small>Estimated cost</small><strong id="costInfo"></strong></div><div class="info-box"><i class="fa-solid fa-heart"></i><small>Experience</small><strong id="experienceInfo"></strong></div></div>
+</section>
+</main>
+<footer>BYOND Spot · Discover Beyond the Usual.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const gems={
+tungabhadra:{title:"Tungabhadra Hidden Village",distance:"42 km from your current location",activity:"Low",weather:"28°C · Partly Cloudy",cost:"₹800–₹1,200",experience:"Culture · Nature",lat:15.2,lng:76.4,heading:"A quieter way to experience Tungabhadra.",intro:"A calmer alternative to heavily visited attractions, with village culture, nature and local food.",why:"Enjoy village culture, local food and nature without the usual tourist rush.",suggestion:"Visit earlier in the day for a more relaxed experience and more time with local activities."},
+heritage:{title:"Quiet Heritage Quarter",distance:"31 km from your current location",activity:"Moderate",weather:"27°C · Sunny",cost:"₹600–₹1,000",experience:"History · Culture",lat:12.95,lng:77.48,heading:"History without the usual crowds.",intro:"A good fit for travelers interested in heritage and local culture who want a relaxed route.",why:"Explore historic streets, local crafts and stories at a slower pace.",suggestion:"Pair a morning heritage walk with a local lunch."},
+nature:{title:"Hidden Forest Retreat",distance:"54 km from your current location",activity:"Low",weather:"25°C · Cloudy",cost:"₹900–₹1,400",experience:"Nature · Relaxed",lat:12.75,lng:77.35,heading:"Slow down and reconnect with nature.",intro:"A quieter destination for nature, photography and unhurried exploration.",why:"Spend time outdoors, photograph the landscape and enjoy a slower travel rhythm.",suggestion:"Start early and keep the schedule flexible."}};
+let gemMap,marker,currentGem;
+function showGem(id){currentGem=id;let g=gems[id];listing.classList.add("hidden");detail.classList.add("active");detailTitle.textContent=g.title;detailLocation.innerHTML='<i class="fa-solid fa-location-dot"></i> '+g.distance;aiHeading.textContent=g.heading;aiIntro.textContent=g.intro;why.textContent=g.why;suggestion.textContent=g.suggestion;activityInfo.textContent=g.activity;weatherInfo.textContent=g.weather;costInfo.textContent=g.cost;experienceInfo.textContent=g.experience;history.replaceState(null,"","hidden-gems.html?id="+id);setTimeout(()=>{if(!gemMap){gemMap=L.map("gemMap",{zoomControl:false}).setView([g.lat,g.lng],11);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(gemMap)}else gemMap.setView([g.lat,g.lng],11);if(marker)marker.remove();marker=L.marker([g.lat,g.lng]).addTo(gemMap).bindPopup(g.title).openPopup();gemMap.invalidateSize()},50);scrollTo({top:0,behavior:"smooth"})}
+function showListing(){detail.classList.remove("active");listing.classList.remove("hidden");history.replaceState(null,"","hidden-gems.html");scrollTo({top:0,behavior:"smooth"})}
+function centerGem(){let g=gems[currentGem];gemMap.flyTo([g.lat,g.lng],13,{duration:.7})}
+function getDirections(){let g=gems[currentGem];if(!g)return;window.open(`https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}`,"_blank");}
+function planVisit(){let g=gems[currentGem];if(!g)return;window.location.href=`planner.html?destination=${encodeURIComponent(g.title)}`;}
+async function askAI(){
+    let q=question.value.trim();
+    if(!q)return;
+    let g=gems[currentGem];
+    question.value="";
+    const scroll=document.querySelector(".ai-scroll");
+    const userMsg=document.createElement("div");
+    userMsg.className="ai-card";
+    userMsg.innerHTML=`<h4><i class="fa-solid fa-user"></i> You</h4><p>${q}</p>`;
+    scroll.appendChild(userMsg);
+    const aiMsg=document.createElement("div");
+    aiMsg.className="ai-card";
+    aiMsg.innerHTML=`<h4><i class="fa-solid fa-wand-magic-sparkles"></i> BYOND AI</h4><p>Thinking...</p>`;
+    scroll.appendChild(aiMsg);
+    scroll.scrollTop=scroll.scrollHeight;
+    try{
+        const res=await fetch("/api/ai/chat",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                message:q,
+                current_place:g?g.title:"Hidden Gems",
+                history:[]
+            })
+        });
+        const data=await res.json();
+        aiMsg.querySelector("p").textContent=data.reply||"I couldn't retrieve an answer at this moment.";
+    }catch(err){
+        aiMsg.querySelector("p").textContent="Sorry, unable to connect to BYOND AI right now.";
+    }
+    scroll.scrollTop=scroll.scrollHeight;
+}
+document.getElementById("question")&&document.getElementById("question").addEventListener("keydown",function(e){if(e.key==="Enter")askAI();});
+let p=new URLSearchParams(location.search);if(p.get("id")&&gems[p.get("id")])showGem(p.get("id"));
+</script>
+</body>
+</html>

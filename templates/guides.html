@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Local Guides | BYOND Spot</title>
+
+    <style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #F7F3ED;
+        color: #352D2D;
+        line-height: 1.6;
+    }
+
+
+    /* =========================
+       NAVBAR
+    ========================= */
+
+    .navbar {
+        height: 72px;
+        background: #FFFFFF;
+        border-bottom: 1px solid #E5DDD3;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 0 6%;
+
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    /* Existing logo - unchanged */
+    .logo {
+        display: flex;
+        align-items: center;
+
+        color: #0B6869;
+
+        font-size: 23px;
+        font-weight: 800;
+
+        letter-spacing: -0.6px;
+    }
+
+    .logo img {
+        height: 50px;
+        width: auto;
+        display: block;
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: #493F3F;
+        font-size: 14px;
+        font-weight: 500;
+        transition: 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+        color: #7A1F3D;
+    }
+
+    .profile-button {
+        width: 40px;
+        height: 40px;
+
+        border: 0;
+        border-radius: 50%;
+
+        background: #F1E5DC;
+        color: #6E1D38;
+
+        font-weight: 700;
+        cursor: pointer;
+
+        transition: 0.2s ease;
+    }
+
+    .profile-button:hover {
+        background: #E7D6CA;
+    }
+
+
+    /* =========================
+       PAGE HEADER
+    ========================= */
+
+    .page-header {
+        padding: 55px 6% 35px;
+
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    .back-link {
+        display: inline-block;
+
+        text-decoration: none;
+
+        color: #81756D;
+
+        font-size: 14px;
+
+        margin-bottom: 20px;
+
+        transition: 0.2s;
+    }
+
+    .back-link:hover {
+        color: #7A1F3D;
+    }
+
+    .page-header h1 {
+        font-size: 36px;
+
+        color: #5D1932;
+
+        margin-bottom: 10px;
+
+        letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+        color: #756B65;
+
+        max-width: 680px;
+
+        font-size: 16px;
+    }
+
+
+    /* =========================
+       GUIDES SECTION
+    ========================= */
+
+    .guides-section {
+        padding: 10px 6% 80px;
+
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    .section-heading {
+        margin-bottom: 25px;
+    }
+
+    .section-heading h2 {
+        font-size: 24px;
+
+        color: #5D1932;
+
+        margin-bottom: 5px;
+    }
+
+    .section-heading p {
+        font-size: 14px;
+        color: #81756D;
+    }
+
+
+    /* =========================
+       GUIDE GRID
+    ========================= */
+
+    .guides-grid {
+        display: grid;
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 24px;
+    }
+
+
+    /* =========================
+       GUIDE CARD
+    ========================= */
+
+    .guide-card {
+        background: #FFFDFC;
+
+        border: 1px solid #E5DDD3;
+
+        border-radius: 16px;
+
+        overflow: hidden;
+
+        transition: 0.25s ease;
+    }
+
+    .guide-card:hover {
+        transform: translateY(-4px);
+
+        border-color: #CDB9A8;
+
+        box-shadow:
+            0 12px 30px rgba(67, 45, 35, 0.10);
+    }
+
+
+    /* =========================
+       GUIDE IMAGE
+    ========================= */
+
+    .guide-image-wrapper {
+        height: 220px;
+
+        position: relative;
+
+        overflow: hidden;
+
+        background: #E9DED0;
+    }
+
+    .guide-image {
+        width: 100%;
+        height: 100%;
+
+        object-fit: cover;
+
+        display: block;
+
+        transition: transform 0.35s ease;
+    }
+
+    .guide-card:hover .guide-image {
+        transform: scale(1.03);
+    }
+
+
+    /* =========================
+       BADGES
+    ========================= */
+
+    .verified-badge {
+        position: absolute;
+
+        top: 12px;
+        left: 12px;
+
+        background: rgba(255, 253, 250, 0.95);
+
+        color: #6E1D38;
+
+        padding: 6px 10px;
+
+        border-radius: 20px;
+
+        font-size: 11px;
+
+        font-weight: 700;
+
+        box-shadow:
+            0 3px 10px rgba(50, 35, 25, 0.12);
+    }
+
+    .rating-badge {
+        position: absolute;
+
+        right: 12px;
+        bottom: 12px;
+
+        background: rgba(255, 253, 250, 0.95);
+
+        padding: 6px 10px;
+
+        border-radius: 20px;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        color: #493F3F;
+
+        box-shadow:
+            0 3px 10px rgba(50, 35, 25, 0.12);
+    }
+
+
+    /* =========================
+       CARD CONTENT
+    ========================= */
+
+    .guide-content {
+        padding: 20px;
+    }
+
+    .guide-name {
+        font-size: 20px;
+
+        color: #4D172B;
+
+        font-weight: 700;
+
+        margin-bottom: 3px;
+    }
+
+    .guide-specialization {
+        font-size: 13px;
+
+        color: #96704F;
+
+        font-weight: 600;
+
+        margin-bottom: 18px;
+    }
+
+
+    /* =========================
+       GUIDE INFORMATION
+    ========================= */
+
+    .guide-info {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 10px;
+
+        margin-bottom: 18px;
+    }
+
+    .info-row {
+        display: flex;
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+        font-size: 13px;
+
+        color: #554C47;
+    }
+
+    .info-label {
+        min-width: 75px;
+
+        color: #8A7E76;
+
+        font-weight: 500;
+    }
+
+
+    /* =========================
+       LANGUAGES
+    ========================= */
+
+    .languages {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 6px;
+    }
+
+    .language-tag {
+        background: #F1E5DC;
+
+        color: #6E1D38;
+
+        padding: 4px 8px;
+
+        border-radius: 6px;
+
+        font-size: 11px;
+
+        font-weight: 600;
+    }
+
+
+    /* =========================
+       CARD FOOTER
+    ========================= */
+
+    .guide-footer {
+        border-top: 1px solid #E8E0D8;
+
+        padding-top: 15px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 10px;
+    }
+
+    .guide-experience {
+        font-size: 12px;
+
+        color: #8A7E76;
+
+        margin-bottom: 2px;
+    }
+
+    .price {
+        font-size: 12px;
+
+        color: #8A7E76;
+    }
+
+    .price strong {
+        color: #4D172B;
+
+        font-size: 15px;
+    }
+
+    .view-btn {
+        border: none;
+
+        background: #6E1D38;
+
+        color: #FFFFFF;
+
+        padding: 9px 15px;
+
+        border-radius: 8px;
+
+        cursor: pointer;
+
+        font-size: 12px;
+
+        font-weight: 600;
+
+        transition: 0.2s ease;
+    }
+
+    .view-btn:hover {
+        background: #4D172B;
+
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    .footer {
+        background: #4D172B;
+
+        color: #F7F3ED;
+
+        text-align: center;
+
+        padding: 25px;
+
+        font-size: 13px;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 1000px) {
+
+        .guides-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .nav-links {
+            gap: 18px;
+        }
+
+    }
+
+
+    @media (max-width: 650px) {
+
+        .navbar {
+            padding: 0 5%;
+        }
+
+        .nav-links {
+            display: none;
+        }
+
+        .page-header {
+            padding: 40px 5% 30px;
+        }
+
+        .page-header h1 {
+            font-size: 29px;
+        }
+
+        .guides-section {
+            padding-left: 5%;
+            padding-right: 5%;
+        }
+
+        .guides-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .guide-image-wrapper {
+            height: 230px;
+        }
+
+    }
+
+</style>
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
+    <nav class="navbar">
+
+        <a href="index.html" class="logo"><img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html#explore">Explore</a>
+            <a href="index.html#hidden-gems" class="active">Hidden Gems</a>
+            <a href="index.html#plan-trip">Plan Trip</a>
+            <a href="index.html#safety">Safety</a>
+        </div>
+
+        <button class="profile-button" onclick="location.href='profile.html'">P</button>
+
+    </nav>
+
+
+
+    <!-- =========================
+         PAGE HEADER
+    ========================== -->
+
+    <section class="page-header">
+
+        <a
+            href="index.html"
+            class="back-link"
+        >
+            ← Back to Explore
+        </a>
+
+
+        <h1>
+            Local Guides
+        </h1>
+
+
+        <p>
+            Discover trusted local guides who can help you
+            experience destinations through local knowledge,
+            culture, history and unique experiences.
+        </p>
+
+    </section>
+
+
+
+    <!-- =========================
+         GUIDES
+    ========================== -->
+
+    <section class="guides-section">
+
+
+        <div class="section-heading">
+
+            <h2>
+                Guides Near You
+            </h2>
+
+            <p>
+                Connect with local guides and explore the destination
+                with someone who knows it best.
+            </p>
+
+        </div>
+
+
+
+        <div class="guides-grid">
+
+
+            <!-- =========================
+                 GUIDE 1
+            ========================== -->
+
+            <div class="guide-card">
+
+
+                <div class="guide-image-wrapper">
+
+                    <img
+                        class="guide-image"
+                        src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80"
+                        alt="Ravi Kumar"
+                    >
+
+
+                    <span class="verified-badge">
+                        ✓ Verified Guide
+                    </span>
+
+
+                    <span class="rating-badge">
+                        ★ 4.9
+                    </span>
+
+                </div>
+
+
+
+                <div class="guide-content">
+
+
+                    <div class="guide-name">
+                        Ravi Kumar
+                    </div>
+
+
+                    <div class="guide-specialization">
+                        History & Culture
+                    </div>
+
+
+
+                    <div class="guide-info">
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Location
+                            </span>
+
+                            <span>
+                                Vijayawada
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Phone
+                            </span>
+
+                            <span>
+                                +91 98765 43210
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Reviews
+                            </span>
+
+                            <span>
+                                128 reviews
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Languages
+                            </span>
+
+
+                            <div class="languages">
+
+                                <span class="language-tag">
+                                    English
+                                </span>
+
+                                <span class="language-tag">
+                                    Telugu
+                                </span>
+
+                                <span class="language-tag">
+                                    Hindi
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="guide-footer">
+
+
+                        <div>
+
+                            <div class="guide-experience">
+                                8 years experience
+                            </div>
+
+                            <div class="price">
+                                From <strong>₹800</strong> / day
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="view-btn"
+                            onclick="viewGuide('Ravi Kumar')"
+                        >
+                            Book Guide
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 GUIDE 2
+            ========================== -->
+
+            <div class="guide-card">
+
+
+                <div class="guide-image-wrapper">
+
+                    <img
+                        class="guide-image"
+                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=800&q=80"
+                        alt="Anjali Reddy"
+                    >
+
+
+                    <span class="verified-badge">
+                        ✓ Verified Guide
+                    </span>
+
+
+                    <span class="rating-badge">
+                        ★ 4.8
+                    </span>
+
+                </div>
+
+
+
+                <div class="guide-content">
+
+
+                    <div class="guide-name">
+                        Anjali Reddy
+                    </div>
+
+
+                    <div class="guide-specialization">
+                        Food & Local Life
+                    </div>
+
+
+
+                    <div class="guide-info">
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Location
+                            </span>
+
+                            <span>
+                                Guntur
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Phone
+                            </span>
+
+                            <span>
+                                +91 91234 56789
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Reviews
+                            </span>
+
+                            <span>
+                                96 reviews
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Languages
+                            </span>
+
+
+                            <div class="languages">
+
+                                <span class="language-tag">
+                                    English
+                                </span>
+
+                                <span class="language-tag">
+                                    Telugu
+                                </span>
+
+                                <span class="language-tag">
+                                    Hindi
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="guide-footer">
+
+
+                        <div>
+
+                            <div class="guide-experience">
+                                6 years experience
+                            </div>
+
+                            <div class="price">
+                                From <strong>₹700</strong> / day
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="view-btn"
+                            onclick="viewGuide('Anjali Reddy')"
+                        >
+                            Book Guide
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 GUIDE 3
+            ========================== -->
+
+            <div class="guide-card">
+
+
+                <div class="guide-image-wrapper">
+
+                    <img
+                        class="guide-image"
+                        src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
+                        alt="Arjun Rao"
+                    >
+
+
+                    <span class="verified-badge">
+                        ✓ Verified Guide
+                    </span>
+
+
+                    <span class="rating-badge">
+                        ★ 4.7
+                    </span>
+
+                </div>
+
+
+
+                <div class="guide-content">
+
+
+                    <div class="guide-name">
+                        Arjun Rao
+                    </div>
+
+
+                    <div class="guide-specialization">
+                        Nature & Adventure
+                    </div>
+
+
+
+                    <div class="guide-info">
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Location
+                            </span>
+
+                            <span>
+                                Visakhapatnam
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Phone
+                            </span>
+
+                            <span>
+                                +91 99887 66554
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Reviews
+                            </span>
+
+                            <span>
+                                114 reviews
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Languages
+                            </span>
+
+
+                            <div class="languages">
+
+                                <span class="language-tag">
+                                    English
+                                </span>
+
+                                <span class="language-tag">
+                                    Telugu
+                                </span>
+
+                                <span class="language-tag">
+                                    Hindi
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="guide-footer">
+
+
+                        <div>
+
+                            <div class="guide-experience">
+                                7 years experience
+                            </div>
+
+                            <div class="price">
+                                From <strong>₹900</strong> / day
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="view-btn"
+                            onclick="viewGuide('Arjun Rao')"
+                        >
+                            Book Guide
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 GUIDE 4
+            ========================== -->
+
+            <div class="guide-card">
+
+
+                <div class="guide-image-wrapper">
+
+                    <img
+                        class="guide-image"
+                        src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=800&q=80"
+                        alt="Lakshmi Devi"
+                    >
+
+
+                    <span class="verified-badge">
+                        ✓ Verified Guide
+                    </span>
+
+
+                    <span class="rating-badge">
+                        ★ 4.9
+                    </span>
+
+                </div>
+
+
+
+                <div class="guide-content">
+
+
+                    <div class="guide-name">
+                        Lakshmi Devi
+                    </div>
+
+
+                    <div class="guide-specialization">
+                        Spiritual Tourism
+                    </div>
+
+
+
+                    <div class="guide-info">
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Location
+                            </span>
+
+                            <span>
+                                Tirupati
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Phone
+                            </span>
+
+                            <span>
+                                +91 93456 78901
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Reviews
+                            </span>
+
+                            <span>
+                                172 reviews
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Languages
+                            </span>
+
+
+                            <div class="languages">
+
+                                <span class="language-tag">
+                                    Telugu
+                                </span>
+
+                                <span class="language-tag">
+                                    Tamil
+                                </span>
+
+                                <span class="language-tag">
+                                    English
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="guide-footer">
+
+
+                        <div>
+
+                            <div class="guide-experience">
+                                10 years experience
+                            </div>
+
+                            <div class="price">
+                                From <strong>₹850</strong> / day
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="view-btn"
+                            onclick="viewGuide('Lakshmi Devi')"
+                        >
+                            Book Guide
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =========================
+                 GUIDE 5
+            ========================== -->
+
+            <div class="guide-card">
+
+
+                <div class="guide-image-wrapper">
+
+                    <img
+                        class="guide-image"
+                        src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80"
+                        alt="Kiran Kumar"
+                    >
+
+
+                    <span class="verified-badge">
+                        ✓ Verified Guide
+                    </span>
+
+
+                    <span class="rating-badge">
+                        ★ 4.6
+                    </span>
+
+                </div>
+
+
+
+                <div class="guide-content">
+
+
+                    <div class="guide-name">
+                        Kiran Kumar
+                    </div>
+
+
+                    <div class="guide-specialization">
+                        History & Culture
+                    </div>
+
+
+
+                    <div class="guide-info">
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Location
+                            </span>
+
+                            <span>
+                                Rajahmundry
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Phone
+                            </span>
+
+                            <span>
+                                +91 90123 45678
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Reviews
+                            </span>
+
+                            <span>
+                                84 reviews
+                            </span>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <span class="info-label">
+                                Languages
+                            </span>
+
+
+                            <div class="languages">
+
+                                <span class="language-tag">
+                                    English
+                                </span>
+
+                                <span class="language-tag">
+                                    Telugu
+                                </span>
+
+                                <span class="language-tag">
+                                    Hindi
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="guide-footer">
+
+
+                        <div>
+
+                            <div class="guide-experience">
+                                5 years experience
+                            </div>
+
+                            <div class="price">
+                                From <strong>₹750</strong> / day
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            class="view-btn"
+                            onclick="viewGuide('Kiran Kumar')"
+                        >
+                            Book Guide
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="footer">
+
+        © 2026 BYOND Spot. Discover more. Travel better.
+
+    </footer>
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        function viewGuide(name) {
+
+            alert(
+                "Guide profile for " +
+                name +
+                " will open here."
+            );
+
+            /*
+                Later this can become:
+
+                window.location.href =
+                    "guide-details.html";
+
+                The guide ID can be passed
+                through the URL.
+
+                Example:
+
+                guide-details.html?id=1
+            */
+
+        }
+
+
+        function openProfile() {
+
+            alert(
+                "Profile page will open here."
+            );
+
+        }
+
+    </script>
+
+</body>
+</html>
+

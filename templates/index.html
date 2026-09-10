@@ -1,0 +1,3477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BYOND Spot | Discover Beyond the Usual</title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- Leaflet Map -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #FAF9F6;
+            color: #263238;
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .navbar {
+            height: 68px;
+
+            background: #FFFFFF;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 4.8%;
+
+            border-bottom: 1px solid #E7E5E1;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 1000;
+        }
+
+
+        .logo {
+            display: flex;
+            align-items: center;
+
+            color: #0B6869;
+
+            font-size: 23px;
+            font-weight: 800;
+
+            letter-spacing: -0.6px;
+        }
+
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+
+            gap: 34px;
+        }
+
+
+        .nav-links a {
+            color: #263238;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            position: relative;
+
+            transition: 0.2s ease;
+        }
+
+
+        .nav-links a:hover {
+            color: #159A9C;
+        }
+
+
+        .nav-links a.active {
+            color: #0B6869;
+        }
+
+
+        .nav-links a.active::after {
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            right: 0;
+
+            bottom: -10px;
+
+            height: 2px;
+
+            background: #159A9C;
+
+            border-radius: 5px;
+        }
+
+
+        .profile-menu-container {
+            position: relative;
+        }
+
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #E8F6F5;
+
+            color: #0B6869;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .profile-button:hover,
+        .profile-button.open {
+            background: #D8F0EF;
+
+            transform: translateY(-1px);
+        }
+
+
+        .profile-dropdown {
+            position: absolute;
+
+            top: calc(100% + 10px);
+            right: 0;
+
+            width: 190px;
+
+            background: #FFFFFF;
+
+            border: 1px solid #E7E5E1;
+
+            border-radius: 13px;
+
+            padding: 7px;
+
+            box-shadow:
+                0 14px 35px rgba(38,50,56,0.14);
+
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+
+            transition:
+                opacity 0.2s ease,
+                visibility 0.2s ease,
+                transform 0.2s ease;
+
+            z-index: 1200;
+        }
+
+
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+
+        .profile-dropdown a,
+        .profile-dropdown button {
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+
+            gap: 11px;
+
+            padding: 10px 11px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: transparent;
+
+            color: #263238;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            text-align: left;
+
+            cursor: pointer;
+
+            transition: 0.18s ease;
+        }
+
+
+        .profile-dropdown a:hover,
+        .profile-dropdown button:hover {
+            background: #E8F6F5;
+            color: #0B6869;
+        }
+
+
+        .profile-dropdown i {
+            width: 16px;
+
+            text-align: center;
+
+            color: #0B6869;
+
+            font-size: 13px;
+        }
+
+
+        .dropdown-divider {
+            height: 1px;
+
+            background: #E7E5E1;
+
+            margin: 5px 4px;
+        }
+
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .hero {
+            min-height: 470px;
+
+            position: relative;
+
+            display: flex;
+            align-items: center;
+
+            overflow: hidden;
+
+            background-image:
+
+                linear-gradient(
+                    90deg,
+                    rgba(11, 48, 57, 0.82) 0%,
+                    rgba(11, 48, 57, 0.65) 38%,
+                    rgba(11, 48, 57, 0.30) 72%,
+                    rgba(11, 48, 57, 0.12) 100%
+                ),
+
+                url("https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1800&q=90");
+
+            background-size: cover;
+
+            background-position: center;
+        }
+
+
+        .hero-content {
+            width: 100%;
+
+            max-width: 1300px;
+
+            margin: auto;
+
+            padding: 55px 5%;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(430px, 520px);
+
+            align-items: center;
+
+            gap: 55px;
+        }
+
+
+        .hero-text {
+            position: relative;
+
+            z-index: 3;
+        }
+
+
+        .hero-eyebrow {
+            color: #8DE0DB;
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 13px;
+        }
+
+
+        .hero h1 {
+            max-width: 570px;
+
+            color: #FFFFFF;
+
+            font-size: clamp(42px, 5vw, 67px);
+
+            line-height: 0.98;
+
+            letter-spacing: -2.5px;
+
+            margin-bottom: 20px;
+        }
+
+
+        .hero h1 span {
+            color: #91E4E0;
+        }
+
+
+        .hero-description {
+            max-width: 490px;
+
+            color: rgba(255,255,255,0.92);
+
+            font-size: 16px;
+
+            line-height: 1.6;
+
+            margin-bottom: 25px;
+        }
+
+
+        /* =====================================================
+           WEATHER CARD
+        ===================================================== */
+
+        .hero-weather {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 9px 14px;
+
+            background: rgba(255,255,255,0.94);
+
+            border: 1px solid rgba(255,255,255,0.55);
+
+            border-radius: 13px;
+
+            box-shadow:
+                0 7px 22px rgba(0,0,0,0.13);
+
+            width: fit-content;
+        }
+
+
+        .weather-icon {
+            width: 32px;
+            height: 32px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 9px;
+
+            background: #E8F6F5;
+
+            color: #159A9C;
+
+            font-size: 16px;
+        }
+
+
+        .weather-info {
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+        }
+
+
+        .weather-temperature {
+            color: #263238;
+
+            font-size: 15px;
+
+            font-weight: 800;
+        }
+
+
+        .weather-condition {
+            color: #718096;
+
+            font-size: 12px;
+
+            font-weight: 600;
+        }
+
+
+        /* =====================================================
+           CURRENT TRIP HERO CARD
+        ===================================================== */
+
+        .current-trip-hero {
+            display: none;
+
+            align-items: center;
+
+            gap: 11px;
+
+            width: fit-content;
+
+            min-width: 250px;
+
+            margin-top: 10px;
+
+            padding: 9px 11px;
+
+            background: rgba(255,255,255,0.96);
+
+            border: 1px solid rgba(255,255,255,0.58);
+
+            border-radius: 13px;
+
+            box-shadow:
+                0 7px 22px rgba(0,0,0,0.13);
+
+            cursor: pointer;
+
+            text-align: left;
+
+            transition:
+                transform 0.22s ease,
+                box-shadow 0.22s ease;
+        }
+
+
+        .current-trip-hero.show {
+            display: flex;
+        }
+
+
+        .current-trip-hero:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 11px 27px rgba(0,0,0,0.18);
+        }
+
+
+        .current-trip-icon {
+            width: 32px;
+            height: 32px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 9px;
+
+            background: #E8F6F5;
+
+            color: #0B6869;
+
+            font-size: 14px;
+        }
+
+
+        .current-trip-info {
+            min-width: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 1px;
+        }
+
+
+        .current-trip-label {
+            color: #0B6869;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            letter-spacing: 0.9px;
+
+            line-height: 1.2;
+        }
+
+
+        .current-trip-destination {
+            color: #263238;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            line-height: 1.3;
+
+            max-width: 190px;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        .current-trip-day {
+            color: #718096;
+
+            font-size: 10px;
+
+            font-weight: 600;
+
+            line-height: 1.3;
+        }
+
+
+        .current-trip-arrow {
+            width: 27px;
+            height: 27px;
+
+            margin-left: auto;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            background: #0B6869;
+
+            color: #FFFFFF;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 10px;
+
+            transition:
+                transform 0.2s ease,
+                background 0.2s ease;
+        }
+
+
+        .current-trip-hero:hover
+        .current-trip-arrow {
+            transform: translateX(3px);
+
+            background: #159A9C;
+        }
+
+
+        /* =====================================================
+           LOCATION MAP
+        ===================================================== */
+
+        .hero-map-wrapper {
+            position: relative;
+
+            width: 100%;
+
+            max-width: 520px;
+
+            height: 330px;
+
+            justify-self: end;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+
+            background: #E8F6F5;
+
+            border: 1px solid rgba(255,255,255,0.28);
+
+            box-shadow:
+                0 20px 50px rgba(0,0,0,0.25);
+
+            z-index: 4;
+        }
+
+
+        #locationMap {
+            width: 100%;
+            height: 100%;
+        }
+
+
+        /* Map top status */
+
+        .map-status {
+            position: absolute;
+
+            top: 15px;
+            left: 15px;
+
+            z-index: 500;
+
+            background: rgba(255,255,255,0.95);
+
+            border-radius: 20px;
+
+            padding: 8px 12px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            color: #263238;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            box-shadow:
+                0 5px 18px rgba(0,0,0,0.12);
+        }
+
+
+        .map-status-dot {
+            width: 7px;
+            height: 7px;
+
+            background: #159A9C;
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 0 4px rgba(21,154,156,0.15);
+        }
+
+
+        /* Map controls */
+
+        .map-actions {
+            position: absolute;
+
+            right: 15px;
+            bottom: 15px;
+
+            z-index: 500;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+        }
+
+
+        .map-action {
+            width: 38px;
+            height: 38px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: rgba(255,255,255,0.96);
+
+            color: #0B6869;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 14px;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 5px 15px rgba(0,0,0,0.12);
+
+            transition: 0.2s ease;
+        }
+
+
+        .map-action:hover {
+            background: #FFFFFF;
+
+            color: #159A9C;
+
+            transform: translateY(-1px);
+        }
+
+
+        /* Current location marker */
+
+        .current-location-marker {
+            width: 22px;
+            height: 22px;
+
+            background: #159A9C;
+
+            border: 4px solid #FFFFFF;
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 0 7px rgba(21,154,156,0.20),
+                0 4px 12px rgba(0,0,0,0.25);
+        }
+
+
+        /* Leaflet adjustments */
+
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+
+
+        .leaflet-control-attribution {
+            font-size: 8px !important;
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .main {
+            max-width: 1300px;
+
+            margin: auto;
+
+            padding: 48px 4.8% 70px;
+        }
+
+
+        /* =====================================================
+           SECTION HEADER
+        ===================================================== */
+
+        .section-header {
+            margin-bottom: 24px;
+        }
+
+
+        .section-line {
+            width: 28px;
+            height: 3px;
+
+            background: #159A9C;
+
+            border-radius: 5px;
+
+            margin-bottom: 9px;
+        }
+
+
+        .section-header h2 {
+            color: #164B5A;
+
+            font-size: 27px;
+
+            line-height: 1.1;
+
+            letter-spacing: -0.7px;
+
+            margin-bottom: 5px;
+        }
+
+
+        .section-header p {
+            color: #718096;
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           EXPLORE CARDS
+        ===================================================== */
+
+        .explore-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap: 17px;
+        }
+
+
+        .explore-card {
+            height: 260px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            border-radius: 13px;
+
+            cursor: pointer;
+
+            background: #DDE8E7;
+
+            box-shadow:
+                0 6px 18px rgba(38,50,56,0.06);
+
+            transition:
+                transform 0.28s ease,
+                box-shadow 0.28s ease;
+        }
+
+
+        .explore-card:hover {
+            transform: translateY(-5px);
+
+            box-shadow:
+                0 15px 30px rgba(38,50,56,0.14);
+        }
+
+
+        .explore-card::before {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background-image: var(--card-image);
+
+            background-size: cover;
+
+            background-position: center;
+
+            transition:
+                transform 0.5s ease;
+        }
+
+
+        .explore-card:hover::before {
+            transform: scale(1.06);
+        }
+
+
+        .explore-card::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    to top,
+                    rgba(0,30,36,0.90) 0%,
+                    rgba(0,30,36,0.55) 42%,
+                    rgba(0,30,36,0.08) 100%
+                );
+        }
+
+
+        .card-content {
+            position: absolute;
+
+            inset: 0;
+
+            z-index: 2;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: flex-end;
+
+            padding: 19px;
+        }
+
+
+        .card-icon {
+            width: 38px;
+            height: 38px;
+
+            background: rgba(255,255,255,0.95);
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 15px;
+
+            margin-bottom: auto;
+
+            color: #0B6869;
+        }
+
+
+        .card-content h3 {
+            color: #FFFFFF;
+
+            font-size: 17px;
+
+            margin-bottom: 4px;
+        }
+
+
+        .card-content p {
+            color: rgba(255,255,255,0.91);
+
+            font-size: 12px;
+
+            line-height: 1.45;
+
+            max-width: 190px;
+        }
+
+
+        .card-arrow {
+            width: 32px;
+            height: 32px;
+
+            background: #FFFFFF;
+
+            color: #0B6869;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-weight: 700;
+
+            margin-top: 12px;
+
+            transition: 0.2s;
+        }
+
+
+        .explore-card:hover .card-arrow {
+            transform: translateX(3px);
+        }
+
+
+        /* =====================================================
+           HIDDEN GEMS
+        ===================================================== */
+
+        .hidden-gems {
+            position: relative;
+
+            margin-top: 38px;
+
+            min-height: 275px;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            background-image:
+
+                linear-gradient(
+                    90deg,
+                    rgba(246,231,209,0.98) 0%,
+                    rgba(246,231,209,0.91) 35%,
+                    rgba(246,231,209,0.50) 65%,
+                    rgba(246,231,209,0.10) 100%
+                ),
+
+                url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=90");
+
+            background-size: cover;
+
+            background-position: center;
+
+            padding: 37px;
+
+            display: flex;
+
+            align-items: center;
+        }
+
+
+        .hidden-content {
+            width: 55%;
+
+            position: relative;
+
+            z-index: 2;
+        }
+
+
+        .badge {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding: 6px 12px;
+
+            background: #F28C7A;
+
+            color: #FFFFFF;
+
+            border-radius: 20px;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            letter-spacing: 0.5px;
+
+            margin-bottom: 13px;
+        }
+
+
+        .hidden-content h2 {
+            color: #164B5A;
+
+            font-size: 31px;
+
+            letter-spacing: -1px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .hidden-content p {
+            color: #28757A;
+
+            font-size: 13px;
+
+            max-width: 480px;
+
+            line-height: 1.55;
+
+            margin-bottom: 18px;
+        }
+
+
+        .primary-button {
+            border: none;
+
+            background: #159A9C;
+
+            color: #FFFFFF;
+
+            border-radius: 25px;
+
+            padding: 11px 18px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        .primary-button:hover {
+            background: #0B6869;
+
+            transform: translateY(-2px);
+        }
+
+
+        /* Hidden Gem Preview */
+
+        .gem-preview {
+            position: absolute;
+
+            right: 30px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 310px;
+
+            background: rgba(255,255,255,0.96);
+
+            border-radius: 15px;
+
+            padding: 12px;
+
+            display: flex;
+
+            gap: 13px;
+
+            box-shadow:
+                0 15px 40px rgba(38,50,56,0.13);
+        }
+
+
+        .gem-image {
+            width: 83px;
+            height: 83px;
+
+            flex-shrink: 0;
+
+            border-radius: 10px;
+
+            background-image:
+                url("https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=400&q=85");
+
+            background-size: cover;
+
+            background-position: center;
+        }
+
+
+        .gem-info {
+            padding: 4px 0;
+        }
+
+
+        .gem-info h3 {
+            color: #164B5A;
+
+            font-size: 13px;
+
+            margin-bottom: 4px;
+        }
+
+
+        .gem-distance {
+            color: #718096;
+
+            font-size: 10px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .activity {
+            display: inline-block;
+
+            background: #E8F6F5;
+
+            color: #0B6869;
+
+            padding: 4px 7px;
+
+            border-radius: 10px;
+
+            font-size: 9px;
+
+            font-weight: 600;
+        }
+
+
+        .gem-tags {
+            display: flex;
+
+            gap: 5px;
+
+            margin-top: 7px;
+        }
+
+
+        .gem-tag {
+            background: #E8F6F5;
+
+            color: #28757A;
+
+            padding: 3px 7px;
+
+            border-radius: 10px;
+
+            font-size: 8px;
+        }
+
+
+        /* =====================================================
+           AI JOURNEY PLANNER
+        ===================================================== */
+
+        .planner-banner {
+            position: relative;
+
+            margin-top: 20px;
+
+            min-height: 122px;
+
+            border-radius: 17px;
+
+            overflow: hidden;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #0B6869 0%,
+                    #117E80 55%,
+                    #159A9C 100%
+                );
+
+            padding: 27px 35px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+        }
+
+
+        .planner-banner::after {
+            content: "";
+
+            position: absolute;
+
+            right: -45px;
+
+            bottom: -95px;
+
+            width: 260px;
+            height: 260px;
+
+            border: 1px solid rgba(255,255,255,0.12);
+
+            border-radius: 50%;
+        }
+
+
+        .planner-banner::before {
+            content: "";
+
+            position: absolute;
+
+            right: 65px;
+
+            bottom: -70px;
+
+            width: 190px;
+            height: 190px;
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            border-radius: 50%;
+        }
+
+
+        .planner-content {
+            position: relative;
+
+            z-index: 2;
+        }
+
+
+        .planner-eyebrow {
+            color: #B7EFEB;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.6px;
+
+            margin-bottom: 6px;
+        }
+
+
+        .planner-content h2 {
+            color: #FFFFFF;
+
+            font-size: 23px;
+
+            margin-bottom: 3px;
+        }
+
+
+        .planner-content p {
+            color: rgba(255,255,255,0.85);
+
+            font-size: 11px;
+        }
+
+
+        .planner-button {
+            position: relative;
+
+            z-index: 3;
+
+            border: none;
+
+            background: #FFFFFF;
+
+            color: #0B6869;
+
+            border-radius: 8px;
+
+            padding: 12px 17px;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        .planner-button:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 8px 20px rgba(0,0,0,0.13);
+        }
+
+
+        /* =====================================================
+           SAFETY
+        ===================================================== */
+
+        .safety-strip {
+            margin-top: 38px;
+
+            min-height: 62px;
+
+            border-radius: 12px;
+
+            border: 1px solid #F5D5CD;
+
+            background: #FFF8F6;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 10px 15px;
+        }
+
+
+        .safety-left {
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+        }
+
+
+        .safety-icon {
+            width: 31px;
+            height: 31px;
+
+            border-radius: 8px;
+
+            background: #F28C7A;
+
+            color: #FFFFFF;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 14px;
+        }
+
+
+        .safety-text h3 {
+            font-size: 11px;
+
+            margin-bottom: 1px;
+
+            color: #263238;
+        }
+
+
+        .safety-text p {
+            color: #718096;
+
+            font-size: 9px;
+        }
+
+
+        .safety-button {
+            border: none;
+
+            background: #F28C7A;
+
+            color: #FFFFFF;
+
+            border-radius: 7px;
+
+            padding: 9px 14px;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        .safety-button:hover {
+            background: #DF7462;
+        }
+
+
+        /* =====================================================
+           ABOUT BYOND SPOT
+        ===================================================== */
+
+        .about-section {
+            margin-top: 42px;
+
+            position: relative;
+
+            min-height: 290px;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            background:
+
+                linear-gradient(
+                    90deg,
+                    rgba(11,104,105,0.97) 0%,
+                    rgba(11,104,105,0.90) 42%,
+                    rgba(11,104,105,0.48) 70%,
+                    rgba(11,104,105,0.18) 100%
+                ),
+
+                url("https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1600&q=90");
+
+            background-size: cover;
+
+            background-position: center;
+
+            padding: 42px 38px;
+
+            display: flex;
+
+            align-items: center;
+        }
+
+
+        .about-content {
+            position: relative;
+
+            z-index: 2;
+
+            max-width: 700px;
+        }
+
+
+        .about-eyebrow {
+            color: #A9E7E3;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.8px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .about-content h2 {
+            color: #FFFFFF;
+
+            font-size: 30px;
+
+            line-height: 1.2;
+
+            letter-spacing: -0.8px;
+
+            margin-bottom: 12px;
+        }
+
+
+        .about-content h2 span {
+            color: #91E4E0;
+        }
+
+
+        .about-content p {
+            color: rgba(255,255,255,0.90);
+
+            font-size: 12px;
+
+            line-height: 1.7;
+
+            max-width: 630px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .about-points {
+            display: flex;
+
+            gap: 9px;
+
+            flex-wrap: wrap;
+
+            margin-top: 16px;
+        }
+
+
+        .about-point {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            background: rgba(255,255,255,0.12);
+
+            border: 1px solid rgba(255,255,255,0.18);
+
+            color: #FFFFFF;
+
+            border-radius: 20px;
+
+            padding: 7px 11px;
+
+            font-size: 9px;
+
+            backdrop-filter: blur(5px);
+        }
+
+
+        .about-point i {
+            color: #91E4E0;
+
+            font-size: 10px;
+        }
+
+
+        /* Decorative circles */
+
+        .about-section::before {
+            content: "";
+
+            position: absolute;
+
+            width: 330px;
+            height: 330px;
+
+            border: 1px solid rgba(255,255,255,0.10);
+
+            border-radius: 50%;
+
+            right: -70px;
+
+            top: -100px;
+        }
+
+
+        .about-section::after {
+            content: "";
+
+            position: absolute;
+
+            width: 230px;
+            height: 230px;
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            border-radius: 50%;
+
+            right: 40px;
+
+            bottom: -140px;
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        footer {
+            border-top: 1px solid #E7E5E1;
+
+            background: #FFFFFF;
+
+            padding: 25px 5%;
+
+            text-align: center;
+
+            color: #718096;
+
+            font-size: 11px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .explore-grid {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+            .explore-card {
+                height: 245px;
+            }
+
+
+            .hero-content {
+                grid-template-columns:
+                    minmax(0, 1fr)
+                    minmax(370px, 450px);
+
+                gap: 35px;
+            }
+
+
+            .hero-map-wrapper {
+                height: 310px;
+            }
+
+        }
+
+
+        @media (max-width: 850px) {
+
+            .navbar {
+                padding: 0 4%;
+            }
+
+            .nav-links {
+                gap: 18px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .hero {
+                min-height: auto;
+            }
+
+            .hero-content {
+                padding-top: 75px;
+                padding-bottom: 60px;
+
+                grid-template-columns: 1fr;
+
+                gap: 30px;
+            }
+
+            .hero-text {
+                max-width: 650px;
+            }
+
+            .hero-map-wrapper {
+                justify-self: start;
+
+                width: min(100%, 560px);
+
+                height: 330px;
+            }
+
+            .hidden-content {
+                width: 65%;
+            }
+
+            .gem-preview {
+                width: 270px;
+
+                right: 18px;
+            }
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            .navbar {
+                padding: 0 4%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .profile-menu-container {
+                margin-left: auto;
+            }
+
+            .hero {
+                min-height: auto;
+
+                background-position: 62% center;
+            }
+
+            .hero-content {
+                padding: 50px 7% 55px;
+            }
+
+            .hero h1 {
+                font-size: 45px;
+            }
+
+            .hero-map-wrapper {
+                height: 300px;
+
+                width: 100%;
+            }
+
+
+            .current-trip-hero {
+                min-width: 0;
+
+                width: 100%;
+
+                max-width: 310px;
+            }
+
+
+            .location-status {
+                top: 18px;
+
+                right: 5%;
+            }
+
+            .main {
+                padding-left: 5%;
+
+                padding-right: 5%;
+            }
+
+            .explore-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .hidden-gems {
+                padding: 28px;
+
+                min-height: 440px;
+
+                align-items: flex-start;
+            }
+
+            .hidden-content {
+                width: 100%;
+            }
+
+            .gem-preview {
+                top: auto;
+
+                bottom: 22px;
+
+                left: 28px;
+
+                right: 28px;
+
+                width: auto;
+
+                transform: none;
+            }
+
+            .planner-banner {
+                padding: 25px;
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 18px;
+            }
+
+
+            .planner-button {
+                width: 100%;
+
+                justify-content: center;
+            }
+
+
+            .about-section {
+                padding: 32px 25px;
+
+                min-height: 350px;
+
+                align-items: flex-start;
+            }
+
+            .about-content h2 {
+                font-size: 26px;
+            }
+
+            .about-content p {
+                font-size: 11px;
+            }
+
+        }
+
+
+        @media (max-width: 480px) {
+
+            .logo img {
+                height: 42px;
+            }
+
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            .hero-map-wrapper {
+                height: 275px;
+
+                border-radius: 15px;
+            }
+
+            .explore-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .explore-card {
+                height: 230px;
+            }
+
+            .section-header h2 {
+                font-size: 24px;
+            }
+
+            .hidden-content h2 {
+                font-size: 27px;
+            }
+
+            .gem-preview {
+                left: 18px;
+
+                right: 18px;
+            }
+
+            .safety-strip {
+                align-items: flex-start;
+
+                gap: 12px;
+            }
+
+            .safety-left {
+                align-items: flex-start;
+            }
+
+            .about-content h2 {
+                font-size: 24px;
+            }
+
+            .about-points {
+                gap: 7px;
+            }
+
+            .about-point {
+                font-size: 8px;
+
+                padding: 6px 9px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ===================================================== -->
+
+    <nav class="navbar">
+
+        <a href="index.html" class="logo">
+
+            <img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+
+        </a>
+
+
+        <div class="nav-links">
+
+            <a
+                href="#explore"
+                class="active"
+            >
+                Explore
+            </a>
+
+
+            <a href="#hidden-gems">
+                Hidden Gems
+            </a>
+
+
+            <a href="#plan-trip">
+                Plan Trip
+            </a>
+
+
+            <a href="#safety">
+                Safety
+            </a>
+
+        </div>
+
+
+        <div class="profile-menu-container">
+
+            <button
+                class="profile-button"
+                id="profileBtn"
+                type="button"
+                aria-label="Open profile menu"
+                aria-expanded="false"
+            >
+                P
+            </button>
+
+
+            <div
+                class="profile-dropdown"
+                id="profileDropdown"
+            >
+
+                <a href="profile.html">
+
+                    <i class="fa-solid fa-user"></i>
+
+                    <span>
+                        My Profile
+                    </span>
+
+                </a>
+
+
+                <a href="settings.html">
+
+                    <i class="fa-solid fa-gear"></i>
+
+                    <span>
+                        Settings
+                    </span>
+
+                </a>
+
+
+                <div class="dropdown-divider"></div>
+
+
+                <button
+                    type="button"
+                    id="logoutBtn"
+                >
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                    <span>
+                        Logout
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         HERO
+    ===================================================== -->
+
+    <section class="hero">
+
+
+        <div class="hero-content">
+
+
+            <!-- HERO TEXT -->
+
+            <div class="hero-text">
+
+
+                <div class="hero-eyebrow">
+
+                    YOUR JOURNEY STARTS HERE
+
+                </div>
+
+
+                <h1>
+
+                    Explore what's
+
+                    <span>
+                        around you.
+                    </span>
+
+                </h1>
+
+
+                <p class="hero-description">
+
+                    Discover places, experiences and services around
+                    your current location — all in one place.
+
+                </p>
+
+
+                <!-- =================================================
+                     WEATHER
+                ================================================= -->
+
+                <div class="hero-weather">
+
+                    <div class="weather-icon">
+
+                        <i class="fa-solid fa-cloud-sun"></i>
+
+                    </div>
+
+
+                    <div class="weather-info">
+
+                        <span class="weather-temperature">
+                            28°C
+                        </span>
+
+                        <span class="weather-condition">
+                            Partly Cloudy
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     CURRENT TRIP
+                ================================================= -->
+
+                <button
+                    class="current-trip-hero"
+                    id="currentTripHero"
+                    type="button"
+                    onclick="goToCurrentTrip()"
+                    aria-label="Open current trip"
+                >
+
+                    <div class="current-trip-icon">
+
+                        <i class="fa-solid fa-route"></i>
+
+                    </div>
+
+
+                    <div class="current-trip-info">
+
+                        <span class="current-trip-label">
+
+                            CURRENT TRIP
+
+                        </span>
+
+
+                        <span
+                            class="current-trip-destination"
+                            id="currentTripDestination"
+                        >
+                            Your Trip
+                        </span>
+
+
+                        <span
+                            class="current-trip-day"
+                            id="currentTripDay"
+                        >
+                            Day 1 of 1
+                        </span>
+
+                    </div>
+
+
+                    <div class="current-trip-arrow">
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </div>
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 LOCATION MAP
+            ================================================= -->
+
+            <div class="hero-map-wrapper">
+
+
+                <div class="map-status">
+
+                    <span class="map-status-dot"></span>
+
+                    You are here
+
+                </div>
+
+
+                <div id="locationMap"></div>
+
+
+                <div class="map-actions">
+
+
+                    <button
+                        class="map-action"
+                        id="centerLocation"
+                        title="Center on my location"
+                        aria-label="Center on my location"
+                    >
+
+                        <i class="fa-solid fa-location-crosshairs"></i>
+
+                    </button>
+
+
+                    <button
+                        class="map-action"
+                        id="fullscreenMap"
+                        title="Fullscreen map"
+                        aria-label="Fullscreen map"
+                    >
+
+                        <i class="fa-solid fa-expand"></i>
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ===================================================== -->
+
+    <main class="main">
+
+
+        <!-- =================================================
+             EXPLORE AROUND YOU
+        ================================================= -->
+
+        <section id="explore">
+
+
+            <div class="section-header">
+
+                <div class="section-line"></div>
+
+                <h2>
+                    Explore around you
+                </h2>
+
+                <p>
+                    Find what you need, whenever you are.
+                </p>
+
+            </div>
+
+
+
+            <div class="explore-grid">
+
+
+                <!-- PLACES -->
+
+                <a
+                    href="places.html"
+                    class="explore-card"
+
+                    style="
+                        --card-image:
+                        url('https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=85');
+                    "
+                >
+
+                    <div class="card-content">
+
+                        <div class="card-icon">
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+                        </div>
+
+
+                        <h3>
+                            Places to Visit
+                        </h3>
+
+
+                        <p>
+                            Explore attractions,
+                            landmarks and hidden gems.
+                        </p>
+
+
+                        <div class="card-arrow">
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+
+                <!-- HOTELS -->
+
+                <a
+                    href="hotels.html"
+                    class="explore-card"
+
+                    style="
+                        --card-image:
+                        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=85');
+                    "
+                >
+
+                    <div class="card-content">
+
+                        <div class="card-icon">
+
+                            <i class="fa-solid fa-hotel"></i>
+
+                        </div>
+
+
+                        <h3>
+                            Hotels & Stays
+                        </h3>
+
+
+                        <p>
+                            Find the perfect place
+                            to stay nearby.
+                        </p>
+
+
+                        <div class="card-arrow">
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+
+                <!-- FOOD -->
+
+                <a
+                    href="restaurants.html"
+                    class="explore-card"
+
+                    style="
+                        --card-image:
+                        url('https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=85');
+                    "
+                >
+
+                    <div class="card-content">
+
+                        <div class="card-icon">
+
+                            <i class="fa-solid fa-utensils"></i>
+
+                        </div>
+
+
+                        <h3>
+                            Food & Restaurants
+                        </h3>
+
+
+                        <p>
+                            Discover local food
+                            and popular eateries.
+                        </p>
+
+
+                        <div class="card-arrow">
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+
+                <!-- GUIDES -->
+
+                <a
+                    href="guides.html"
+                    class="explore-card"
+
+                    style="
+                        --card-image:
+                        url('https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=800&q=85');
+                    "
+                >
+
+                    <div class="card-content">
+
+                        <div class="card-icon">
+
+                            <i class="fa-solid fa-person-hiking"></i>
+
+                        </div>
+
+
+                        <h3>
+                            Local Guides
+                        </h3>
+
+
+                        <p>
+                            Connect with trusted
+                            local guides.
+                        </p>
+
+
+                        <div class="card-arrow">
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+
+                <!-- TRANSPORT -->
+
+                <a
+                    href="travel.html"
+                    class="explore-card"
+
+                    style="
+                        --card-image:
+                        url('https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=85');
+                    "
+                >
+
+                    <div class="card-content">
+
+                        <div class="card-icon">
+
+                            <i class="fa-solid fa-bus"></i>
+
+                        </div>
+
+
+                        <h3>
+                            Travel & Transport
+                        </h3>
+
+
+                        <p>
+                            Find flights, trains,
+                            buses, cabs and more.
+                        </p>
+
+
+                        <div class="card-arrow">
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             HIDDEN GEMS
+        ================================================= -->
+
+        <section
+            class="hidden-gems"
+            id="hidden-gems"
+        >
+
+            <div class="hidden-content">
+
+                <div class="badge">
+
+                    <i class="fa-solid fa-star"></i>
+
+                    DISCOVER DIFFERENTLY
+
+                </div>
+
+
+                <h2>
+
+                    Discover Beyond the Usual
+
+                </h2>
+
+
+                <p>
+
+                    Uncover lesser-known places that match what
+                    you love — without following the usual tourist crowds.
+
+                </p>
+
+
+                <button
+                    class="primary-button"
+                    onclick="window.location.href='hidden-gems.html'"
+                >
+
+                    Explore Hidden Gems
+
+                    &nbsp;
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+
+            <div class="gem-preview">
+
+                <div class="gem-image"></div>
+
+
+                <div class="gem-info">
+
+                    <h3>
+                        A place worth discovering
+                    </h3>
+
+
+                    <div class="gem-distance">
+                        Away from the usual route
+                    </div>
+
+
+                    <span class="activity">
+                        Moderate activity
+                    </span>
+
+
+                    <div class="gem-tags">
+
+                        <span class="gem-tag">
+                            Local
+                        </span>
+
+                        <span class="gem-tag">
+                            Culture
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             AI JOURNEY PLANNER
+        ================================================= -->
+
+        <section
+            class="planner-banner"
+            id="plan-trip"
+        >
+
+            <div class="planner-content">
+
+                <div class="planner-eyebrow">
+
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                    &nbsp; AI JOURNEY PLANNING
+
+                </div>
+
+
+                <h2>
+                    Your Journey, Intelligently Planned
+                </h2>
+
+
+                <p>
+
+                    Let AI create a personalized itinerary based
+                    on your interests, time and budget.
+
+                </p>
+
+            </div>
+
+
+            <button
+                class="planner-button"
+                onclick="window.location.href='planner.html'"
+            >
+
+                Create My Journey
+
+                &nbsp;
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </button>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SAFETY
+        ================================================= -->
+
+        <section
+            class="safety-strip"
+            id="safety"
+        >
+
+            <div class="safety-left">
+
+                <div class="safety-icon">
+
+                    <i class="fa-solid fa-exclamation"></i>
+
+                </div>
+
+
+                <div class="safety-text">
+
+                    <h3>
+                        Need help while travelling?
+                    </h3>
+
+
+                    <p>
+
+                        Quickly access nearby emergency services
+                        and safety information.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="safety-button"
+                onclick="window.location.href='safety.html'"
+            >
+
+                Emergency & SOS
+
+            </button>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ABOUT BYOND SPOT
+        ================================================= -->
+
+        <section
+            class="about-section"
+            id="about"
+        >
+
+            <div class="about-content">
+
+                <div class="about-eyebrow">
+
+                    ABOUT BYOND SPOT
+
+                </div>
+
+
+                <h2>
+
+                    Travel beyond the usual.
+                    <span>Discover what others miss.</span>
+
+                </h2>
+
+
+                <p>
+
+                    BYOND Spot is an intelligent tourism platform
+                    designed to help travelers discover destinations,
+                    local services and experiences based on their
+                    interests, budget, time and surroundings.
+
+                </p>
+
+
+                <p>
+
+                    Instead of directing everyone toward the same
+                    popular tourist attractions, BYOND Spot helps
+                    travelers discover suitable lesser-known places
+                    while creating better opportunities for local
+                    communities and helping reduce overcrowding.
+
+                </p>
+
+
+                <div class="about-points">
+
+                    <div class="about-point">
+
+                        <i class="fa-solid fa-compass"></i>
+
+                        Personalized Discovery
+
+                    </div>
+
+
+                    <div class="about-point">
+
+                        <i class="fa-solid fa-map-location-dot"></i>
+
+                        Hidden Places
+
+                    </div>
+
+
+                    <div class="about-point">
+
+                        <i class="fa-solid fa-people-group"></i>
+
+                        Local Communities
+
+                    </div>
+
+
+                    <div class="about-point">
+
+                        <i class="fa-solid fa-route"></i>
+
+                        Smarter Travel
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ===================================================== -->
+
+    <footer>
+
+        BYOND Spot · Discover Beyond the Usual.
+
+    </footer>
+
+
+
+    <!-- =====================================================
+         LEAFLET JS
+    ===================================================== -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+    <script>
+
+
+        /* =====================================================
+           LOCATION MAP
+        ===================================================== */
+
+        let currentLocation = [
+            16.5062,
+            80.6480
+        ];
+
+
+        const map =
+            L.map("locationMap", {
+
+                zoomControl: false,
+
+                scrollWheelZoom: true,
+
+                dragging: true,
+
+                doubleClickZoom: true,
+
+                touchZoom: true,
+
+                keyboard: true
+
+            }).setView(
+                currentLocation,
+                11
+            );
+
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+
+                maxZoom: 19,
+
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+
+            }
+        ).addTo(map);
+
+
+
+        /* =====================================================
+           CURRENT LOCATION MARKER
+        ===================================================== */
+
+        const locationIcon =
+            L.divIcon({
+
+                className: "",
+
+                html:
+                    '<div class="current-location-marker"></div>',
+
+                iconSize: [
+                    22,
+                    22
+                ],
+
+                iconAnchor: [
+                    11,
+                    11
+                ]
+
+            });
+
+
+        const currentMarker =
+            L.marker(
+                currentLocation,
+                {
+                    icon: locationIcon
+                }
+            ).addTo(map);
+
+
+        currentMarker.bindTooltip(
+            "Your Location",
+            {
+
+                direction: "top",
+
+                offset: [
+                    0,
+                    -10
+                ]
+
+            }
+        );
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    currentLocation = [pos.coords.latitude, pos.coords.longitude];
+                    currentMarker.setLatLng(currentLocation);
+                },
+                function(err) {
+                    console.log("Using regional center:", err.message);
+                },
+                { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+            );
+        }
+
+
+        /* =====================================================
+           FETCH & DISPLAY PLACES ON MAP
+        ===================================================== */
+
+        fetch("/api/places")
+            .then(res => res.json())
+            .then(data => {
+                const places = data.places || [];
+                const bounds = [currentLocation];
+
+                places.forEach(p => {
+                    if (p.latitude != null && p.longitude != null) {
+                        const lat = parseFloat(p.latitude);
+                        const lng = parseFloat(p.longitude);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            const spotIcon = L.divIcon({
+                                className: "",
+                                html: '<div style="background:#0B6869;color:#FFF;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #FFF;box-shadow:0 3px 8px rgba(0,0,0,0.3);font-size:14px;cursor:pointer;">📍</div>',
+                                iconSize: [28, 28],
+                                iconAnchor: [14, 14],
+                                popupAnchor: [0, -14]
+                            });
+
+                            const placeMarker = L.marker([lat, lng], { icon: spotIcon }).addTo(map);
+                            const popupHtml = `
+                                <div style="font-family: 'Segoe UI', Arial, sans-serif; min-width: 160px;">
+                                    <strong style="color: #0B6869; font-size: 14px;">${p.name}</strong><br>
+                                    <span style="color: #756B65; font-size: 11px;">📍 ${p.location || 'Andhra Pradesh'}</span><br>
+                                    <div style="margin-top: 6px;">
+                                        <a href="place-details.html?place=${p.id}" style="color: #0B6869; font-weight: 700; text-decoration: none; font-size: 12px;">Explore Spot →</a>
+                                    </div>
+                                </div>
+                            `;
+                            placeMarker.bindPopup(popupHtml);
+                            bounds.push([lat, lng]);
+                        }
+                    }
+                });
+
+                if (bounds.length > 1) {
+                    map.fitBounds(bounds, { padding: [40, 40] });
+                }
+            })
+            .catch(err => {
+                console.warn("Could not load places for map:", err);
+            });
+
+
+        /* =====================================================
+           CENTER ON LOCATION
+        ===================================================== */
+
+        document
+            .getElementById("centerLocation")
+            .addEventListener(
+                "click",
+                function() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function(pos) {
+                                currentLocation = [pos.coords.latitude, pos.coords.longitude];
+                                currentMarker.setLatLng(currentLocation);
+                                map.flyTo(currentLocation, 14, { duration: 0.8 });
+                            },
+                            function() {
+                                map.flyTo(currentLocation, 14, { duration: 0.8 });
+                            }
+                        );
+                    } else {
+                        map.flyTo(currentLocation, 14, { duration: 0.8 });
+                    }
+                }
+            );
+
+
+
+        /* =====================================================
+           FULLSCREEN
+        ===================================================== */
+
+        document
+            .getElementById("fullscreenMap")
+            .addEventListener(
+                "click",
+                function() {
+
+                    const mapWrapper =
+                        document.querySelector(
+                            ".hero-map-wrapper"
+                        );
+
+
+                    if (!document.fullscreenElement) {
+
+                        if (
+                            mapWrapper.requestFullscreen
+                        ) {
+
+                            mapWrapper.requestFullscreen();
+
+                        }
+
+                    } else {
+
+                        document.exitFullscreen();
+
+                    }
+
+                }
+            );
+
+
+
+        /* =====================================================
+           FULLSCREEN ICON
+        ===================================================== */
+
+        document.addEventListener(
+            "fullscreenchange",
+            function() {
+
+                const button =
+                    document.getElementById(
+                        "fullscreenMap"
+                    );
+
+
+                const icon =
+                    button.querySelector("i");
+
+
+                if (document.fullscreenElement) {
+
+                    icon.className =
+                        "fa-solid fa-compress";
+
+                    button.title =
+                        "Exit fullscreen";
+
+                } else {
+
+                    icon.className =
+                        "fa-solid fa-expand";
+
+                    button.title =
+                        "Fullscreen map";
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           MAP RESIZE
+        ===================================================== */
+
+        document.addEventListener(
+            "fullscreenchange",
+            function() {
+
+                setTimeout(
+                    function() {
+
+                        map.invalidateSize();
+
+                    },
+                    300
+                );
+
+            }
+        );
+
+
+
+        /* =====================================================
+           PROFILE MENU
+        ===================================================== */
+
+        const profileBtn =
+            document.getElementById(
+                "profileBtn"
+            );
+
+
+        const profileDropdown =
+            document.getElementById(
+                "profileDropdown"
+            );
+
+
+       const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async function () {
+
+        const confirmed = confirm(
+            "Are you sure you want to logout?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        logoutBtn.disabled = true;
+
+        try {
+
+            const token = localStorage.getItem(
+                "byondSpotAccessToken"
+            );
+
+            await fetch("/api/auth/logout", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+
+                    ...(token
+                        ? {
+                            "Authorization":
+                                "Bearer " + token
+                        }
+                        : {})
+                },
+
+                credentials: "include"
+            });
+
+        } catch (error) {
+
+            /*
+             * Even if the backend cannot be reached,
+             * remove the local authentication state.
+             */
+            console.warn(
+                "Logout request failed:",
+                error
+            );
+
+        } finally {
+
+            /*
+             * Remove frontend authentication data.
+             */
+            localStorage.removeItem(
+                "byondSpotAccessToken"
+            );
+
+            localStorage.removeItem(
+                "byondSpotUser"
+            );
+
+            /*
+             * IMPORTANT:
+             * Do NOT remove byondSpotTrip or
+             * byondSpotActiveTrip here.
+             *
+             * Those belong to the trip system,
+             * not authentication.
+             */
+
+            window.location.href = "login.html";
+        }
+    });
+}
+
+
+        profileBtn.addEventListener(
+            "click",
+            function(event) {
+
+                event.stopPropagation();
+
+
+                const isOpen =
+                    profileDropdown.classList.toggle(
+                        "show"
+                    );
+
+
+                profileBtn.classList.toggle(
+                    "open",
+                    isOpen
+                );
+
+
+                profileBtn.setAttribute(
+                    "aria-expanded",
+                    isOpen
+                        ? "true"
+                        : "false"
+                );
+
+            }
+        );
+
+
+        document.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    !event.target.closest(
+                        ".profile-menu-container"
+                    )
+                ) {
+
+                    profileDropdown.classList.remove(
+                        "show"
+                    );
+
+
+                    profileBtn.classList.remove(
+                        "open"
+                    );
+
+
+                    profileBtn.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+
+            }
+        );
+
+
+
+
+
+
+
+        /* =====================================================
+           ACTIVE TRIP
+        ===================================================== */
+
+        function getActiveTrip() {
+
+            const activeFlag =
+                localStorage.getItem(
+                    "byondSpotActiveTrip"
+                );
+
+
+            const tripData =
+                localStorage.getItem(
+                    "byondSpotTrip"
+                );
+
+
+            if (
+                activeFlag !== "true" ||
+                !tripData
+            ) {
+
+                return null;
+
+            }
+
+
+            try {
+
+                const trip =
+                    JSON.parse(
+                        tripData
+                    );
+
+
+                if (
+                    trip &&
+                    trip.status === "active"
+                ) {
+
+                    return trip;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Invalid active trip data:",
+                    error
+                );
+
+            }
+
+
+            return null;
+
+        }
+
+
+
+        /* =====================================================
+           UPDATE CURRENT TRIP HERO CARD
+        ===================================================== */
+
+        function updateCurrentTripUI() {
+
+            const currentTripHero =
+                document.getElementById(
+                    "currentTripHero"
+                );
+
+
+            const destinationElement =
+                document.getElementById(
+                    "currentTripDestination"
+                );
+
+
+            const dayElement =
+                document.getElementById(
+                    "currentTripDay"
+                );
+
+
+            if (
+                !currentTripHero ||
+                !destinationElement ||
+                !dayElement
+            ) {
+
+                return;
+
+            }
+
+
+            const trip =
+                getActiveTrip();
+
+
+
+            /* ---------------------------------------------
+               NO ACTIVE TRIP
+            --------------------------------------------- */
+
+            if (!trip) {
+
+                currentTripHero.classList.remove(
+                    "show"
+                );
+
+                return;
+
+            }
+
+
+
+            /* ---------------------------------------------
+               ACTIVE TRIP
+            --------------------------------------------- */
+
+            const destination =
+                trip.destination?.name ||
+                trip.destination_name ||
+                trip.destination ||
+                "Your Trip";
+
+
+            const currentDay =
+                Number(
+                    trip.current_day || 1
+                );
+
+
+            const totalDays =
+                Number(
+                    trip.duration_days ||
+                    trip.days ||
+                    1
+                );
+
+
+            destinationElement.textContent =
+                destination;
+
+
+            dayElement.textContent =
+                `Day ${Math.min(
+                    currentDay,
+                    totalDays
+                )} of ${totalDays}`;
+
+
+            currentTripHero.classList.add(
+                "show"
+            );
+
+        }
+
+
+
+        /* =====================================================
+           OPEN CURRENT TRIP
+        ===================================================== */
+
+        function goToCurrentTrip() {
+
+            const trip =
+                getActiveTrip();
+
+
+            if (!trip) {
+
+                alert(
+                    "There is no active trip right now."
+                );
+
+                return;
+
+            }
+
+
+            window.location.href =
+                "current-trip.html";
+
+        }
+
+
+
+        /* =====================================================
+           INITIALIZE
+        ===================================================== */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                updateCurrentTripUI();
+
+            }
+        );
+
+
+        /*
+            Refresh when returning to the homepage
+            through browser navigation.
+        */
+
+        window.addEventListener(
+            "pageshow",
+            function() {
+
+                updateCurrentTripUI();
+
+            }
+        );
+
+
+    </script>
+
+
+</body>
+
+</html>

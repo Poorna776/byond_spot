@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Plan Your Trip | BYOND Spot</title>
+
+    <style>
+        /* =========================================================
+           GLOBAL
+        ========================================================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #F7F3ED;
+            color: #302923;
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        /* =========================================================
+           NAVBAR
+           KEEPING YOUR EXISTING NAVBAR
+        ========================================================= */
+
+        nav {
+            height: 72px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5DDD3;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 6%;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #302923;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #5D1932;
+        }
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: #F1E4D8;
+            color: #5D1932;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* =========================================================
+           PAGE
+        ========================================================= */
+
+        .page {
+            max-width: 1000px;
+            margin: auto;
+            padding: 42px 6% 80px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+
+            color: #6E1D38;
+            text-decoration: none;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            margin-bottom: 34px;
+
+            transition: 0.2s ease;
+        }
+
+        .back-link:hover {
+            transform: translateX(-3px);
+            color: #4D172B;
+        }
+
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        .page-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 38px;
+        }
+
+        .page-header h1 {
+            font-size: 40px;
+            line-height: 1.15;
+            color: #5D1932;
+            margin-bottom: 13px;
+            letter-spacing: -0.7px;
+        }
+
+        .page-header p {
+            color: #756B65;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* =========================================================
+           MAIN CARD
+        ========================================================= */
+
+        .planner-card {
+            background: #FFFDFC;
+            border: 1px solid #E5DDD3;
+            border-radius: 20px;
+            padding: 38px;
+            box-shadow: 0 8px 30px rgba(76, 52, 40, 0.05);
+        }
+
+        /* =========================================================
+           FORM SECTIONS
+        ========================================================= */
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-label {
+            display: block;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            color: #756B65;
+
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+
+            margin-bottom: 11px;
+        }
+
+        .section-helper {
+            color: #8A7E76;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 7px;
+        }
+
+        /* =========================================================
+           DESTINATION
+        ========================================================= */
+
+        .destination-wrapper {
+            position: relative;
+        }
+
+        .destination-input {
+            position: relative;
+        }
+
+        .destination-input input {
+            width: 100%;
+            height: 58px;
+
+            border: 1px solid #DCCFC3;
+            border-radius: 11px;
+
+            padding: 0 18px 0 47px;
+
+            font-size: 15px;
+            color: #302923;
+
+            outline: none;
+            background: #FAF8F4;
+
+            transition: 0.2s ease;
+        }
+
+        .destination-input input::placeholder {
+            color: #9A8F87;
+        }
+
+        .destination-input input:focus {
+            border-color: #8A5364;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(93, 25, 50, 0.06);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 17px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            font-size: 17px;
+            color: #7B6D64;
+
+            pointer-events: none;
+        }
+
+        .destination-suggestions {
+            display: none;
+
+            position: absolute;
+            top: calc(100% + 7px);
+            left: 0;
+            right: 0;
+
+            background: #FFFFFF;
+
+            border: 1px solid #E5DDD3;
+            border-radius: 12px;
+
+            box-shadow: 0 14px 30px rgba(55, 39, 30, 0.10);
+
+            overflow: hidden;
+
+            z-index: 20;
+        }
+
+        .destination-suggestions.show {
+            display: block;
+        }
+
+        .suggestion {
+            width: 100%;
+            border: none;
+            background: transparent;
+
+            padding: 13px 16px;
+
+            text-align: left;
+            cursor: pointer;
+
+            border-bottom: 1px solid #F0EBE5;
+
+            transition: 0.15s ease;
+        }
+
+        .suggestion:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion:hover {
+            background: #F8F1EA;
+        }
+
+        .suggestion-name {
+            display: block;
+            color: #4D172B;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .suggestion-location {
+            display: block;
+            color: #8A7E76;
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           FORM GRID
+        ========================================================= */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 52px;
+
+            border: 1px solid #DCCFC3;
+            border-radius: 10px;
+
+            padding: 0 15px;
+
+            font-size: 14px;
+            color: #302923;
+
+            background: #FAF8F4;
+            outline: none;
+
+            transition: 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #8A5364;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(93, 25, 50, 0.06);
+        }
+
+        input[type="date"] {
+            color-scheme: light;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 0.7;
+        }
+
+        /* =========================================================
+           TRAVELLERS
+        ========================================================= */
+
+        .traveller-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            width: 100%;
+            height: 52px;
+
+            border: 1px solid #DCCFC3;
+            border-radius: 10px;
+
+            background: #FAF8F4;
+
+            padding: 0 10px;
+        }
+
+        .traveller-control button {
+            width: 34px;
+            height: 34px;
+
+            border: 1px solid #D9CCC1;
+            border-radius: 8px;
+
+            background: #FFFFFF;
+            color: #5D1932;
+
+            font-size: 18px;
+            line-height: 1;
+
+            cursor: pointer;
+
+            transition: 0.15s ease;
+        }
+
+        .traveller-control button:hover {
+            background: #F2E7DE;
+            border-color: #BFA99A;
+        }
+
+        .traveller-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4D172B;
+        }
+
+        /* =========================================================
+           INTERESTS
+        ========================================================= */
+
+        .interest-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .interest {
+            border: 1px solid #DCCFC3;
+            background: #FFFFFF;
+
+            padding: 10px 16px;
+            border-radius: 24px;
+
+            font-size: 13px;
+            color: #5D1932;
+
+            cursor: pointer;
+
+            transition: 0.18s ease;
+        }
+
+        .interest:hover {
+            border-color: #A9828D;
+            background: #FCF8F4;
+        }
+
+        .interest.selected {
+            background: #F1E4D8;
+            border-color: #8D596A;
+            color: #4D172B;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           STYLE / TRANSPORT OPTIONS
+        ========================================================= */
+
+        .option-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 11px;
+        }
+
+        .option-list.transport {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .option {
+            position: relative;
+        }
+
+        .option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 52px;
+
+            padding: 10px 12px;
+
+            border: 1px solid #DCCFC3;
+            border-radius: 10px;
+
+            background: #FFFFFF;
+
+            color: #6B5E56;
+            font-size: 13px;
+            font-weight: 600;
+
+            text-align: center;
+
+            cursor: pointer;
+
+            transition: 0.18s ease;
+        }
+
+        .option label:hover {
+            background: #FCF8F4;
+            border-color: #BFA99A;
+        }
+
+        .option input:checked + label {
+            background: #F1E4D8;
+            border-color: #8D596A;
+            color: #4D172B;
+        }
+
+        /* =========================================================
+           TRIP SUMMARY
+        ========================================================= */
+
+        .trip-summary {
+            display: none;
+
+            margin-top: 4px;
+            margin-bottom: 30px;
+
+            padding: 16px 18px;
+
+            background: #F8F1EA;
+            border: 1px solid #E7D9CD;
+            border-radius: 12px;
+        }
+
+        .trip-summary.show {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .summary-title {
+            color: #5D1932;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .summary-text {
+            color: #7C7068;
+            font-size: 12px;
+        }
+
+        .summary-days {
+            color: #4D172B;
+            font-size: 20px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* =========================================================
+           VALIDATION
+        ========================================================= */
+
+        .error-message {
+            display: none;
+
+            color: #9B334D;
+            font-size: 12px;
+
+            margin-top: 7px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .input-error {
+            border-color: #B85D73 !important;
+            background: #FFF8F9 !important;
+        }
+
+        /* =========================================================
+           CREATE BUTTON
+        ========================================================= */
+
+        .create-btn {
+            width: 100%;
+            height: 58px;
+
+            border: none;
+            border-radius: 11px;
+
+            background: #5D1932;
+            color: #FFFFFF;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+
+            box-shadow: 0 7px 18px rgba(93, 25, 50, 0.14);
+        }
+
+        .create-btn:hover {
+            background: #4D172B;
+            transform: translateY(-1px);
+            box-shadow: 0 9px 22px rgba(93, 25, 50, 0.18);
+        }
+
+        .create-btn:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* =========================================================
+           PLANNING STATE
+        ========================================================= */
+
+        .planning-card {
+            display: none;
+
+            background: #FFFDFC;
+            border: 1px solid #E5DDD3;
+            border-radius: 20px;
+
+            padding: 52px 30px;
+
+            text-align: center;
+
+            box-shadow: 0 8px 30px rgba(76, 52, 40, 0.05);
+        }
+
+        .planning-card.show {
+            display: block;
+        }
+
+        .planning-icon {
+            width: 58px;
+            height: 58px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin: 0 auto 20px;
+
+            border-radius: 50%;
+
+            background: #F1E4D8;
+            color: #5D1932;
+
+            font-size: 25px;
+        }
+
+        .planning-card h2 {
+            color: #5D1932;
+            font-size: 23px;
+            margin-bottom: 9px;
+        }
+
+        .planning-card p {
+            color: #756B65;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .planning-steps {
+            max-width: 350px;
+            margin: 28px auto 0;
+
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            text-align: left;
+        }
+
+        .planning-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            color: #81756D;
+            font-size: 13px;
+
+            opacity: 0.45;
+            transition: 0.25s ease;
+        }
+
+        .planning-step.active {
+            color: #5D1932;
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        .step-icon {
+            width: 20px;
+            height: 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #E9E0D8;
+
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+
+        .planning-step.active .step-icon {
+            background: #F1E4D8;
+            color: #5D1932;
+        }
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 760px) {
+
+            nav {
+                padding: 0 5%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page {
+                padding: 30px 5% 60px;
+            }
+
+            .page-header {
+                margin-bottom: 30px;
+            }
+
+            .page-header h1 {
+                font-size: 31px;
+            }
+
+            .page-header p {
+                font-size: 14px;
+            }
+
+            .planner-card {
+                padding: 25px 20px;
+                border-radius: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 22px;
+            }
+
+            .option-list,
+            .option-list.transport {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .trip-summary.show {
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 450px) {
+
+            .page-header h1 {
+                font-size: 28px;
+            }
+
+            .planner-card {
+                padding: 22px 17px;
+            }
+
+            .option-list,
+            .option-list.transport {
+                grid-template-columns: 1fr;
+            }
+
+            .interest {
+                padding: 9px 13px;
+            }
+
+            .summary-days {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<nav>
+
+    <a href="index.html" class="logo">
+        <img
+               src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+               alt="BYOND Spot"
+        >
+    </a>
+
+    <div class="nav-links">
+        <a href="index.html#explore">Explore</a>
+        <a href="index.html#hidden-gems" class="active">Hidden Gems</a>
+        <a href="index.html#plan-trip">Plan Trip</a>
+        <a href="index.html#safety">Safety</a>
+    </div>
+
+    <button class="profile-button" onclick="location.href='profile.html'">P</button>
+
+</nav>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="page">
+
+    <a href="index.html" class="back-link">
+        ← Back to Explore
+    </a>
+
+
+    <!-- =====================================================
+         HEADER
+    ===================================================== -->
+
+    <div class="page-header">
+
+        <h1>Plan Your Trip</h1>
+
+        <p>
+            Tell us what kind of journey you're looking for,
+            and we'll help shape the right experience for you.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         PLANNER FORM
+    ===================================================== -->
+
+    <div class="planner-card" id="plannerCard">
+
+        <!-- DESTINATION -->
+
+        <div class="form-section">
+
+            <label class="section-label" for="destination">
+                Where are you going?
+            </label>
+
+            <div class="destination-wrapper">
+
+                <div class="destination-input">
+
+                    <span class="search-icon">⌕</span>
+
+                    <input
+                        type="text"
+                        id="destination"
+                        autocomplete="off"
+                        placeholder="Search for a destination"
+                    >
+
+                </div>
+
+                <div
+                    class="destination-suggestions"
+                    id="destinationSuggestions"
+                ></div>
+
+            </div>
+
+            <div
+                class="error-message"
+                id="destinationError"
+            >
+                Please select or enter a destination.
+            </div>
+
+        </div>
+
+
+        <!-- DATES -->
+
+        <div class="form-section">
+
+            <div class="section-label">
+                When are you travelling?
+            </div>
+
+            <div class="form-grid">
+
+                <div>
+
+                    <label
+                        class="section-label"
+                        for="startDate"
+                    >
+                        Start date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="startDate"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label
+                        class="section-label"
+                        for="endDate"
+                    >
+                        End date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="endDate"
+                        class="form-control"
+                    >
+
+                </div>
+
+            </div>
+
+            <div
+                class="error-message"
+                id="dateError"
+            ></div>
+
+        </div>
+
+
+        <!-- AUTOMATIC DURATION -->
+
+        <div
+            class="trip-summary"
+            id="tripSummary"
+        >
+
+            <div>
+
+                <div class="summary-title">
+                    Your trip duration
+                </div>
+
+                <div
+                    class="summary-text"
+                    id="summaryText"
+                >
+                    Select your travel dates.
+                </div>
+
+            </div>
+
+            <div
+                class="summary-days"
+                id="summaryDays"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <!-- TRAVELLERS + BUDGET -->
+
+        <div class="form-section">
+
+            <div class="form-grid">
+
+                <!-- TRAVELLERS -->
+
+                <div>
+
+                    <label class="section-label">
+                        Who's travelling?
+                    </label>
+
+                    <div class="traveller-control">
+
+                        <button
+                            type="button"
+                            onclick="changeTravellers(-1)"
+                            aria-label="Decrease travellers"
+                        >
+                            −
+                        </button>
+
+                        <span
+                            class="traveller-count"
+                            id="travellerCount"
+                        >
+                            2 travellers
+                        </span>
+
+                        <button
+                            type="button"
+                            onclick="changeTravellers(1)"
+                            aria-label="Increase travellers"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BUDGET -->
+
+                <div>
+
+                    <label
+                        class="section-label"
+                        for="budget"
+                    >
+                        Total trip budget
+                    </label>
+
+                    <input
+                        type="number"
+                        id="budget"
+                        class="form-control"
+                        min="500"
+                        step="500"
+                        placeholder="₹ 10,000"
+                    >
+
+                    <div class="section-helper">
+                        Enter the approximate total amount you want to spend.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="error-message"
+                id="budgetError"
+            >
+                Please enter a valid budget.
+            </div>
+
+        </div>
+
+
+        <!-- INTERESTS -->
+
+        <div class="form-section">
+
+            <div class="section-label">
+                What do you enjoy?
+            </div>
+
+            <div class="interest-list">
+
+                <button
+                    type="button"
+                    class="interest"
+                    data-interest="History"
+                >
+                    History
+                </button>
+
+                <button
+                    type="button"
+                    class="interest"
+                    data-interest="Nature"
+                >
+                    Nature
+                </button>
+
+                <button
+                    type="button"
+                    class="interest"
+                    data-interest="Food"
+                >
+                    Food
+                </button>
+
+                <button
+                    type="button"
+                    class="interest"
+                    data-interest="Culture"
+                >
+                    Culture
+                </button>
+
+                <button
+                    type="button"
+                    class="interest"
+                    data-interest="Adventure"
+                >
+                    Adventure
+                </button>
+
+                <button
+                    type="button"
+                    class="interest"
+                    data-interest="Shopping"
+                >
+                    Shopping
+                </button>
+
+            </div>
+
+            <div class="section-helper">
+                Select as many as you like. Leave them unselected for a balanced trip.
+            </div>
+
+        </div>
+
+
+        <!-- TRAVEL STYLE -->
+
+        <div class="form-section">
+
+            <div class="section-label">
+                What's your travel style?
+            </div>
+
+            <div class="option-list">
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="travelStyle"
+                        id="styleRelaxed"
+                        value="Relaxed"
+                    >
+
+                    <label for="styleRelaxed">
+                        Relaxed
+                    </label>
+
+                </div>
+
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="travelStyle"
+                        id="styleBalanced"
+                        value="Balanced"
+                        checked
+                    >
+
+                    <label for="styleBalanced">
+                        Balanced
+                    </label>
+
+                </div>
+
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="travelStyle"
+                        id="stylePacked"
+                        value="Packed"
+                    >
+
+                    <label for="stylePacked">
+                        Packed
+                    </label>
+
+                </div>
+
+            </div>
+
+            <div class="section-helper">
+                This helps determine how many experiences are planned each day.
+            </div>
+
+        </div>
+
+
+        <!-- TRANSPORT -->
+
+        <div class="form-section">
+
+            <div class="section-label">
+                Preferred transport
+            </div>
+
+            <div class="option-list transport">
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="transport"
+                        id="transportCar"
+                        value="Car"
+                    >
+
+                    <label for="transportCar">
+                        Car
+                    </label>
+
+                </div>
+
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="transport"
+                        id="transportCab"
+                        value="Cab"
+                    >
+
+                    <label for="transportCab">
+                        Cab
+                    </label>
+
+                </div>
+
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="transport"
+                        id="transportPublic"
+                        value="Public Transport"
+                    >
+
+                    <label for="transportPublic">
+                        Public Transport
+                    </label>
+
+                </div>
+
+
+                <div class="option">
+
+                    <input
+                        type="radio"
+                        name="transport"
+                        id="transportFlexible"
+                        value="No Preference"
+                        checked
+                    >
+
+                    <label for="transportFlexible">
+                        No Preference
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CREATE -->
+
+        <button
+            type="button"
+            class="create-btn"
+            id="createButton"
+            onclick="createTrip()"
+        >
+            ✨ Create My Journey
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         PLANNING STATE
+    ===================================================== -->
+
+    <div
+        class="planning-card"
+        id="planningCard"
+    >
+
+        <div class="planning-icon">
+            ✦
+        </div>
+
+        <h2>
+            Building your journey
+        </h2>
+
+        <p>
+            Preparing your trip based on your preferences...
+        </p>
+
+
+        <div class="planning-steps">
+
+            <div
+                class="planning-step active"
+                id="stepDestination"
+            >
+                <span class="step-icon">✓</span>
+                <span>Understanding your destination</span>
+            </div>
+
+            <div
+                class="planning-step"
+                id="stepPreferences"
+            >
+                <span class="step-icon">2</span>
+                <span>Organising your preferences</span>
+            </div>
+
+            <div
+                class="planning-step"
+                id="stepItinerary"
+            >
+                <span class="step-icon">3</span>
+                <span>Preparing your journey</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+    /* =========================================================
+       CONFIGURATION
+       Backend endpoint can be connected here later.
+    ========================================================= */
+
+    const API_CONFIG = {
+        createTrip: "/api/trips/plan"
+    };
+
+
+    /* =========================================================
+       DEMO DESTINATIONS
+       These are fallback suggestions for the prototype.
+       Backend destination search can replace this later.
+    ========================================================= */
+
+    const destinations = [
+        {
+            id: "amaravati",
+            name: "Amaravati Historical Site",
+            location: "Amaravati, Andhra Pradesh"
+        },
+        {
+            id: "kondaveedu",
+            name: "Kondaveedu Fort",
+            location: "Guntur, Andhra Pradesh"
+        },
+        {
+            id: "undavalli",
+            name: "Undavalli Caves",
+            location: "Vijayawada, Andhra Pradesh"
+        },
+        {
+            id: "kondapalli",
+            name: "Kondapalli",
+            location: "Vijayawada, Andhra Pradesh"
+        },
+        {
+            id: "bhavani",
+            name: "Bhavani Island",
+            location: "Vijayawada, Andhra Pradesh"
+        },
+        {
+            id: "mangalagiri",
+            name: "Mangalagiri",
+            location: "Guntur, Andhra Pradesh"
+        }
+    ];
+
+
+    /* =========================================================
+       ELEMENTS
+    ========================================================= */
+
+    const destinationInput =
+        document.getElementById("destination");
+
+    const destinationSuggestions =
+        document.getElementById("destinationSuggestions");
+
+    const startDateInput =
+        document.getElementById("startDate");
+
+    const endDateInput =
+        document.getElementById("endDate");
+
+    const tripSummary =
+        document.getElementById("tripSummary");
+
+    const summaryText =
+        document.getElementById("summaryText");
+
+    const summaryDays =
+        document.getElementById("summaryDays");
+
+    const budgetInput =
+        document.getElementById("budget");
+
+    const destinationError =
+        document.getElementById("destinationError");
+
+    const dateError =
+        document.getElementById("dateError");
+
+    const budgetError =
+        document.getElementById("budgetError");
+
+    const plannerCard =
+        document.getElementById("plannerCard");
+
+    const planningCard =
+        document.getElementById("planningCard");
+
+    const createButton =
+        document.getElementById("createButton");
+
+
+    /* =========================================================
+       INITIAL DATE SETUP
+    ========================================================= */
+
+    function initializeDates() {
+
+        const today = new Date();
+
+        const todayString =
+            today.toISOString().split("T")[0];
+
+        startDateInput.min = todayString;
+        endDateInput.min = todayString;
+
+    }
+
+    initializeDates();
+
+
+    /* =========================================================
+       DESTINATION SEARCH
+    ========================================================= */
+
+    destinationInput.addEventListener("input", function () {
+
+        const search =
+            this.value.trim().toLowerCase();
+
+        if (!search) {
+
+            destinationSuggestions.innerHTML = "";
+            destinationSuggestions.classList.remove("show");
+
+            return;
+        }
+
+
+        const matches =
+            destinations.filter(destination =>
+                destination.name.toLowerCase().includes(search) ||
+                destination.location.toLowerCase().includes(search)
+            );
+
+
+        if (matches.length === 0) {
+
+            destinationSuggestions.innerHTML = `
+                <button
+                    type="button"
+                    class="suggestion"
+                    onclick="useCustomDestination()"
+                >
+                    <span class="suggestion-name">
+                        Use "${escapeHTML(this.value.trim())}"
+                    </span>
+
+                    <span class="suggestion-location">
+                        Continue with this destination
+                    </span>
+                </button>
+            `;
+
+        } else {
+
+            destinationSuggestions.innerHTML =
+                matches.map(destination => `
+                    <button
+                        type="button"
+                        class="suggestion"
+                        onclick="selectDestination('${destination.id}')"
+                    >
+                        <span class="suggestion-name">
+                            ${escapeHTML(destination.name)}
+                        </span>
+
+                        <span class="suggestion-location">
+                            ${escapeHTML(destination.location)}
+                        </span>
+                    </button>
+                `).join("");
+
+        }
+
+
+        destinationSuggestions.classList.add("show");
+
+    });
+
+
+    /* =========================================================
+       SELECT DESTINATION
+    ========================================================= */
+
+    function selectDestination(id) {
+
+        const destination =
+            destinations.find(item => item.id === id);
+
+        if (!destination) {
+            return;
+        }
+
+        destinationInput.value =
+            destination.name;
+
+        destinationInput.dataset.destinationId =
+            destination.id;
+
+        destinationSuggestions.classList.remove("show");
+
+        clearError(destinationInput, destinationError);
+
+    }
+
+
+    /* =========================================================
+       CUSTOM DESTINATION
+    ========================================================= */
+
+    function useCustomDestination() {
+
+        const value =
+            destinationInput.value.trim();
+
+        if (!value) {
+            return;
+        }
+
+        destinationInput.dataset.destinationId = "";
+
+        destinationSuggestions.classList.remove("show");
+
+    }
+
+
+    /* =========================================================
+       CLOSE SUGGESTIONS WHEN CLICKING OUTSIDE
+    ========================================================= */
+
+    document.addEventListener("click", function (event) {
+
+        if (!event.target.closest(".destination-wrapper")) {
+
+            destinationSuggestions.classList.remove("show");
+
+        }
+
+    });
+
+
+    /* =========================================================
+       DATE CHANGE
+    ========================================================= */
+
+    startDateInput.addEventListener("change", updateTripDuration);
+    endDateInput.addEventListener("change", updateTripDuration);
+
+
+    function updateTripDuration() {
+
+        const startValue =
+            startDateInput.value;
+
+        const endValue =
+            endDateInput.value;
+
+
+        if (!startValue || !endValue) {
+
+            tripSummary.classList.remove("show");
+            return;
+
+        }
+
+
+        const start =
+            new Date(startValue + "T00:00:00");
+
+        const end =
+            new Date(endValue + "T00:00:00");
+
+
+        if (end < start) {
+
+            tripSummary.classList.remove("show");
+
+            showError(
+                dateError,
+                "End date must be after the start date."
+            );
+
+            endDateInput.classList.add("input-error");
+
+            return;
+        }
+
+
+        clearError(endDateInput, dateError);
+
+
+        const difference =
+            end.getTime() - start.getTime();
+
+        const days =
+            Math.round(
+                difference / (1000 * 60 * 60 * 24)
+            ) + 1;
+
+
+        tripSummary.classList.add("show");
+
+        summaryDays.textContent =
+            `${days} ${days === 1 ? "Day" : "Days"}`;
+
+        summaryText.textContent =
+            `${formatDate(start)} → ${formatDate(end)}`;
+
+    }
+
+
+    /* =========================================================
+       TRAVELLERS
+    ========================================================= */
+
+    let travellers = 2;
+
+
+    function changeTravellers(change) {
+
+        travellers += change;
+
+        if (travellers < 1) {
+            travellers = 1;
+        }
+
+        if (travellers > 20) {
+            travellers = 20;
+        }
+
+
+        document.getElementById("travellerCount").textContent =
+            `${travellers} ${travellers === 1 ? "traveller" : "travellers"}`;
+
+    }
+
+
+    /* =========================================================
+       INTEREST SELECTION
+    ========================================================= */
+
+    document.querySelectorAll(".interest").forEach(button => {
+
+        button.addEventListener("click", function () {
+
+            this.classList.toggle("selected");
+
+        });
+
+    });
+
+
+    /* =========================================================
+       FORM VALIDATION
+    ========================================================= */
+
+    function validateForm() {
+
+        let valid = true;
+
+
+        /* Destination */
+
+        const destination =
+            destinationInput.value.trim();
+
+        if (!destination) {
+
+            showError(
+                destinationInput,
+                destinationError
+            );
+
+            valid = false;
+
+        } else {
+
+            clearError(
+                destinationInput,
+                destinationError
+            );
+
+        }
+
+
+        /* Dates */
+
+        const startDate =
+            startDateInput.value;
+
+        const endDate =
+            endDateInput.value;
+
+
+        if (!startDate || !endDate) {
+
+            showError(
+                dateError,
+                "Please select your travel dates."
+            );
+
+            if (!startDate) {
+                startDateInput.classList.add("input-error");
+            }
+
+            if (!endDate) {
+                endDateInput.classList.add("input-error");
+            }
+
+            valid = false;
+
+        } else {
+
+            const start =
+                new Date(startDate + "T00:00:00");
+
+            const end =
+                new Date(endDate + "T00:00:00");
+
+
+            if (end < start) {
+
+                showError(
+                    dateError,
+                    "End date must be after the start date."
+                );
+
+                endDateInput.classList.add("input-error");
+
+                valid = false;
+
+            } else {
+
+                clearError(
+                    endDateInput,
+                    dateError
+                );
+
+                startDateInput.classList.remove("input-error");
+
+            }
+
+        }
+
+
+        /* Budget */
+
+        const budget =
+            Number(budgetInput.value);
+
+
+        if (!budget || budget < 500) {
+
+            showError(
+                budgetInput,
+                budgetError
+            );
+
+            valid = false;
+
+        } else {
+
+            clearError(
+                budgetInput,
+                budgetError
+            );
+
+        }
+
+
+        return valid;
+
+    }
+
+
+    /* =========================================================
+       ERROR HELPERS
+    ========================================================= */
+
+    function showError(element, messageElement) {
+
+        if (element) {
+            element.classList.add("input-error");
+        }
+
+        if (messageElement) {
+
+            if (typeof messageElement === "string") {
+                return;
+            }
+
+            if (messageElement.tagName) {
+
+                if (
+                    messageElement === dateError &&
+                    typeof arguments[1] === "string"
+                ) {
+                    messageElement.textContent =
+                        arguments[1];
+                }
+
+                messageElement.classList.add("show");
+
+            }
+
+        }
+
+    }
+
+
+    function clearError(element, messageElement) {
+
+        if (element) {
+            element.classList.remove("input-error");
+        }
+
+        if (messageElement) {
+            messageElement.classList.remove("show");
+        }
+
+    }
+
+
+    /* =========================================================
+       IMPROVED ERROR HANDLING
+    ========================================================= */
+
+    function setError(element, errorElement, message) {
+
+        if (element) {
+            element.classList.add("input-error");
+        }
+
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.add("show");
+        }
+
+    }
+
+
+    /* =========================================================
+       CREATE TRIP
+    ========================================================= */
+
+    async function createTrip() {
+
+    if (!validateForm()) {
+        return;
+    }
+
+    const tripData = collectTripData();
+
+    const accessToken = localStorage.getItem(
+        "byondSpotAccessToken"
+    );
+
+    const headers = {
+        "Content-Type": "application/json"
+    };
+
+    if (accessToken) {
+        headers["Authorization"] = "Bearer " + accessToken;
+    }
+
+    const createButton = document.querySelector(
+        ".create-journey-button"
+    );
+
+    const originalButtonText = createButton
+        ? createButton.innerHTML
+        : "";
+
+    try {
+
+        // Show loading state
+        if (createButton) {
+            createButton.disabled = true;
+            createButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Creating Your Journey...
+            `;
+        }
+
+        // Show planning animation
+        const plannerCard = document.querySelector(
+            ".planner-card"
+        );
+
+        const planningAnimation = document.querySelector(
+            ".planning-animation"
+        );
+
+        if (plannerCard) {
+            plannerCard.style.display = "none";
+        }
+
+        if (planningAnimation) {
+            planningAnimation.style.display = "flex";
+        }
+
+        runPlanningAnimation();
+
+        // =========================
+        // CALL AI BACKEND
+        // =========================
+
+        const response = await fetch(
+            API_CONFIG.createTrip,
+            {
+                method: "POST",
+                headers: headers,
+                credentials: "include",
+                body: JSON.stringify(tripData)
+            }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        // =========================
+        // HANDLE ERROR
+        // =========================
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Unable to create your journey."
+            );
+        }
+
+        // =========================
+        // SAVE AI-GENERATED TRIP
+        // =========================
+
+        const generatedTrip = data.trip;
+
+        localStorage.setItem(
+            "byondSpotTrip",
+            JSON.stringify(generatedTrip)
+        );
+
+        // A newly generated trip is planned,
+        // NOT active yet.
+        localStorage.removeItem(
+            "byondSpotActiveTrip"
+        );
+
+        // =========================
+        // GO TO ITINERARY
+        // =========================
+
+        window.location.href = "itinerary.html";
+
+    } catch (error) {
+
+        console.error(
+            "Trip creation error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Something went wrong while creating your journey."
+        );
+
+        // Restore planner UI
+        if (createButton) {
+            createButton.disabled = false;
+            createButton.innerHTML = originalButtonText;
+        }
+
+        const plannerCard = document.querySelector(
+            ".planner-card"
+        );
+
+        const planningAnimation = document.querySelector(
+            ".planning-animation"
+        );
+
+        if (plannerCard) {
+            plannerCard.style.display = "";
+        }
+
+        if (planningAnimation) {
+            planningAnimation.style.display = "none";
+        }
+    }
+}
+
+
+    /* =========================================================
+       COLLECT TRIP DATA
+    ========================================================= */
+
+    function collectTripData() {
+
+        const selectedInterests =
+            Array.from(
+                document.querySelectorAll(".interest.selected")
+            ).map(button =>
+                button.dataset.interest
+            );
+
+
+        const travelStyle =
+            document.querySelector(
+                'input[name="travelStyle"]:checked'
+            )?.value || "Balanced";
+
+
+        const transport =
+            document.querySelector(
+                'input[name="transport"]:checked'
+            )?.value || "No Preference";
+
+
+        const startDate =
+            startDateInput.value;
+
+        const endDate =
+            endDateInput.value;
+
+
+        const duration =
+            calculateDays(
+                startDate,
+                endDate
+            );
+
+
+        return {
+
+            destination: {
+                id:
+                    destinationInput.dataset.destinationId || null,
+
+                name:
+                    destinationInput.value.trim()
+            },
+
+            start_date: startDate,
+
+            end_date: endDate,
+
+            duration_days: duration,
+
+            travellers: travellers,
+
+            budget: Number(
+                budgetInput.value
+            ),
+
+            interests: selectedInterests,
+
+            travel_style: travelStyle,
+
+            transport: transport,
+
+            created_at:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    /* =========================================================
+       VALIDATE PLANNER
+    ========================================================= */
+
+    function validatePlannerForm() {
+
+        let valid = true;
+
+
+        /* Destination */
+
+        const destination =
+            destinationInput.value.trim();
+
+
+        if (!destination) {
+
+            setError(
+                destinationInput,
+                destinationError,
+                "Please enter a destination."
+            );
+
+            valid = false;
+
+        } else {
+
+            clearError(
+                destinationInput,
+                destinationError
+            );
+
+        }
+
+
+        /* Dates */
+
+        const startDate =
+            startDateInput.value;
+
+        const endDate =
+            endDateInput.value;
+
+
+        if (!startDate || !endDate) {
+
+            setError(
+                null,
+                dateError,
+                "Please select both travel dates."
+            );
+
+            if (!startDate) {
+                startDateInput.classList.add("input-error");
+            }
+
+            if (!endDate) {
+                endDateInput.classList.add("input-error");
+            }
+
+            valid = false;
+
+        } else {
+
+            const start =
+                new Date(startDate + "T00:00:00");
+
+            const end =
+                new Date(endDate + "T00:00:00");
+
+
+            if (end < start) {
+
+                setError(
+                    endDateInput,
+                    dateError,
+                    "End date must be after the start date."
+                );
+
+                valid = false;
+
+            } else {
+
+                startDateInput.classList.remove("input-error");
+                endDateInput.classList.remove("input-error");
+                dateError.classList.remove("show");
+
+            }
+
+        }
+
+
+        /* Budget */
+
+        const budget =
+            Number(budgetInput.value);
+
+
+        if (!budget || budget < 500) {
+
+            setError(
+                budgetInput,
+                budgetError,
+                "Please enter a budget of at least ₹500."
+            );
+
+            valid = false;
+
+        } else {
+
+            clearError(
+                budgetInput,
+                budgetError
+            );
+
+        }
+
+
+        return valid;
+
+    }
+
+
+    /* =========================================================
+       PLANNING ANIMATION
+    ========================================================= */
+
+    function runPlanningAnimation() {
+
+        const steps = [
+
+            document.getElementById("stepDestination"),
+
+            document.getElementById("stepPreferences"),
+
+            document.getElementById("stepItinerary")
+
+        ];
+
+
+        steps.forEach((step, index) => {
+
+            setTimeout(() => {
+
+                steps.forEach(item =>
+                    item.classList.remove("active")
+                );
+
+                step.classList.add("active");
+
+            }, index * 850);
+
+        });
+
+    }
+
+
+    /* =========================================================
+       CALCULATE DAYS
+    ========================================================= */
+
+    function calculateDays(startDate, endDate) {
+
+        if (!startDate || !endDate) {
+            return 0;
+        }
+
+
+        const start =
+            new Date(startDate + "T00:00:00");
+
+        const end =
+            new Date(endDate + "T00:00:00");
+
+
+        return Math.round(
+            (end - start) /
+            (1000 * 60 * 60 * 24)
+        ) + 1;
+
+    }
+
+
+    /* =========================================================
+       FORMAT DATE
+    ========================================================= */
+
+    function formatDate(date) {
+
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       ESCAPE HTML
+       Used only for displaying user-entered text safely.
+    ========================================================= */
+
+    function escapeHTML(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* =========================================================
+       RESTORE SAVED PLANNER DATA
+    ========================================================= */
+
+    function restoreTripData() {
+
+        const saved =
+            localStorage.getItem("byondSpotTrip");
+
+
+        if (!saved) {
+            return;
+        }
+
+
+        try {
+
+            const data =
+                JSON.parse(saved);
+
+
+            if (data.destination) {
+
+                destinationInput.value =
+                    data.destination.name || "";
+
+                destinationInput.dataset.destinationId =
+                    data.destination.id || "";
+
+            }
+
+
+            if (data.start_date) {
+                startDateInput.value =
+                    data.start_date;
+            }
+
+
+            if (data.end_date) {
+                endDateInput.value =
+                    data.end_date;
+            }
+
+
+            if (data.budget) {
+                budgetInput.value =
+                    data.budget;
+            }
+
+
+            if (data.travellers) {
+
+                travellers =
+                    Number(data.travellers);
+
+                document.getElementById(
+                    "travellerCount"
+                ).textContent =
+                    `${travellers} ${travellers === 1 ? "traveller" : "travellers"}`;
+
+            }
+
+
+            if (Array.isArray(data.interests)) {
+
+                document.querySelectorAll(".interest")
+                    .forEach(button => {
+
+                        if (
+                            data.interests.includes(
+                                button.dataset.interest
+                            )
+                        ) {
+                            button.classList.add("selected");
+                        }
+
+                    });
+
+            }
+
+
+            if (data.travel_style) {
+
+                const style =
+                    document.querySelector(
+                        `input[name="travelStyle"][value="${CSS.escape(data.travel_style)}"]`
+                    );
+
+                if (style) {
+                    style.checked = true;
+                }
+
+            }
+
+
+            if (data.transport) {
+
+                const transport =
+                    document.querySelector(
+                        `input[name="transport"][value="${CSS.escape(data.transport)}"]`
+                    );
+
+                if (transport) {
+                    transport.checked = true;
+                }
+
+            }
+
+
+            updateTripDuration();
+
+        } catch (error) {
+
+            console.warn(
+                "Could not restore saved trip data.",
+                error
+            );
+
+        }
+
+    }
+
+
+    restoreTripData();
+
+</script>
+
+</body>
+</html>

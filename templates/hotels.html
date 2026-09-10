@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hotels & Stays | BYOND Spot</title>
+
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* =========================
+           GLOBAL
+        ========================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #FAF9F6;
+            color: #263238;
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+
+        /* =========================
+           NAVBAR
+        ========================== */
+
+        .navbar {
+            height: 70px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E7E5E1;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 5%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+        }
+
+  .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #263238;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #159A9C;
+        }
+
+        .profile-button{width:40px;height:40px;border:0;border-radius:50%;background:#E8F6F5;color:#0B6869;font-weight:700}
+
+
+        /* =========================
+           PAGE HEADER
+        ========================== */
+
+        .page {
+            max-width: 1400px;
+            margin: auto;
+            padding: 32px 5% 60px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .back-link:hover {
+            color: #0B6869;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            color: #0B6869;
+            margin-bottom: 7px;
+        }
+
+        .page-header p {
+            color: #718096;
+            font-size: 15px;
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================== */
+
+        .search-section {
+            background: #FFFFFF;
+            border: 1px solid #E7E5E1;
+            border-radius: 14px;
+            padding: 16px;
+
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            height: 46px;
+
+            border: 1px solid #E7E5E1;
+            border-radius: 9px;
+
+            padding: 0 16px 0 42px;
+            outline: none;
+
+            font-size: 14px;
+            background: #FAF9F6;
+        }
+
+        .search-box input:focus {
+            border-color: #159A9C;
+            background: #FFFFFF;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 13px;
+            color: #718096;
+        }
+
+        .filter-select {
+            width: 150px;
+            height: 46px;
+
+            border: 1px solid #E7E5E1;
+            border-radius: 9px;
+
+            padding: 0 12px;
+            outline: none;
+
+            background: #FAF9F6;
+            color: #263238;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            border-color: #159A9C;
+        }
+
+
+        /* =========================
+           MAP
+        ========================== */
+
+        .map {
+            height: 470px;
+            width: 100%;
+
+            border-radius: 16px;
+            border: 1px solid #E7E5E1;
+
+            position: relative;
+            overflow: hidden;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e8eee9 0%,
+                    #f2f0e9 45%,
+                    #e9eeee 100%
+                );
+
+            margin-bottom: 32px;
+        }
+
+        /* Decorative roads */
+
+        .road {
+            position: absolute;
+            background: #FFFFFF;
+            opacity: 0.85;
+            border-radius: 50px;
+        }
+
+        .road-one {
+            width: 130%;
+            height: 7px;
+            left: -15%;
+            top: 48%;
+            transform: rotate(-12deg);
+        }
+
+        .road-two {
+            width: 100%;
+            height: 6px;
+            left: 5%;
+            top: 28%;
+            transform: rotate(28deg);
+        }
+
+        .road-three {
+            width: 85%;
+            height: 5px;
+            left: 8%;
+            top: 72%;
+            transform: rotate(8deg);
+        }
+
+        .road-four {
+            width: 6px;
+            height: 120%;
+            left: 65%;
+            top: -10%;
+            transform: rotate(17deg);
+        }
+
+
+        /* Map labels */
+
+        .map-label {
+            position: absolute;
+            font-size: 11px;
+            color: #718096;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .label-one {
+            top: 18%;
+            left: 16%;
+        }
+
+        .label-two {
+            top: 63%;
+            left: 20%;
+        }
+
+        .label-three {
+            top: 35%;
+            right: 15%;
+        }
+
+        .label-four {
+            bottom: 14%;
+            right: 20%;
+        }
+
+
+        /* =========================
+           MAP MARKERS
+        ========================== */
+
+        .marker {
+            position: absolute;
+
+            width: 34px;
+            height: 34px;
+
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+
+            background: #159A9C;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+            transition: 0.2s;
+
+            z-index: 5;
+        }
+
+        .marker span {
+            transform: rotate(45deg);
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .marker:hover {
+            transform: rotate(-45deg) scale(1.12);
+        }
+
+        .marker.active {
+            background: #F28C7A;
+            transform: rotate(-45deg) scale(1.2);
+            z-index: 10;
+        }
+
+        .marker-one {
+            left: 31%;
+            top: 35%;
+        }
+
+        .marker-two {
+            left: 60%;
+            top: 27%;
+        }
+
+        .marker-three {
+            left: 70%;
+            top: 61%;
+        }
+
+        .marker-four {
+            left: 43%;
+            top: 67%;
+        }
+
+        .marker-five {
+            left: 78%;
+            top: 39%;
+        }
+
+
+        /* User location */
+
+        .user-location {
+            position: absolute;
+            left: 48%;
+            top: 49%;
+
+            width: 17px;
+            height: 17px;
+
+            border-radius: 50%;
+            background: #0B6869;
+
+            border: 4px solid #FFFFFF;
+
+            box-shadow: 0 0 0 8px rgba(21, 154, 156, 0.18);
+
+            z-index: 8;
+        }
+
+        .location-label {
+            position: absolute;
+            left: 48%;
+            top: calc(49% + 28px);
+
+            font-size: 11px;
+            font-weight: 600;
+            color: #0B6869;
+
+            background: #FFFFFF;
+            padding: 5px 8px;
+            border-radius: 6px;
+
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+            z-index: 8;
+        }
+
+
+        /* Map controls */
+
+        .map-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+
+            z-index: 1000;
+        }
+
+        .map-control {
+            width: 38px;
+            height: 38px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #FFFFFF;
+            color: #263238;
+
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .map-control:hover {
+            background: #E8F6F5;
+            color: #0B6869;
+        }
+
+
+        /* Route */
+
+        .route {
+            position: absolute;
+
+            height: 4px;
+            width: 190px;
+
+            left: 48%;
+            top: 51%;
+
+            background: #F28C7A;
+
+            transform-origin: left center;
+            transform: rotate(-22deg);
+
+            border-radius: 10px;
+
+            display: none;
+            z-index: 6;
+        }
+
+        .route.visible {
+            display: block;
+        }
+
+
+        /* Map info */
+
+        .map-info {
+            position: absolute;
+            left: 18px;
+            bottom: 18px;
+
+            background: rgba(255,255,255,0.95);
+
+            padding: 13px 16px;
+            border-radius: 10px;
+
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .custom-hotel-pin {
+            width: 34px;
+            height: 34px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            background: #159A9C;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .custom-hotel-pin span {
+            transform: rotate(45deg);
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .custom-hotel-pin.active {
+            background: #F28C7A;
+            transform: rotate(-45deg) scale(1.2);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+
+            color: #0B6869;
+
+            font-size: 23px;
+            font-weight: 800;
+
+            letter-spacing: -0.6px;
+        }
+
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+
+        .map-info strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .map-info span {
+            font-size: 11px;
+            color: #718096;
+        }
+
+
+        /* =========================
+           RESTAURANT/HOTEL LIST
+        ========================== */
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 16px;
+        }
+
+        .section-title h2 {
+            font-size: 21px;
+            color: #263238;
+        }
+
+        .results-count {
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .hotel-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+
+        /* =========================
+           HOTEL CARD
+        ========================== */
+
+        .hotel-card {
+            background: #FFFFFF;
+            border: 1px solid #E7E5E1;
+            border-radius: 14px;
+
+            overflow: hidden;
+            cursor: pointer;
+
+            transition: 0.25s;
+        }
+
+        .hotel-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(38, 50, 56, 0.08);
+        }
+
+        .hotel-card.selected {
+            border: 2px solid #159A9C;
+        }
+
+        .hotel-image {
+            height: 190px;
+            position: relative;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #d8cdbd,
+                    #eee6d8
+                );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .hotel-image span {
+            opacity: 0.7;
+        }
+
+        .activity-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+
+            padding: 5px 9px;
+            border-radius: 20px;
+
+            font-size: 11px;
+            font-weight: 600;
+
+            background: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .activity-low {
+            color: #0B6869;
+        }
+
+        .activity-moderate {
+            color: #9A6A00;
+        }
+
+        .activity-high {
+            color: #B44B3D;
+        }
+
+        .hotel-content {
+            padding: 17px;
+        }
+
+        .hotel-name {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+
+            margin-bottom: 9px;
+
+            font-size: 13px;
+        }
+
+        .rating-star {
+            color: #F28C7A;
+            font-weight: 700;
+        }
+
+        .reviews {
+            color: #718096;
+        }
+
+        .hotel-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+
+            margin-bottom: 14px;
+        }
+
+        .meta-item {
+            background: #F3E7D3;
+            padding: 5px 8px;
+
+            border-radius: 5px;
+
+            font-size: 11px;
+            color: #5F554A;
+        }
+
+        .hotel-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .distance {
+            color: #718096;
+            font-size: 12px;
+        }
+
+        .price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0B6869;
+        }
+
+        .price small {
+            font-weight: 400;
+            color: #718096;
+        }
+
+
+        /* =========================
+           SELECTED HOTEL PANEL
+        ========================== */
+
+        .selected-panel {
+            position: fixed;
+
+            bottom: 22px;
+            left: 50%;
+
+            transform: translateX(-50%) translateY(120px);
+
+            width: min(500px, 90%);
+
+            background: #FFFFFF;
+
+            border: 1px solid #E7E5E1;
+            border-radius: 13px;
+
+            padding: 16px 18px;
+
+            box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+
+            transition: 0.3s;
+
+            z-index: 200;
+
+            opacity: 0;
+        }
+
+        .selected-panel.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .selected-panel-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+
+            margin-bottom: 12px;
+        }
+
+        .selected-panel h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .selected-panel p {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .close-panel {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #718096;
+        }
+
+        .route-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding-top: 10px;
+            border-top: 1px solid #E7E5E1;
+        }
+
+        .route-details {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .directions-btn {
+            border: none;
+            background: #159A9C;
+            color: #FFFFFF;
+
+            padding: 9px 14px;
+
+            border-radius: 7px;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .directions-btn:hover {
+            background: #0B6869;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1000px) {
+
+            .hotel-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .search-section {
+                flex-wrap: wrap;
+            }
+
+            .search-box {
+                flex-basis: 100%;
+            }
+        }
+
+
+        @media (max-width: 650px) {
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .nav-link {
+                display: none;
+            }
+
+            .page {
+                padding: 25px 20px 50px;
+            }
+
+            .page-header h1 {
+                font-size: 27px;
+            }
+
+            .search-section {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .map {
+                height: 350px;
+            }
+
+            .hotel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hotel-image {
+                height: 200px;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
+    <nav class="navbar">
+
+        <a href="index.html" class="logo">
+            <img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html#explore">Explore</a>
+            <a href="index.html#hidden-gems" class="active">Hidden Gems</a>
+            <a href="index.html#plan-trip">Plan Trip</a>
+            <a href="index.html#safety">Safety</a>
+        </div>
+
+        <button class="profile-button" onclick="location.href='profile.html'">P</button>
+
+    </nav>
+
+
+
+    <!-- =========================
+         MAIN PAGE
+    ========================== -->
+
+    <main class="page">
+
+
+        <a href="index.html" class="back-link">
+            ← Back to Explore
+        </a>
+
+
+        <div class="page-header">
+
+            <h1>Hotels & Stays</h1>
+
+            <p>
+                Find comfortable stays near your destination.
+            </p>
+
+        </div>
+
+
+
+        <!-- =========================
+             SEARCH + FILTERS
+        ========================== -->
+
+        <section class="search-section">
+
+            <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search hotels, stays or locations..."
+                >
+
+            </div>
+
+
+            <select id="priceFilter" class="filter-select">
+
+                <option value="all">
+                    Price
+                </option>
+
+                <option value="budget">
+                    Budget
+                </option>
+
+                <option value="mid">
+                    Mid-range
+                </option>
+
+                <option value="premium">
+                    Premium
+                </option>
+
+            </select>
+
+
+            <select id="ratingFilter" class="filter-select">
+
+                <option value="all">
+                    Rating
+                </option>
+
+                <option value="4.5">
+                    4.5+
+                </option>
+
+                <option value="4">
+                    4.0+
+                </option>
+
+            </select>
+
+
+            <select id="activityFilter" class="filter-select">
+
+                <option value="all">
+                    Activity
+                </option>
+
+                <option value="low">
+                    Low activity
+                </option>
+
+                <option value="moderate">
+                    Moderate
+                </option>
+
+                <option value="high">
+                    High activity
+                </option>
+
+            </select>
+
+        </section>
+
+
+
+        <!-- =========================
+             MAP
+        ========================== -->
+
+        <section class="map" id="map" style="position:relative;">
+
+            <!-- Map controls -->
+            <div class="map-controls">
+                <button
+                    class="map-control"
+                    onclick="zoomIn()"
+                    title="Zoom in"
+                >
+                    +
+                </button>
+
+                <button
+                    class="map-control"
+                    onclick="zoomOut()"
+                    title="Zoom out"
+                >
+                    −
+                </button>
+
+                <button
+                    class="map-control"
+                    onclick="locateUser()"
+                    title="My location"
+                >
+                    ◎
+                </button>
+            </div>
+
+            <!-- Map information -->
+            <div class="map-info">
+                <strong>
+                    Hotels around you
+                </strong>
+                <span>
+                    Select a hotel to view its route
+                </span>
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             HOTEL LIST
+        ========================== -->
+
+        <div class="section-title">
+
+            <h2>
+                Stays near you
+            </h2>
+
+            <span
+                class="results-count"
+                id="resultsCount"
+            >
+                5 stays found
+            </span>
+
+        </div>
+
+
+        <section
+            class="hotel-grid"
+            id="hotelGrid"
+        >
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         SELECTED HOTEL PANEL
+    ========================== -->
+
+    <div
+        class="selected-panel"
+        id="selectedPanel"
+    >
+
+        <div class="selected-panel-top">
+
+            <div>
+
+                <h3 id="selectedHotelName">
+                    Hotel Name
+                </h3>
+
+                <p id="selectedHotelLocation">
+                    Location
+                </p>
+
+            </div>
+
+            <button
+                class="close-panel"
+                onclick="closePanel()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="route-info">
+
+            <div class="route-details">
+
+                <strong id="routeDistance">
+                    2.4 km
+                </strong>
+
+                <br>
+
+                <span id="routeTime">
+                    Approximately 8 min
+                </span>
+
+            </div>
+
+
+            <button
+                class="directions-btn"
+                onclick="showDirections()"
+            >
+                Get Directions
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+    const API_CONFIG = {
+        hotels: "/api/hotels",
+        route: "/api/route"
+    };
+
+    let hotels = [];
+    let selectedHotel = null;
+    let map = null;
+    let hotelMarkers = [];
+    let userMarker = null;
+    let userCoords = [16.5062, 80.6480];
+    let routeLayer = null;
+
+    const hotelGrid = document.getElementById("hotelGrid");
+    const resultsCount = document.getElementById("resultsCount");
+    const searchInput = document.getElementById("searchInput");
+    const priceFilter = document.getElementById("priceFilter");
+    const ratingFilter = document.getElementById("ratingFilter");
+    const activityFilter = document.getElementById("activityFilter");
+
+    const hotelImages = {
+        "Riverfront Grand Hotel": "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80",
+        "Heritage Residency": "https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=900&q=80",
+        "Green View Inn": "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=900&q=80",
+        "City Comfort Suites": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80",
+        "Lakeview Boutique Stay": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80"
+    };
+
+    function initMap() {
+        if (map) return;
+        map = L.map('map', { zoomControl: false }).setView(userCoords, 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                userCoords = [pos.coords.latitude, pos.coords.longitude];
+                const userIcon = L.divIcon({
+                    className: 'user-location-marker',
+                    html: `<div style="width:16px;height:16px;border-radius:50%;background:#0B6869;border:3px solid #FFFFFF;box-shadow:0 0 0 6px rgba(11,104,105,0.25);"></div>`,
+                    iconSize: [22, 22],
+                    iconAnchor: [11, 11]
+                });
+                if (userMarker) {
+                    userMarker.setLatLng(userCoords);
+                } else {
+                    userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map).bindPopup("<b>You are here</b>");
+                }
+            }, () => {});
+        }
+    }
+
+    function getActivityText(activity) {
+        if (activity === "low") return "Low activity";
+        if (activity === "moderate") return "Moderate activity";
+        if (activity === "high") return "High activity";
+        return "Activity unavailable";
+    }
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function getDistanceText(hotel) {
+        if (hotel.latitude && hotel.longitude && userCoords) {
+            const d = calculateDistanceKm(userCoords[0], userCoords[1], hotel.latitude, hotel.longitude);
+            return `${d.toFixed(1)} km away`;
+        }
+        return "Nearby";
+    }
+
+    async function loadHotels() {
+        const search = searchInput.value.trim();
+        const price = priceFilter.value;
+        const rating = ratingFilter.value;
+        const activity = activityFilter.value;
+
+        const params = new URLSearchParams();
+        if (search) params.append("search", search);
+        if (price !== "all") params.append("price", price);
+        if (rating !== "all") params.append("rating", rating);
+        if (activity !== "all") params.append("activity", activity);
+
+        const url = params.toString() ? `${API_CONFIG.hotels}?${params.toString()}` : API_CONFIG.hotels;
+
+        try {
+            resultsCount.textContent = "Loading stays...";
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Unable to load hotels");
+            hotels = await response.json();
+            displayHotels(hotels);
+        } catch (error) {
+            console.error("Hotels API error:", error);
+            hotels = [];
+            resultsCount.textContent = "Unable to load stays";
+            hotelGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; background: white; padding: 40px; border-radius: 14px; text-align: center; border: 1px solid #E7E5E1; color: #718096;">
+                    Unable to load hotels. Please try again.
+                </div>
+            `;
+        }
+    }
+
+    function displayHotels(list) {
+        hotelGrid.innerHTML = "";
+        resultsCount.textContent = `${list.length} ${list.length === 1 ? "stay" : "stays"} found`;
+
+        // Clear existing markers
+        hotelMarkers.forEach(m => {
+            if (map) map.removeLayer(m);
+        });
+        hotelMarkers = [];
+
+        if (!list.length) {
+            hotelGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; background: white; padding: 40px; border-radius: 14px; text-align: center; border: 1px solid #E7E5E1; color: #718096;">
+                    No stays match your search.
+                </div>
+            `;
+            return;
+        }
+
+        const mapPoints = [];
+
+        list.forEach((hotel, index) => {
+            const activity = hotel.activity || "low";
+            const activityClass = activity === "low" ? "activity-low" : activity === "moderate" ? "activity-moderate" : "activity-high";
+            const activityText = getActivityText(activity);
+            const image = hotelImages[hotel.name] || hotel.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80";
+
+            const card = document.createElement("article");
+            card.className = "hotel-card";
+            card.dataset.index = index;
+            card.onclick = function() {
+                selectHotel(index);
+            };
+
+            card.innerHTML = `
+                <div class="hotel-image">
+                    <img src="${image}" alt="${hotel.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80'">
+                    <div class="activity-badge ${activityClass}">● ${activityText}</div>
+                </div>
+                <div class="hotel-content">
+                    <div class="hotel-name">${hotel.name}</div>
+                    <div class="rating">
+                        <span class="rating-star">★ ${Number(hotel.rating || 0).toFixed(1)}</span>
+                        <span class="reviews">${Number(hotel.reviews || 0).toLocaleString()} reviews</span>
+                    </div>
+                    <div class="hotel-meta">
+                        <span class="meta-item">${hotel.type || "Hotel"}</span>
+                        <span class="meta-item">${hotel.location}</span>
+                    </div>
+                    <div class="hotel-bottom">
+                        <span class="distance">${getDistanceText(hotel)}</span>
+                        <span class="price">₹${Number(hotel.price || 0).toLocaleString()}<small>/night</small></span>
+                    </div>
+                </div>
+            `;
+            hotelGrid.appendChild(card);
+
+            if (map && hotel.latitude && hotel.longitude) {
+                const pinIcon = L.divIcon({
+                    className: 'hotel-pin-container',
+                    html: `<div class="custom-hotel-pin" id="pin-hotel-${index}"><span>H</span></div>`,
+                    iconSize: [34, 34],
+                    iconAnchor: [17, 34],
+                    popupAnchor: [0, -34]
+                });
+                const marker = L.marker([hotel.latitude, hotel.longitude], { icon: pinIcon })
+                    .addTo(map)
+                    .bindPopup(`<strong>${hotel.name}</strong><br><span style="color:#718096;font-size:12px;">${hotel.location}</span><br><b>₹${hotel.price}</b>/night`);
+                marker.on('click', () => selectHotel(index));
+                hotelMarkers.push(marker);
+                mapPoints.push([hotel.latitude, hotel.longitude]);
+            }
+        });
+
+        if (map && mapPoints.length > 0) {
+            map.fitBounds(mapPoints, { padding: [40, 40] });
+        }
+    }
+
+    async function selectHotel(index) {
+        const hotel = hotels[index];
+        if (!hotel) return;
+        selectedHotel = hotel;
+
+        document.querySelectorAll(".hotel-card").forEach(c => c.classList.remove("selected"));
+        const selectedCard = document.querySelector(`.hotel-card[data-index="${index}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add("selected");
+            selectedCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        document.querySelectorAll(".custom-hotel-pin").forEach(p => p.classList.remove("active"));
+        const pinEl = document.getElementById(`pin-hotel-${index}`);
+        if (pinEl) pinEl.classList.add("active");
+
+        if (map && hotel.latitude && hotel.longitude) {
+            map.flyTo([hotel.latitude, hotel.longitude], 14);
+            if (hotelMarkers[index]) hotelMarkers[index].openPopup();
+        }
+
+        document.getElementById("selectedHotelName").textContent = hotel.name;
+        document.getElementById("selectedHotelLocation").textContent = `${hotel.location} • ${Number(hotel.rating || 0).toFixed(1)} ★`;
+
+        const distStr = getDistanceText(hotel).replace(" away", "");
+        document.getElementById("routeDistance").textContent = distStr;
+        const estMin = Math.max(5, Math.round(parseFloat(distStr || 2) * 2.5));
+        document.getElementById("routeTime").textContent = `Approximately ${estMin} min`;
+
+        document.getElementById("selectedPanel").classList.add("show");
+
+        if (map && hotel.latitude && hotel.longitude) {
+            drawRouteToHotel(userCoords[0], userCoords[1], hotel.latitude, hotel.longitude);
+        }
+    }
+
+    async function drawRouteToHotel(startLat, startLng, destLat, destLng) {
+        if (routeLayer && map) {
+            map.removeLayer(routeLayer);
+            routeLayer = null;
+        }
+        try {
+            const res = await fetch(`/api/route?start=${startLat},${startLng}&end=${destLat},${destLng}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.route_geojson && map) {
+                    routeLayer = L.geoJSON(data.route_geojson, {
+                        style: { color: '#0B6869', weight: 4, opacity: 0.85, dashArray: '4, 8' }
+                    }).addTo(map);
+                    if (data.distance_km) {
+                        document.getElementById("routeDistance").textContent = `${data.distance_km.toFixed(1)} km`;
+                    }
+                    if (data.duration_minutes) {
+                        document.getElementById("routeTime").textContent = `Approximately ${Math.round(data.duration_minutes)} min`;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Routing error:", e);
+        }
+    }
+
+    function closePanel() {
+        document.getElementById("selectedPanel").classList.remove("show");
+        document.querySelectorAll(".custom-hotel-pin").forEach(p => p.classList.remove("active"));
+        document.querySelectorAll(".hotel-card").forEach(c => c.classList.remove("selected"));
+        if (routeLayer && map) {
+            map.removeLayer(routeLayer);
+            routeLayer = null;
+        }
+        selectedHotel = null;
+    }
+
+    function zoomIn() {
+        if (map) map.zoomIn();
+    }
+
+    function zoomOut() {
+        if (map) map.zoomOut();
+    }
+
+    function locateUser() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                userCoords = [pos.coords.latitude, pos.coords.longitude];
+                if (map) {
+                    map.flyTo(userCoords, 14);
+                    if (!userMarker) {
+                        const userIcon = L.divIcon({
+                            className: 'user-location-marker',
+                            html: `<div style="width:16px;height:16px;border-radius:50%;background:#0B6869;border:3px solid #FFFFFF;box-shadow:0 0 0 6px rgba(11,104,105,0.25);"></div>`,
+                            iconSize: [22, 22],
+                            iconAnchor: [11, 11]
+                        });
+                        userMarker = L.marker(userCoords, { icon: userIcon }).addTo(map).bindPopup("<b>You are here</b>");
+                    } else {
+                        userMarker.setLatLng(userCoords);
+                    }
+                    userMarker.openPopup();
+                }
+            });
+        }
+    }
+
+    function showDirections() {
+        if (!selectedHotel) {
+            alert("Please select a hotel first.");
+            return;
+        }
+        const lat = selectedHotel.latitude;
+        const lng = selectedHotel.longitude;
+        if (lat !== undefined && lng !== undefined) {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+            window.open(url, "_blank");
+            return;
+        }
+        alert("Directions are not available for this hotel yet.");
+    }
+
+    searchInput.addEventListener("input", loadHotels);
+    priceFilter.addEventListener("change", loadHotels);
+    ratingFilter.addEventListener("change", loadHotels);
+    activityFilter.addEventListener("change", loadHotels);
+
+    document.addEventListener("DOMContentLoaded", function() {
+        initMap();
+        loadHotels();
+    });
+</script>
+
+</body>
+</html>

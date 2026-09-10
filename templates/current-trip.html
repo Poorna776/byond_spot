@@ -1,0 +1,5947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Current Trip | BYOND Spot</title>
+
+    <style>
+        :root {
+            --off-white: #F7F3ED;
+            --soft-white: #FFFDFC;
+            --beige: #D9C7B4;
+            --champagne: #E8D8C5;
+            --cabernet: #5D1932;
+            --dark-wine: #421322;
+            --wine-soft: #7A304A;
+            --text: #302A27;
+            --muted: #756B65;
+            --border: #E5DDD3;
+            --green: #52735A;
+            --green-soft: #E6EEE7;
+            --orange: #A46A35;
+            --orange-soft: #F4E8D9;
+            --red: #9B3E3E;
+            --red-soft: #F4E1E1;
+            --shadow: 0 12px 35px rgba(65, 37, 29, 0.08);
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: var(--off-white);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =====================================================
+           NAVBAR
+           DO NOT MODIFY
+        ====================================================== */
+
+        .navbar {
+            height: 76px;
+            padding: 0 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--soft-white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 48px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 34px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--cabernet);
+        }
+
+        .profile-button {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: var(--cabernet);
+            color: white;
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           PAGE
+        ====================================================== */
+
+        .page {
+            width: min(1400px, 92%);
+            margin: 0 auto;
+            padding: 34px 0 70px;
+        }
+
+        /* =====================================================
+           TOP BAR
+        ====================================================== */
+
+        .trip-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 25px;
+            margin-bottom: 26px;
+        }
+
+        .eyebrow {
+            color: var(--wine-soft);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
+
+        .trip-top h1 {
+            font-size: clamp(28px, 4vw, 42px);
+            color: var(--dark-wine);
+            line-height: 1.1;
+        }
+
+        .trip-top p {
+            color: var(--muted);
+            margin-top: 9px;
+            font-size: 14px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--soft-white);
+            color: var(--text);
+            padding: 11px 17px;
+            border-radius: 11px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: var(--beige);
+        }
+
+        .btn-primary {
+            background: var(--cabernet);
+            color: white;
+            border-color: var(--cabernet);
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-wine);
+        }
+
+        .btn-danger {
+            color: var(--red);
+            background: var(--red-soft);
+            border-color: transparent;
+        }
+
+        /* =====================================================
+           STATUS STRIP
+        ====================================================== */
+
+        .status-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .status-card {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 17px;
+            box-shadow: var(--shadow);
+        }
+
+        .status-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
+        .status-value {
+            margin-top: 7px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--dark-wine);
+        }
+
+        .status-small {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        /* =====================================================
+           MAIN GRID
+        ====================================================== */
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.8fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .left-column,
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .card {
+            background: var(--soft-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            padding: 20px 22px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header h2 {
+            font-size: 19px;
+            color: var(--dark-wine);
+        }
+
+        .card-header p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .card-body {
+            padding: 0 22px 22px;
+        }
+
+        /* =====================================================
+           DAY SELECTOR
+        ====================================================== */
+
+        .day-selector {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+
+        .day-btn {
+            flex: 0 0 auto;
+            padding: 9px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--off-white);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .day-btn.active {
+            background: var(--cabernet);
+            color: white;
+            border-color: var(--cabernet);
+        }
+
+        /* =====================================================
+           TODAY'S PLAN
+        ====================================================== */
+
+        .timeline {
+            position: relative;
+            padding: 8px 0 2px;
+        }
+
+        .timeline::before {
+            content: "";
+            position: absolute;
+            left: 75px;
+            top: 17px;
+            bottom: 17px;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 62px 28px minmax(0, 1fr);
+            gap: 12px;
+            position: relative;
+            padding: 14px 0;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--muted);
+            text-align: right;
+            padding-top: 5px;
+        }
+
+        .timeline-dot-wrap {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            padding-top: 4px;
+        }
+
+        .timeline-dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            border: 3px solid var(--soft-white);
+            background: var(--beige);
+            box-shadow: 0 0 0 1px var(--border);
+        }
+
+        .timeline-item.completed .timeline-dot {
+            background: var(--green);
+        }
+
+        .timeline-item.current .timeline-dot {
+            background: var(--cabernet);
+            box-shadow: 0 0 0 5px rgba(93, 25, 50, 0.10);
+        }
+
+        .timeline-item.skipped {
+            opacity: 0.55;
+        }
+
+        .place-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 15px;
+            background: #FFFEFC;
+        }
+
+        .place-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .place-name {
+            color: var(--dark-wine);
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .place-location {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .place-status {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 5px 8px;
+            border-radius: 8px;
+            height: fit-content;
+            white-space: nowrap;
+        }
+
+        .status-completed {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .status-next {
+            background: #F0E4EA;
+            color: var(--cabernet);
+        }
+
+        .status-upcoming {
+            background: var(--off-white);
+            color: var(--muted);
+        }
+
+        .status-skipped {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .place-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 11px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .place-actions {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-top: 13px;
+        }
+
+        .small-btn {
+            border: 1px solid var(--border);
+            background: var(--off-white);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .small-btn:hover {
+            border-color: var(--beige);
+        }
+
+        .small-btn.primary {
+            background: var(--cabernet);
+            color: white;
+            border-color: var(--cabernet);
+        }
+
+        /* =====================================================
+           PROGRESS
+        ====================================================== */
+
+        .progress-box {
+            padding: 18px;
+            background: var(--off-white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 18px;
+        }
+
+        .progress-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .progress-heading span:last-child {
+            color: var(--cabernet);
+        }
+
+        .progress-track {
+            height: 9px;
+            background: #EAE1D7;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 11px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--cabernet);
+            border-radius: inherit;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* =====================================================
+           LOCATION
+        ====================================================== */
+
+        .location-card {
+            padding: 18px;
+        }
+
+        .location-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--green-soft);
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .location-status.inactive {
+            background: var(--orange-soft);
+            color: var(--orange);
+        }
+
+        .location-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .location-stat {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        .location-stat label {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .location-stat strong {
+            display: block;
+            color: var(--dark-wine);
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .location-note {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+            margin-top: 13px;
+        }
+
+        /* =====================================================
+           WEATHER
+        ====================================================== */
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 14px;
+            background: var(--off-white);
+        }
+
+        .weather-icon {
+            font-size: 34px;
+        }
+
+        .weather-temp {
+            font-size: 27px;
+            font-weight: 800;
+            color: var(--dark-wine);
+        }
+
+        .weather-condition {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .weather-stat {
+            text-align: center;
+            padding: 10px 5px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .weather-stat span {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .weather-stat strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--dark-wine);
+        }
+
+        /* =====================================================
+           CROWD
+        ====================================================== */
+
+        .crowd-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .crowd-item:last-child {
+            border-bottom: none;
+        }
+
+        .crowd-place {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--dark-wine);
+        }
+
+        .crowd-distance {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .crowd-level {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 6px 9px;
+            border-radius: 8px;
+        }
+
+        .crowd-low {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .crowd-medium {
+            background: var(--orange-soft);
+            color: var(--orange);
+        }
+
+        .crowd-high {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .crowd-unavailable {
+            background: #EFE9E2;
+            color: var(--muted);
+        }
+
+        .place-crowd-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+            font-size: 11px;
+        }
+
+        .crowd-title {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .crowd-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .crowd-badge-high {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .crowd-badge-medium {
+            background: var(--orange-soft);
+            color: var(--orange);
+        }
+
+        .crowd-badge-low {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .crowd-badge-unavailable {
+            background: #EFE9E2;
+            color: var(--muted);
+        }
+
+        /* =====================================================
+           BUDGET
+        ====================================================== */
+
+        .budget-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 15px;
+        }
+
+        .budget-remaining {
+            font-size: 29px;
+            font-weight: 900;
+            color: var(--dark-wine);
+        }
+
+        .budget-label {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .budget-percent {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--green);
+        }
+
+        .budget-track {
+            height: 9px;
+            background: #EAE1D7;
+            border-radius: 99px;
+            overflow: hidden;
+            margin: 12px 0 15px;
+        }
+
+        .budget-fill {
+            height: 100%;
+            width: 0;
+            background: var(--cabernet);
+            border-radius: inherit;
+        }
+
+        .budget-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
+
+        .budget-stat {
+            padding: 10px;
+            border-radius: 10px;
+            background: var(--off-white);
+        }
+
+        .budget-stat span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .budget-stat strong {
+            display: block;
+            color: var(--dark-wine);
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .budget-warning {
+            margin-top: 13px;
+            padding: 12px;
+            border-radius: 11px;
+            background: var(--orange-soft);
+            color: var(--orange);
+            font-size: 11px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        /* =====================================================
+           AI
+        ====================================================== */
+
+        .ai-card {
+            border: 1px solid #DCC7D0;
+            background:
+                linear-gradient(
+                    145deg,
+                    #FFFDFC 0%,
+                    #F8F0F3 100%
+                );
+        }
+
+        .ai-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            background: var(--cabernet);
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+        }
+
+        .ai-suggestion {
+            border: 1px solid #E3D3DA;
+            background: rgba(255, 253, 252, .9);
+            border-radius: 14px;
+            padding: 15px;
+            margin-top: 11px;
+        }
+
+        .suggestion-type {
+            color: var(--cabernet);
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+
+        .suggestion-title {
+            color: var(--dark-wine);
+            font-weight: 800;
+            margin-top: 6px;
+            font-size: 14px;
+        }
+
+        .suggestion-text {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.6;
+            margin-top: 7px;
+        }
+
+        .why-box {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 9px;
+            background: #F7F1F3;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 7px;
+            margin-top: 11px;
+        }
+
+        .empty-ai {
+            text-align: center;
+            padding: 25px 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* =====================================================
+           NEARBY
+        ====================================================== */
+
+        .nearby-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .nearby-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px;
+            background: #FFFEFC;
+        }
+
+        .nearby-card h3 {
+            color: var(--dark-wine);
+            font-size: 13px;
+        }
+
+        .nearby-card p {
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .nearby-tags {
+            margin-top: 8px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--off-white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 6px;
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        /* =====================================================
+           SAFETY
+        ====================================================== */
+
+        .safety-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .safety-btn {
+            border: 1px solid var(--border);
+            background: var(--off-white);
+            border-radius: 10px;
+            padding: 12px 7px;
+            color: var(--text);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .safety-btn:hover {
+            border-color: var(--cabernet);
+            color: var(--cabernet);
+        }
+
+        /*=======================================================
+            END TRIP
+        ========================================================*/
+        .end-trip-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid #d8b8b8;
+    border-radius: 10px;
+    background: #fff8f8;
+    color: #6e1d38;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.end-trip-button:hover {
+    background: #6e1d38;
+    color: #ffffff;
+    border-color: #6e1d38;
+}    
+
+
+
+        /* =====================================================
+           DAY EXPENSE
+        ====================================================== */
+
+        .expense-form {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: 14px;
+            background: var(--off-white);
+            border: 1px solid var(--border);
+        }
+
+        .expense-form.visible {
+            display: block;
+        }
+
+        .expense-total {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .currency {
+            font-weight: 900;
+            font-size: 21px;
+            color: var(--cabernet);
+        }
+
+        .expense-total input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid var(--beige);
+            background: transparent;
+            padding: 5px 0;
+            font-size: 23px;
+            font-weight: 800;
+            outline: none;
+            color: var(--dark-wine);
+        }
+
+        .expense-categories {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .expense-category label {
+            display: block;
+            font-size: 9px;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .expense-category input {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: var(--soft-white);
+            border-radius: 8px;
+            padding: 8px;
+            outline: none;
+        }
+
+        /* =====================================================
+           MODAL
+        ====================================================== */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(40, 25, 21, .55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            width: min(620px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            background: var(--soft-white);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, .2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .modal-header h2 {
+            color: var(--dark-wine);
+            font-size: 20px;
+        }
+
+        .close-modal {
+            border: none;
+            background: var(--off-white);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            color: var(--muted);
+            font-size: 17px;
+        }
+
+        .search-box {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: var(--off-white);
+            padding: 12px 13px;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .modal-results {
+            display: grid;
+            gap: 8px;
+            margin-top: 13px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        .result-item strong {
+            display: block;
+            color: var(--dark-wine);
+            font-size: 13px;
+        }
+
+        .result-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 3px;
+        }
+
+        /* =====================================================
+           TOAST
+        ====================================================== */
+
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            background: var(--dark-wine);
+            color: white;
+            padding: 13px 17px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: .25s ease;
+            z-index: 700;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
+        @media (max-width: 1000px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 0 4%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page {
+                width: 94%;
+                padding-top: 23px;
+            }
+
+            .trip-top {
+                flex-direction: column;
+            }
+
+            .top-actions {
+                width: 100%;
+            }
+
+            .top-actions .btn {
+                flex: 1;
+            }
+
+            .status-strip {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .timeline::before {
+                left: 54px;
+            }
+
+            .timeline-item {
+                grid-template-columns: 45px 20px minmax(0, 1fr);
+                gap: 9px;
+            }
+
+            .timeline-time {
+                font-size: 10px;
+            }
+
+            .place-top {
+                flex-direction: column;
+            }
+
+            .nearby-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .expense-categories {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .safety-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .status-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header,
+            .card-body {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .location-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     NAVBAR — PRESERVED
+========================================================== -->
+
+<nav class="navbar">
+    <a href="index.html" class="logo">
+        <img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+    </a>
+    <div class="nav-links">
+        <a href="index.html#explore">Explore</a>
+        <a href="index.html#hidden-gems" class="active">Hidden Gems</a>
+        <a href="index.html#plan-trip">Plan Trip</a>
+        <a href="index.html#safety">Safety</a>
+    </div>
+    <button class="profile-button" onclick="location.href='profile.html'">P</button>
+</nav>
+
+
+<main class="page">
+
+    <!-- =====================================================
+         TOP
+    ====================================================== -->
+
+    <section class="trip-top">
+
+        <div>
+            <div class="eyebrow">Live Trip Companion</div>
+
+            <h1 id="tripDestination">
+                Your Current Trip
+            </h1>
+
+            <p id="tripSubtitle">
+                Stay on track, discover nearby experiences and adapt your journey.
+            </p>
+        </div>
+
+        <button
+    class="end-trip-button"
+    id="endTripButton"
+    type="button"
+    onclick="endTrip()"
+>
+    <i class="fa-solid fa-flag-checkered"></i>
+    End Trip
+</button>
+
+        <div class="top-actions">
+            <button class="btn" onclick="goHome()">
+                ← Home
+            </button>
+
+            <button class="btn" onclick="openNearbyModal()">
+                Explore Nearby
+            </button>
+
+            <button class="btn btn-primary" onclick="openAddPlaceModal()">
+                + Add Stop
+            </button>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         STATUS
+    ====================================================== -->
+
+    <section class="status-strip">
+
+        <div class="status-card">
+            <div class="status-label">Trip Status</div>
+            <div class="status-value">
+                <span class="live-dot"></span>
+                Active
+            </div>
+            <div class="status-small" id="statusDate">
+                Today
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-label">Current Day</div>
+            <div class="status-value" id="currentDayStatus">
+                Day 1
+            </div>
+            <div class="status-small" id="totalDaysStatus">
+                of 3 days
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-label">Places Completed</div>
+            <div class="status-value" id="completedStatus">
+                0 / 0
+            </div>
+            <div class="status-small">
+                Planned places
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-label">Trip Progress</div>
+            <div class="status-value" id="tripProgressStatus">
+                0%
+            </div>
+            <div class="status-small">
+                Overall journey
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+
+    <section class="dashboard-grid">
+
+        <!-- =================================================
+             LEFT
+        ================================================== -->
+
+        <div class="left-column">
+
+            <!-- TODAY'S PLAN -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Today's Journey</h2>
+                        <p id="todayDescription">
+                            Your live plan for today.
+                        </p>
+                    </div>
+
+                    <button class="small-btn" onclick="openAddPlaceModal()">
+                        + Add
+                    </button>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="day-selector" id="daySelector"></div>
+
+                    <div class="progress-box">
+
+                        <div class="progress-heading">
+                            <span>Today's progress</span>
+                            <span id="todayProgressText">0%</span>
+                        </div>
+
+                        <div class="progress-track">
+                            <div class="progress-fill" id="todayProgressFill"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="timeline" id="timeline"></div>
+
+                    <!-- END OF DAY EXPENSE -->
+
+                    <div class="expense-form" id="expenseForm">
+
+                        <h3 style="font-size:15px;color:var(--dark-wine);">
+                            Day <span id="expenseDayNumber">1</span> Expenses
+                        </h3>
+
+                        <p style="font-size:11px;color:var(--muted);margin-top:5px;">
+                            Record what you actually spent today. This helps BYOND Spot adapt future suggestions.
+                        </p>
+
+                        <div class="expense-total" style="margin-top:15px;">
+                            <span class="currency">₹</span>
+                            <input
+                                type="number"
+                                id="expenseTotal"
+                                min="0"
+                                placeholder="Total spent today"
+                            >
+                        </div>
+
+                        <div class="expense-categories">
+
+                            <div class="expense-category">
+                                <label>Food</label>
+                                <input type="number" id="expenseFood" min="0" value="0">
+                            </div>
+
+                            <div class="expense-category">
+                                <label>Transport</label>
+                                <input type="number" id="expenseTransport" min="0" value="0">
+                            </div>
+
+                            <div class="expense-category">
+                                <label>Activities</label>
+                                <input type="number" id="expenseActivities" min="0" value="0">
+                            </div>
+
+                            <div class="expense-category">
+                                <label>Shopping</label>
+                                <input type="number" id="expenseShopping" min="0" value="0">
+                            </div>
+
+                            <div class="expense-category">
+                                <label>Other</label>
+                                <input type="number" id="expenseOther" min="0" value="0">
+                            </div>
+
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            style="margin-top:15px;"
+                            onclick="saveDayExpenses()"
+                        >
+                            Save Day's Expenses
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- LIVE LOCATION -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Live Location</h2>
+                        <p>Used to understand your trip progress and nearby experiences.</p>
+                    </div>
+
+                    <button
+                        class="small-btn primary"
+                        id="locationToggle"
+                        onclick="toggleLocationTracking()"
+                    >
+                        Enable
+                    </button>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="location-card">
+
+                        <div
+                            class="location-status inactive"
+                            id="locationStatus"
+                        >
+                            <span>●</span>
+                            Location services inactive
+                        </div>
+
+                        <div class="location-details">
+
+                            <div class="location-stat">
+                                <label>Latitude</label>
+                                <strong id="latitudeValue">—</strong>
+                            </div>
+
+                            <div class="location-stat">
+                                <label>Longitude</label>
+                                <strong id="longitudeValue">—</strong>
+                            </div>
+
+                            <div class="location-stat">
+                                <label>Accuracy</label>
+                                <strong id="accuracyValue">—</strong>
+                            </div>
+
+                            <div class="location-stat">
+                                <label>Last Updated</label>
+                                <strong id="locationUpdatedValue">—</strong>
+                            </div>
+
+                        </div>
+
+                        <p class="location-note">
+                            Location is optional. It is used to calculate proximity to planned
+                            places and discover relevant nearby experiences. It does not
+                            automatically change your itinerary.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- NEARBY -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Nearby Experiences</h2>
+                        <p>Real places from the destination database can appear here.</p>
+                    </div>
+
+                    <button class="small-btn" onclick="loadNearbyPlaces()">
+                        Refresh
+                    </button>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="nearby-grid" id="nearbyGrid">
+                        <div class="empty-ai">
+                            Enable location to discover places around you.
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             RIGHT
+        ================================================== -->
+
+        <div class="right-column">
+
+            <!-- WEATHER -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Weather</h2>
+                        <p id="weatherLocation">Current destination</p>
+                    </div>
+
+                    <button class="small-btn" onclick="refreshWeather()">
+                        Refresh
+                    </button>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="weather-main">
+
+                        <div class="weather-icon" id="weatherIcon">
+                            🌤️
+                        </div>
+
+                        <div>
+                            <div class="weather-temp" id="weatherTemp">
+                                31°C
+                            </div>
+
+                            <div class="weather-condition" id="weatherCondition">
+                                Weather data loading...
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="weather-grid">
+
+                        <div class="weather-stat">
+                            <span>Rain</span>
+                            <strong id="rainProbability">—</strong>
+                        </div>
+
+                        <div class="weather-stat">
+                            <span>Feels Like</span>
+                            <strong id="feelsLike">—</strong>
+                        </div>
+
+                        <div class="weather-stat">
+                            <span>Wind</span>
+                            <strong id="windSpeed">—</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CROWD -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Crowd Activity</h2>
+                        <p>Helps AI avoid unnecessarily crowded experiences.</p>
+                    </div>
+
+                    <button class="small-btn" onclick="refreshCrowdData()">
+                        Refresh
+                    </button>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div id="crowdList">
+                        <div class="empty-ai">
+                            BestTime crowd activity loading...
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- BUDGET -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Budget Health</h2>
+                        <p>Based on your actual spending.</p>
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="budget-main">
+
+                        <div>
+                            <div class="budget-label">
+                                Remaining
+                            </div>
+
+                            <div
+                                class="budget-remaining"
+                                id="remainingBudget"
+                            >
+                                ₹0
+                            </div>
+                        </div>
+
+                        <div
+                            class="budget-percent"
+                            id="budgetPercent"
+                        >
+                            0% remaining
+                        </div>
+
+                    </div>
+
+                    <div class="budget-track">
+                        <div
+                            class="budget-fill"
+                            id="budgetFill"
+                        ></div>
+                    </div>
+
+                    <div class="budget-breakdown">
+
+                        <div class="budget-stat">
+                            <span>Total Budget</span>
+                            <strong id="totalBudget">₹0</strong>
+                        </div>
+
+                        <div class="budget-stat">
+                            <span>Spent</span>
+                            <strong id="spentBudget">₹0</strong>
+                        </div>
+
+                        <div class="budget-stat">
+                            <span>Today's Spend</span>
+                            <strong id="todaySpentBudget">₹0</strong>
+                        </div>
+
+                        <div class="budget-stat">
+                            <span>Projected Cost</span>
+                            <strong id="projectedBudget">₹0</strong>
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="budget-warning"
+                        id="budgetWarning"
+                    >
+                        Your projected trip cost is higher than your original budget.
+                        AI will prioritize lower-cost suggestions.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- AI -->
+
+            <section class="card ai-card">
+
+                <div class="card-header">
+
+                    <div class="ai-title">
+
+                        <div class="ai-icon">
+                            AI
+                        </div>
+
+                        <div>
+                            <h2>BYOND AI</h2>
+                            <p>Context-aware suggestions</p>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="small-btn primary"
+                        onclick="requestAISuggestions()"
+                    >
+                        Refresh AI
+                    </button>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div id="aiSuggestions">
+
+                        <div class="empty-ai">
+                            Your suggestions will consider your location,
+                            weather, crowd activity, budget, interests and schedule.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SAFETY -->
+
+            <section class="card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Safety</h2>
+                        <p>Quick access while travelling.</p>
+                    </div>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="safety-grid">
+
+                        <button
+                            class="safety-btn"
+                            onclick="shareLocation()"
+                        >
+                            📍 Share Location
+                        </button>
+
+                        <button
+                            class="safety-btn"
+                            onclick="callEmergency()"
+                        >
+                            🚨 Emergency
+                        </button>
+
+                        <button
+                            class="safety-btn"
+                            onclick="findHospitals()"
+                        >
+                            🏥 Hospitals
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- =========================================================
+     ADD / CHANGE PLACE MODAL
+========================================================== -->
+
+<div class="modal-overlay" id="placeModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+                <h2 id="modalTitle">
+                    Add a Place
+                </h2>
+
+                <p style="font-size:11px;color:var(--muted);margin-top:4px;">
+                    Choose from valid places in the destination database.
+                </p>
+            </div>
+
+            <button
+                class="close-modal"
+                onclick="closePlaceModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <input
+            type="text"
+            class="search-box"
+            id="placeSearch"
+            placeholder="Search places..."
+            oninput="searchPlaces()"
+        >
+
+        <div class="modal-results" id="placeResults"></div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     NEARBY MODAL
+========================================================== -->
+
+<div class="modal-overlay" id="nearbyModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+                <h2>Explore Nearby</h2>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px;">
+                    Discover real places around your current location.
+                </p>
+            </div>
+
+            <button
+                class="close-modal"
+                onclick="closeNearbyModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div id="nearbyModalResults"></div>
+
+    </div>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+/* ============================================================
+   BYOND SPOT — CURRENT TRIP
+   ============================================================
+
+   IMPORTANT:
+   The API paths below are proposed backend contracts.
+   Replace them with your actual Flask routes once finalized.
+============================================================ */
+
+const API_CONFIG = {
+
+    trip: "/api/trips/{trip_id}",
+
+    updateItinerary:
+        "/api/trips/{trip_id}/itinerary",
+
+    expenses:
+        "/api/trips/{trip_id}/expenses",
+
+    progress:
+        "/api/trips/{trip_id}/progress",
+
+    nearby:
+        "/api/places/nearby",
+
+    weather:
+        "/api/weather",
+
+    crowd:
+        "/api/trips/{trip_id}/crowd",
+
+    crowdGeneral:
+        "/api/trips/crowd",
+
+    aiSuggestions:
+        "/api/ai/trip-suggestions"
+};
+
+
+/* ============================================================
+   DEMO DATA
+   Used only when backend is unavailable.
+============================================================ */
+
+const DEMO_PLACES = [
+
+    {
+        id: "undavalli",
+        name: "Undavalli Caves",
+        location: "Vijayawada, Andhra Pradesh",
+        category: ["Culture", "History"],
+        lat: 16.4963,
+        lng: 80.5894,
+        estimated_cost: 150,
+        duration_minutes: 90,
+        crowd_level: "medium"
+    },
+
+    {
+        id: "amaravati",
+        name: "Amaravati Historical Site",
+        location: "Amaravati, Andhra Pradesh",
+        category: ["History", "Culture"],
+        lat: 16.5728,
+        lng: 80.3575,
+        estimated_cost: 100,
+        duration_minutes: 120,
+        crowd_level: "low"
+    },
+
+    {
+        id: "kondaveedu",
+        name: "Kondaveedu Fort",
+        location: "Guntur, Andhra Pradesh",
+        category: ["History", "Adventure"],
+        lat: 16.4570,
+        lng: 80.2500,
+        estimated_cost: 100,
+        duration_minutes: 120,
+        crowd_level: "high"
+    },
+
+    {
+        id: "kondapalli",
+        name: "Kondapalli",
+        location: "Vijayawada, Andhra Pradesh",
+        category: ["Culture", "Shopping"],
+        lat: 16.6170,
+        lng: 80.5410,
+        estimated_cost: 250,
+        duration_minutes: 90,
+        crowd_level: "medium"
+    },
+
+    {
+        id: "bhavani",
+        name: "Bhavani Island",
+        location: "Vijayawada, Andhra Pradesh",
+        category: ["Nature", "Adventure"],
+        lat: 16.5146,
+        lng: 80.6166,
+        estimated_cost: 300,
+        duration_minutes: 150,
+        crowd_level: "medium"
+    },
+
+    {
+        id: "mangalagiri",
+        name: "Mangalagiri",
+        location: "Andhra Pradesh",
+        category: ["Culture", "History"],
+        lat: 16.4308,
+        lng: 80.5685,
+        estimated_cost: 100,
+        duration_minutes: 90,
+        crowd_level: "low"
+    }
+];
+
+
+/* ============================================================
+   STATE
+============================================================ */
+
+let trip = null;
+
+let currentDay = 1;
+
+let currentLocation = null;
+
+let locationWatchId = null;
+
+let isTrackingLocation = false;
+
+let nearbyPlaces = [];
+
+let crowdData = [];
+
+let weatherData = {
+
+    temperature: 31,
+
+    feels_like: 33,
+
+    rain_probability: 20,
+
+    wind_speed: 12,
+
+    condition: "Partly cloudy",
+
+    icon: "🌤️"
+
+};
+
+let editingDayIndex = null;
+
+let editingPlaceIndex = null;
+
+
+/* ============================================================
+   INITIALIZATION
+============================================================ */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    loadTrip();
+
+    renderDaySelector();
+
+    renderCurrentDay();
+
+    updateTripSummary();
+
+    updateBudget();
+
+    updateOverallProgress();
+
+    updateWeatherUI();
+
+    await loadBackendTrip();
+
+    await refreshCrowdData();
+
+});
+
+/* ==========================
+    END TRIP
+========================== */
+
+function endTrip() {
+    const tripData = localStorage.getItem("byondSpotTrip");
+
+    if (!tripData) {
+        alert("No active trip found.");
+        return;
+    }
+
+    let trip;
+
+    try {
+        trip = JSON.parse(tripData);
+    } catch (error) {
+        console.error("Invalid trip data:", error);
+        alert("Unable to end the trip.");
+        return;
+    }
+
+    const confirmed = confirm(
+        "Are you sure you want to end this trip?\n\n" +
+        "Your current trip will no longer appear on the homepage."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    // Mark trip as completed
+    trip.status = "completed";
+    trip.completed_at = new Date().toISOString();
+
+    // Preserve the trip data for future history/analytics
+    localStorage.setItem(
+        "byondSpotTrip",
+        JSON.stringify(trip)
+    );
+
+    // Remove active-trip state
+    localStorage.removeItem("byondSpotActiveTrip");
+
+    // Return to homepage
+    window.location.href = "index.html";
+}
+
+/* ============================================================
+   LOAD TRIP
+============================================================ */
+
+function loadTrip() {
+
+    const stored =
+        localStorage.getItem("byondSpotTrip");
+
+    if (!stored) {
+
+        createDemoTrip();
+
+        return;
+    }
+
+    try {
+
+        trip = JSON.parse(stored);
+
+    } catch (error) {
+
+        console.error(
+            "Could not parse stored trip",
+            error
+        );
+
+        createDemoTrip();
+    }
+
+
+    if (!trip.itinerary) {
+
+        trip.itinerary = createDemoItinerary();
+
+    }
+
+    if (!trip.original_itinerary) {
+
+        trip.original_itinerary =
+            JSON.parse(
+                JSON.stringify(trip.itinerary)
+            );
+
+    }
+
+    if (!trip.expenses) {
+
+        trip.expenses = [];
+
+    }
+
+    if (!trip.completed_places) {
+
+        trip.completed_places = [];
+
+    }
+
+    if (!trip.skipped_places) {
+
+        trip.skipped_places = [];
+
+    }
+
+    if (!trip.live_modifications) {
+
+        trip.live_modifications = [];
+
+    }
+
+    if (!trip.status) {
+
+        trip.status = "active";
+
+    }
+
+    currentDay =
+        Number(trip.current_day || 1);
+
+}
+
+
+function createDemoTrip() {
+
+    trip = {
+
+        id: null,
+
+        status: "active",
+
+        destination: {
+
+            id: "vijayawada",
+
+            name: "Vijayawada & Surroundings"
+
+        },
+
+        duration_days: 3,
+
+        travellers: 2,
+
+        budget: 10000,
+
+        interests: [
+
+            "History",
+
+            "Culture",
+
+            "Nature"
+
+        ],
+
+        current_day: 1,
+
+        itinerary: createDemoItinerary(),
+
+        original_itinerary: createDemoItinerary(),
+
+        expenses: [],
+
+        completed_places: [],
+
+        skipped_places: [],
+
+        live_modifications: [],
+
+        started_at:
+            new Date().toISOString()
+
+    };
+
+    saveTrip();
+
+}
+
+
+function createDemoItinerary() {
+
+    return [
+
+        {
+
+            day: 1,
+
+            places: [
+
+                {
+
+                    place_id: "undavalli",
+
+                    name: "Undavalli Caves",
+
+                    location:
+                        "Vijayawada, Andhra Pradesh",
+
+                    start_time: "09:00",
+
+                    duration_minutes: 90,
+
+                    estimated_cost: 150,
+
+                    lat: 16.4963,
+
+                    lng: 80.5894,
+
+                    status: "upcoming"
+
+                },
+
+                {
+
+                    place_id: "amaravati",
+
+                    name: "Amaravati Historical Site",
+
+                    location:
+                        "Amaravati, Andhra Pradesh",
+
+                    start_time: "14:00",
+
+                    duration_minutes: 120,
+
+                    estimated_cost: 100,
+
+                    lat: 16.5728,
+
+                    lng: 80.3575,
+
+                    status: "upcoming"
+
+                },
+
+                {
+
+                    place_id: "bhavani",
+
+                    name: "Bhavani Island",
+
+                    location:
+                        "Vijayawada, Andhra Pradesh",
+
+                    start_time: "18:00",
+
+                    duration_minutes: 150,
+
+                    estimated_cost: 300,
+
+                    lat: 16.5146,
+
+                    lng: 80.6166,
+
+                    status: "upcoming"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            day: 2,
+
+            places: [
+
+                {
+
+                    place_id: "kondaveedu",
+
+                    name: "Kondaveedu Fort",
+
+                    location:
+                        "Guntur, Andhra Pradesh",
+
+                    start_time: "09:00",
+
+                    duration_minutes: 120,
+
+                    estimated_cost: 100,
+
+                    lat: 16.4570,
+
+                    lng: 80.2500,
+
+                    status: "upcoming"
+
+                },
+
+                {
+
+                    place_id: "mangalagiri",
+
+                    name: "Mangalagiri",
+
+                    location:
+                        "Andhra Pradesh",
+
+                    start_time: "15:00",
+
+                    duration_minutes: 90,
+
+                    estimated_cost: 100,
+
+                    lat: 16.4308,
+
+                    lng: 80.5685,
+
+                    status: "upcoming"
+
+                }
+
+            ]
+
+        },
+
+        {
+
+            day: 3,
+
+            places: [
+
+                {
+
+                    day: 3,
+
+                    place_id: "kondapalli",
+
+                    name: "Kondapalli",
+
+                    location:
+                        "Vijayawada, Andhra Pradesh",
+
+                    start_time: "10:00",
+
+                    duration_minutes: 90,
+
+                    estimated_cost: 250,
+
+                    lat: 16.6170,
+
+                    lng: 80.5410,
+
+                    status: "upcoming"
+
+                }
+
+            ]
+
+        }
+
+    ];
+
+}
+
+
+/* ============================================================
+   BACKEND TRIP
+============================================================ */
+
+async function loadBackendTrip() {
+
+    if (!trip || !trip.id) {
+
+        return;
+    }
+
+    try {
+
+        const endpoint =
+            API_CONFIG.trip.replace(
+                "{trip_id}",
+                encodeURIComponent(trip.id)
+            );
+
+        const response =
+            await fetch(endpoint);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Trip API unavailable"
+            );
+        }
+
+        const backendTrip =
+            await response.json();
+
+        trip = {
+
+            ...trip,
+
+            ...backendTrip
+
+        };
+
+        saveTrip();
+
+        currentDay =
+            Number(trip.current_day || 1);
+
+        renderAll();
+
+    } catch (error) {
+
+        console.info(
+            "Using local trip data until backend is available."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   SAVE
+============================================================ */
+
+function saveTrip() {
+
+    localStorage.setItem(
+        "byondSpotTrip",
+        JSON.stringify(trip)
+    );
+
+    localStorage.setItem(
+        "byondSpotActiveTrip",
+        "true"
+    );
+}
+
+
+/* ============================================================
+   RENDER EVERYTHING
+============================================================ */
+
+function renderAll() {
+
+    renderDaySelector();
+
+    renderCurrentDay();
+
+    updateTripSummary();
+
+    updateBudget();
+
+    updateOverallProgress();
+
+    updateWeatherUI();
+
+    renderCrowdData();
+
+}
+
+
+/* ============================================================
+   SUMMARY
+============================================================ */
+
+function updateTripSummary() {
+
+    const destination =
+        trip?.destination?.name ||
+        "Your Current Trip";
+
+    document.getElementById(
+        "tripDestination"
+    ).textContent = destination;
+
+    document.getElementById(
+        "tripSubtitle"
+    ).textContent =
+        `${trip.duration_days || 1} days · ` +
+        `${trip.travellers || 1} traveller(s) · ` +
+        `Live journey`;
+
+    document.getElementById(
+        "currentDayStatus"
+    ).textContent =
+        `Day ${currentDay}`;
+
+    document.getElementById(
+        "totalDaysStatus"
+    ).textContent =
+        `of ${trip.duration_days || 1} days`;
+
+    document.getElementById(
+        "statusDate"
+    ).textContent =
+        new Date().toLocaleDateString(
+            undefined,
+            {
+                weekday: "short",
+                day: "numeric",
+                month: "short"
+            }
+        );
+}
+
+
+/* ============================================================
+   DAY SELECTOR
+============================================================ */
+
+function renderDaySelector() {
+
+    const container =
+        document.getElementById(
+            "daySelector"
+        );
+
+    container.innerHTML = "";
+
+    const totalDays =
+        Number(trip.duration_days || 1);
+
+    for (
+        let day = 1;
+        day <= totalDays;
+        day++
+    ) {
+
+        const button =
+            document.createElement("button");
+
+        button.className =
+            `day-btn ${
+                day === currentDay
+                    ? "active"
+                    : ""
+            }`;
+
+        button.textContent =
+            `Day ${day}`;
+
+        button.onclick = () => {
+
+            currentDay = day;
+
+            trip.current_day = day;
+
+            saveTrip();
+
+            renderAll();
+
+            refreshCrowdData();
+
+        };
+
+        container.appendChild(button);
+    }
+}
+
+
+/* ============================================================
+   CURRENT DAY
+============================================================ */
+
+function getCurrentDayData() {
+
+    if (!trip.itinerary) {
+
+        return {
+
+            day: currentDay,
+
+            places: []
+
+        };
+
+    }
+
+    return (
+        trip.itinerary.find(
+            item =>
+                Number(item.day) ===
+                Number(currentDay)
+        )
+        || {
+
+            day: currentDay,
+
+            places: []
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   RENDER TIMELINE
+============================================================ */
+
+function renderCurrentDay() {
+
+    const timeline =
+        document.getElementById(
+            "timeline"
+        );
+
+    timeline.innerHTML = "";
+
+    const dayData =
+        getCurrentDayData();
+
+    const places =
+        dayData.places || [];
+
+    document.getElementById(
+        "todayDescription"
+    ).textContent =
+        places.length
+            ? `${places.length} planned stop(s) for Day ${currentDay}.`
+            : "No places planned for today.";
+
+    if (!places.length) {
+
+        timeline.innerHTML = `
+            <div class="empty-ai">
+                No places planned for this day.
+                Add a stop to continue your journey.
+            </div>
+        `;
+
+        updateTodayProgress();
+
+        return;
+    }
+
+
+    places.forEach(
+        (place, index) => {
+
+            const item =
+                document.createElement("div");
+
+            const status =
+                getPlaceStatus(place);
+
+            const crowdItem = Array.isArray(crowdData) ? crowdData.find(c =>
+                (c.place_id && place.place_id && String(c.place_id) === String(place.place_id)) ||
+                (c.place_id && place.id && String(c.place_id) === String(place.id)) ||
+                (c.name && place.name && c.name.toLowerCase().trim() === place.name.toLowerCase().trim())
+            ) : null;
+
+            let crowdHtml = "";
+            if (crowdItem) {
+                const levelStr = String(crowdItem.crowd_level || "").toLowerCase();
+                let badgeClass = "crowd-badge-medium";
+                let label = crowdItem.crowd_level || "Unavailable";
+
+                if (!crowdItem.available || levelStr === "unavailable") {
+                    badgeClass = "crowd-badge-unavailable";
+                    label = (crowdItem.message && crowdItem.message.toLowerCase().includes("temporarily")) ? "Temporarily unavailable" : "Data unavailable";
+                } else if (levelStr === "very busy" || levelStr === "busy" || levelStr === "high") {
+                    badgeClass = "crowd-badge-high";
+                } else if (levelStr === "low") {
+                    badgeClass = "crowd-badge-low";
+                }
+
+                const typeDesc = crowdItem.is_live ? "Live" : (crowdItem.available ? "Expected" : "");
+
+                crowdHtml = `
+                    <div class="place-crowd-info">
+                        <span class="crowd-title">Crowd Activity</span>
+                        <span class="crowd-badge ${badgeClass}">
+                            ● ${escapeHtml(label)}${typeDesc ? ` · ${typeDesc}` : ""}
+                        </span>
+                    </div>
+                `;
+            } else {
+                crowdHtml = `
+                    <div class="place-crowd-info">
+                        <span class="crowd-title">Crowd Activity</span>
+                        <span class="crowd-badge crowd-badge-unavailable">
+                            ● Crowd data unavailable
+                        </span>
+                    </div>
+                `;
+            }
+
+            item.className =
+                `timeline-item ${status}`;
+
+            item.innerHTML = `
+
+                <div class="timeline-time">
+                    ${formatTime(place.start_time)}
+                </div>
+
+                <div class="timeline-dot-wrap">
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="place-card">
+
+                    <div class="place-top">
+
+                        <div>
+                            <div class="place-name">
+                                ${escapeHtml(place.name)}
+                            </div>
+
+                            <div class="place-location">
+                                ${escapeHtml(place.location || "")}
+                            </div>
+                        </div>
+
+                        <div class="place-status
+                            ${status === "completed"
+                                ? "status-completed"
+                                : status === "current"
+                                    ? "status-next"
+                                    : status === "skipped"
+                                        ? "status-skipped"
+                                        : "status-upcoming"}">
+
+                            ${
+                                status === "completed"
+                                    ? "Completed"
+                                    : status === "current"
+                                        ? "Next"
+                                        : status === "skipped"
+                                            ? "Skipped"
+                                            : "Upcoming"
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="place-meta">
+
+                        <span>
+                            ⏱ ${place.duration_minutes || 60} min
+                        </span>
+
+                        <span>
+                            ₹${place.estimated_cost || 0} est.
+                        </span>
+
+                    </div>
+
+                    ${crowdHtml}
+
+                    <div class="place-actions">
+
+                        ${
+                            status !== "completed"
+                            && status !== "skipped"
+                            ? `
+                                <button
+                                    class="small-btn primary"
+                                    onclick="completePlace(${index})"
+                                >
+                                    ✓ Complete
+                                </button>
+
+                                <button
+                                    class="small-btn"
+                                    onclick="changePlace(${index})"
+                                >
+                                    Change
+                                </button>
+
+                                <button
+                                    class="small-btn"
+                                    onclick="skipPlace(${index})"
+                                >
+                                    Skip
+                                </button>
+                            `
+                            : ""
+                        }
+
+                        ${
+                            status === "completed"
+                            || status === "skipped"
+                            ? `
+                                <button
+                                    class="small-btn"
+                                    onclick="undoPlaceStatus(${index})"
+                                >
+                                    Undo
+                                </button>
+                            `
+                            : ""
+                        }
+
+                        <button
+                            class="small-btn"
+                            onclick="removePlace(${index})"
+                        >
+                            Remove
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+            timeline.appendChild(item);
+
+        }
+    );
+
+    updateTodayProgress();
+}
+
+
+/* ============================================================
+   PLACE STATUS
+============================================================ */
+
+function getPlaceStatus(place) {
+
+    if (place.status === "completed") {
+
+        return "completed";
+
+    }
+
+    if (place.status === "skipped") {
+
+        return "skipped";
+
+    }
+
+    const dayData =
+        getCurrentDayData();
+
+    const firstPending =
+        (dayData.places || []).find(
+            p =>
+                p.status !== "completed"
+                &&
+                p.status !== "skipped"
+        );
+
+    if (
+        firstPending &&
+        firstPending.place_id ===
+            place.place_id
+    ) {
+
+        return "current";
+
+    }
+
+    return "upcoming";
+}
+
+
+/* ============================================================
+   COMPLETE
+============================================================ */
+
+function completePlace(index) {
+
+    const dayData =
+        getCurrentDayData();
+
+    const place =
+        dayData.places[index];
+
+    if (!place) return;
+
+    place.status = "completed";
+
+    if (
+        !trip.completed_places.includes(
+            place.place_id
+        )
+    ) {
+
+        trip.completed_places.push(
+            place.place_id
+        );
+
+    }
+
+    trip.skipped_places =
+        trip.skipped_places.filter(
+            id =>
+                id !== place.place_id
+        );
+
+    recordModification(
+        "completed",
+        place
+    );
+
+    saveTrip();
+
+    syncProgress();
+
+    renderAll();
+
+    showToast(
+        `${place.name} marked as completed.`
+    );
+}
+
+
+/* ============================================================
+   SKIP
+============================================================ */
+
+function skipPlace(index) {
+
+    const dayData =
+        getCurrentDayData();
+
+    const place =
+        dayData.places[index];
+
+    if (!place) return;
+
+    place.status = "skipped";
+
+    if (
+        !trip.skipped_places.includes(
+            place.place_id
+        )
+    ) {
+
+        trip.skipped_places.push(
+            place.place_id
+        );
+
+    }
+
+    trip.completed_places =
+        trip.completed_places.filter(
+            id =>
+                id !== place.place_id
+        );
+
+    recordModification(
+        "skipped",
+        place
+    );
+
+    saveTrip();
+
+    syncProgress();
+
+    renderAll();
+
+    showToast(
+        `${place.name} skipped.`
+    );
+}
+
+
+/* ============================================================
+   UNDO
+============================================================ */
+
+function undoPlaceStatus(index) {
+
+    const dayData =
+        getCurrentDayData();
+
+    const place =
+        dayData.places[index];
+
+    if (!place) return;
+
+    place.status = "upcoming";
+
+    trip.completed_places =
+        trip.completed_places.filter(
+            id =>
+                id !== place.place_id
+        );
+
+    trip.skipped_places =
+        trip.skipped_places.filter(
+            id =>
+                id !== place.place_id
+        );
+
+    saveTrip();
+
+    syncProgress();
+
+    renderAll();
+
+}
+
+
+/* ============================================================
+   REMOVE
+============================================================ */
+
+function removePlace(index) {
+
+    const dayData =
+        getCurrentDayData();
+
+    const place =
+        dayData.places[index];
+
+    if (!place) return;
+
+    const confirmed =
+        confirm(
+            `Remove ${place.name} from today's plan?`
+        );
+
+    if (!confirmed) return;
+
+    dayData.places.splice(
+        index,
+        1
+    );
+
+    trip.live_modifications.push({
+
+        type: "removed",
+
+        day: currentDay,
+
+        place_id: place.place_id,
+
+        timestamp:
+            new Date().toISOString()
+
+    });
+
+    saveTrip();
+
+    syncItinerary();
+
+    renderAll();
+
+    showToast(
+        `${place.name} removed from today's plan.`
+    );
+}
+
+
+/* ============================================================
+   CHANGE PLACE
+============================================================ */
+
+function changePlace(index) {
+
+    editingDayIndex =
+        currentDay;
+
+    editingPlaceIndex =
+        index;
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        "Change This Place";
+
+    document.getElementById(
+        "placeModal"
+    ).classList.add("show");
+
+    document.getElementById(
+        "placeSearch"
+    ).value = "";
+
+    searchPlaces();
+
+}
+
+
+/* ============================================================
+   ADD PLACE
+============================================================ */
+
+function openAddPlaceModal() {
+
+    editingDayIndex =
+        currentDay;
+
+    editingPlaceIndex =
+        null;
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        `Add a Place to Day ${currentDay}`;
+
+    document.getElementById(
+        "placeModal"
+    ).classList.add("show");
+
+    document.getElementById(
+        "placeSearch"
+    ).value = "";
+
+    searchPlaces();
+}
+
+
+function closePlaceModal() {
+
+    document.getElementById(
+        "placeModal"
+    ).classList.remove("show");
+
+}
+
+
+/* ============================================================
+   SEARCH PLACES
+============================================================ */
+
+async function searchPlaces() {
+
+    const query =
+        document.getElementById(
+            "placeSearch"
+        ).value.trim();
+
+    let results = [];
+
+    try {
+
+        const url =
+            `${API_CONFIG.nearby}` +
+            `?destination=${encodeURIComponent(
+                trip.destination?.id || ""
+            )}` +
+            `&search=${encodeURIComponent(query)}`;
+
+        const response =
+            await fetch(url);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Place API unavailable"
+            );
+
+        }
+
+        results =
+            await response.json();
+
+    } catch (error) {
+
+        results =
+            DEMO_PLACES.filter(
+                place => {
+
+                    const searchText =
+                        `${place.name} ${place.location} ${place.category.join(" ")}`
+                            .toLowerCase();
+
+                    return searchText.includes(
+                        query.toLowerCase()
+                    );
+
+                }
+            );
+
+    }
+
+    renderPlaceResults(results);
+
+}
+
+
+function renderPlaceResults(results) {
+
+    const container =
+        document.getElementById(
+            "placeResults"
+        );
+
+    container.innerHTML = "";
+
+    if (!results.length) {
+
+        container.innerHTML = `
+            <div class="empty-ai">
+                No matching places found.
+            </div>
+        `;
+
+        return;
+    }
+
+    results.forEach(place => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "result-item";
+
+        item.innerHTML = `
+
+            <div>
+                <strong>
+                    ${escapeHtml(place.name)}
+                </strong>
+
+                <span>
+                    ${escapeHtml(place.location || "")}
+                    · ₹${place.estimated_cost || 0}
+                </span>
+            </div>
+
+            <button
+                class="small-btn primary"
+                onclick='selectPlace(${JSON.stringify(place).replace(/'/g, "&apos;")})'
+            >
+                ${
+                    editingPlaceIndex === null
+                        ? "Add"
+                        : "Replace"
+                }
+            </button>
+
+        `;
+
+        container.appendChild(item);
+
+    });
+}
+
+
+/* ============================================================
+   SELECT PLACE
+============================================================ */
+
+function selectPlace(place) {
+
+    const dayData =
+        getCurrentDayData();
+
+    if (!dayData.places) {
+
+        dayData.places = [];
+
+    }
+
+
+    const duplicate =
+        dayData.places.some(
+            existing =>
+                existing.place_id ===
+                place.id
+        );
+
+    if (
+        duplicate &&
+        editingPlaceIndex === null
+    ) {
+
+        showToast(
+            "This place is already in today's plan."
+        );
+
+        return;
+
+    }
+
+
+    const newPlace = {
+
+        place_id:
+            place.id,
+
+        name:
+            place.name,
+
+        location:
+            place.location,
+
+        start_time:
+            place.start_time ||
+            getNextAvailableTime(
+                dayData.places
+            ),
+
+        duration_minutes:
+            place.duration_minutes ||
+            60,
+
+        estimated_cost:
+            place.estimated_cost ||
+            0,
+
+        lat:
+            place.lat,
+
+        lng:
+            place.lng,
+
+        status:
+            "upcoming"
+
+    };
+
+
+    if (
+        editingPlaceIndex !== null
+    ) {
+
+        const oldPlace =
+            dayData.places[
+                editingPlaceIndex
+            ];
+
+        dayData.places[
+            editingPlaceIndex
+        ] = newPlace;
+
+        recordModification(
+            "changed",
+            newPlace,
+            oldPlace
+        );
+
+        showToast(
+            `${newPlace.name} replaced ${oldPlace.name}.`
+        );
+
+    } else {
+
+        dayData.places.push(
+            newPlace
+        );
+
+        recordModification(
+            "added",
+            newPlace
+        );
+
+        showToast(
+            `${newPlace.name} added to Day ${currentDay}.`
+        );
+
+    }
+
+
+    saveTrip();
+
+    syncItinerary();
+
+    closePlaceModal();
+
+    renderAll();
+
+}
+
+
+function getNextAvailableTime(places) {
+
+    if (!places.length) {
+
+        return "09:00";
+
+    }
+
+    const last =
+        places[places.length - 1];
+
+    const [hours, minutes] =
+        last.start_time
+            .split(":")
+            .map(Number);
+
+    let totalMinutes =
+        hours * 60
+        + minutes
+        + Number(
+            last.duration_minutes || 60
+        )
+        + 30;
+
+    let newHours =
+        Math.floor(
+            totalMinutes / 60
+        );
+
+    let newMinutes =
+        totalMinutes % 60;
+
+    return `${String(newHours).padStart(2, "0")}:${String(newMinutes).padStart(2, "0")}`;
+
+}
+
+
+/* ============================================================
+   MODIFICATION HISTORY
+============================================================ */
+
+function recordModification(
+    type,
+    newPlace,
+    oldPlace = null
+) {
+
+    trip.live_modifications.push({
+
+        type,
+
+        day: currentDay,
+
+        place_id:
+            newPlace?.place_id || null,
+
+        old_place_id:
+            oldPlace?.place_id || null,
+
+        timestamp:
+            new Date().toISOString()
+
+    });
+
+}
+
+
+/* ============================================================
+   SYNC ITINERARY
+============================================================ */
+
+async function syncItinerary() {
+
+    if (!trip.id) {
+
+        return;
+
+    }
+
+    try {
+
+        const endpoint =
+            API_CONFIG.updateItinerary
+                .replace(
+                    "{trip_id}",
+                    encodeURIComponent(
+                        trip.id
+                    )
+                );
+
+        await fetch(
+            endpoint,
+            {
+
+                method: "PATCH",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    itinerary:
+                        trip.itinerary,
+
+                    original_itinerary:
+                        trip.original_itinerary,
+
+                    live_modifications:
+                        trip.live_modifications
+
+                })
+
+            }
+        );
+
+    } catch (error) {
+
+        console.info(
+            "Itinerary will remain locally saved until backend is available."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   LOCATION TRACKING
+============================================================ */
+
+function toggleLocationTracking() {
+
+    if (
+        !navigator.geolocation
+    ) {
+
+        showToast(
+            "Location services are not supported by this browser."
+        );
+
+        return;
+
+    }
+
+    if (isTrackingLocation) {
+
+        stopLocationTracking();
+
+    } else {
+
+        startLocationTracking();
+
+    }
+
+}
+
+
+function startLocationTracking() {
+
+    locationWatchId =
+        navigator.geolocation.watchPosition(
+
+            position => {
+
+                const {
+                    latitude,
+                    longitude,
+                    accuracy
+                } = position.coords;
+
+                currentLocation = {
+
+                    lat: latitude,
+
+                    lng: longitude,
+
+                    accuracy,
+
+                    timestamp:
+                        new Date().toISOString()
+
+                };
+
+                isTrackingLocation =
+                    true;
+
+                updateLocationUI();
+
+                calculateProgressFromLocation();
+
+                loadNearbyPlaces();
+
+                requestAISuggestions(
+                    false
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Location error:",
+                    error
+                );
+
+                isTrackingLocation =
+                    false;
+
+                updateLocationUI();
+
+                showToast(
+                    "Location permission was not available."
+                );
+
+            },
+
+            {
+
+                enableHighAccuracy: true,
+
+                maximumAge: 60000,
+
+                timeout: 15000
+
+            }
+
+        );
+
+    isTrackingLocation =
+        true;
+
+    updateLocationUI();
+
+    showToast(
+        "Location tracking enabled."
+    );
+
+}
+
+
+function stopLocationTracking() {
+
+    if (
+        locationWatchId !== null
+    ) {
+
+        navigator.geolocation.clearWatch(
+            locationWatchId
+        );
+
+    }
+
+    locationWatchId =
+        null;
+
+    isTrackingLocation =
+        false;
+
+    updateLocationUI();
+
+    showToast(
+        "Location tracking disabled."
+    );
+
+}
+
+
+function updateLocationUI() {
+
+    const status =
+        document.getElementById(
+            "locationStatus"
+        );
+
+    const button =
+        document.getElementById(
+            "locationToggle"
+        );
+
+    if (isTrackingLocation) {
+
+        status.className =
+            "location-status";
+
+        status.innerHTML =
+            "<span>●</span> Location services active";
+
+        button.textContent =
+            "Disable";
+
+    } else {
+
+        status.className =
+            "location-status inactive";
+
+        status.innerHTML =
+            "<span>●</span> Location services inactive";
+
+        button.textContent =
+            "Enable";
+
+    }
+
+
+    if (!currentLocation) {
+
+        return;
+
+    }
+
+    document.getElementById(
+        "latitudeValue"
+    ).textContent =
+        currentLocation.lat.toFixed(5);
+
+    document.getElementById(
+        "longitudeValue"
+    ).textContent =
+        currentLocation.lng.toFixed(5);
+
+    document.getElementById(
+        "accuracyValue"
+    ).textContent =
+        `${Math.round(
+            currentLocation.accuracy
+        )} m`;
+
+    document.getElementById(
+        "locationUpdatedValue"
+    ).textContent =
+        new Date(
+            currentLocation.timestamp
+        ).toLocaleTimeString(
+            [],
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+}
+
+
+/* ============================================================
+   LOCATION → PROGRESS
+============================================================ */
+
+function calculateProgressFromLocation() {
+
+    if (!currentLocation) {
+
+        return;
+
+    }
+
+    const dayData =
+        getCurrentDayData();
+
+    if (!dayData.places?.length) {
+
+        return;
+
+    }
+
+    let closestPlace = null;
+
+    let closestDistance =
+        Infinity;
+
+    dayData.places.forEach(place => {
+
+        if (
+            typeof place.lat !== "number"
+            ||
+            typeof place.lng !== "number"
+        ) {
+
+            return;
+
+        }
+
+        const distance =
+            distanceKm(
+                currentLocation.lat,
+                currentLocation.lng,
+                place.lat,
+                place.lng
+            );
+
+        if (
+            distance <
+            closestDistance
+        ) {
+
+            closestDistance =
+                distance;
+
+            closestPlace =
+                place;
+
+        }
+
+    });
+
+
+    if (
+        closestPlace
+        &&
+        closestDistance <= 0.15
+        &&
+        closestPlace.status === "upcoming"
+    ) {
+
+        closestPlace.proximity =
+            closestDistance;
+
+    }
+
+    renderCurrentDay();
+
+}
+
+
+/* ============================================================
+   NEARBY PLACES
+============================================================ */
+
+async function loadNearbyPlaces() {
+
+    if (!currentLocation) {
+
+        document.getElementById(
+            "nearbyGrid"
+        ).innerHTML = `
+            <div class="empty-ai">
+                Enable location to discover nearby experiences.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    try {
+
+        const url =
+            `${API_CONFIG.nearby}` +
+            `?lat=${currentLocation.lat}` +
+            `&lng=${currentLocation.lng}` +
+            `&radius=2`;
+
+        const response =
+            await fetch(url);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Nearby API unavailable"
+            );
+
+        }
+
+        nearbyPlaces =
+            await response.json();
+
+    } catch (error) {
+
+        nearbyPlaces =
+            DEMO_PLACES
+                .map(place => ({
+
+                    ...place,
+
+                    distance_km:
+                        distanceKm(
+                            currentLocation.lat,
+                            currentLocation.lng,
+                            place.lat,
+                            place.lng
+                        )
+
+                }))
+                .filter(
+                    place =>
+                        place.distance_km <= 20
+                )
+                .sort(
+                    (a, b) =>
+                        a.distance_km -
+                        b.distance_km
+                )
+                .slice(0, 6);
+
+    }
+
+    renderNearbyPlaces();
+
+}
+
+
+function renderNearbyPlaces() {
+
+    const grid =
+        document.getElementById(
+            "nearbyGrid"
+        );
+
+    grid.innerHTML = "";
+
+    if (!nearbyPlaces.length) {
+
+        grid.innerHTML = `
+            <div class="empty-ai">
+                No nearby places found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    nearbyPlaces.forEach(place => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "nearby-card";
+
+        card.innerHTML = `
+
+            <h3>
+                ${escapeHtml(place.name)}
+            </h3>
+
+            <p>
+                ${escapeHtml(
+                    place.location || ""
+                )}
+            </p>
+
+            <div class="nearby-tags">
+
+                <span class="tag">
+                    ${
+                        place.distance_km
+                            ? `${place.distance_km.toFixed(1)} km`
+                            : "Nearby"
+                    }
+                </span>
+
+                ${
+                    place.category?.[0]
+                    ? `
+                        <span class="tag">
+                            ${escapeHtml(
+                                place.category[0]
+                            )}
+                        </span>
+                    `
+                    : ""
+                }
+
+            </div>
+
+        `;
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+/* ============================================================
+   WEATHER
+============================================================ */
+
+async function refreshWeather() {
+
+    try {
+
+        const destination =
+            trip.destination?.name ||
+            "";
+
+        const response =
+            await fetch(
+                `${API_CONFIG.weather}?destination=${encodeURIComponent(
+                    destination
+                )}`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Weather API unavailable"
+            );
+
+        }
+
+        weatherData =
+            await response.json();
+
+    } catch (error) {
+
+        /*
+            Demo weather fallback.
+
+            Replace with actual backend weather
+            response when your Flask API is ready.
+        */
+
+        weatherData = {
+
+            temperature: 31,
+
+            feels_like: 33,
+
+            rain_probability: 20,
+
+            wind_speed: 12,
+
+            condition: "Partly cloudy",
+
+            icon: "🌤️"
+
+        };
+
+    }
+
+    updateWeatherUI();
+
+    requestAISuggestions(false);
+
+}
+
+
+function updateWeatherUI() {
+
+    document.getElementById(
+        "weatherIcon"
+    ).textContent =
+        weatherData.icon || "🌤️";
+
+    document.getElementById(
+        "weatherTemp"
+    ).textContent =
+        `${weatherData.temperature ?? "—"}°C`;
+
+    document.getElementById(
+        "weatherCondition"
+    ).textContent =
+        weatherData.condition ||
+        "Weather unavailable";
+
+    document.getElementById(
+        "rainProbability"
+    ).textContent =
+        weatherData.rain_probability !== undefined
+            ? `${weatherData.rain_probability}%`
+            : "—";
+
+    document.getElementById(
+        "feelsLike"
+    ).textContent =
+        weatherData.feels_like !== undefined
+            ? `${weatherData.feels_like}°C`
+            : "—";
+
+    document.getElementById(
+        "windSpeed"
+    ).textContent =
+        weatherData.wind_speed !== undefined
+            ? `${weatherData.wind_speed} km/h`
+            : "—";
+
+    document.getElementById(
+        "weatherLocation"
+    ).textContent =
+        trip.destination?.name ||
+        "Current destination";
+
+}
+
+
+/* ============================================================
+   CROWD
+============================================================ */
+
+async function refreshCrowdData() {
+    const dayData = getCurrentDayData();
+    const currentPlaces = dayData.places || [];
+
+    const container = document.getElementById("crowdList");
+    if (container && (!crowdData || crowdData.length === 0)) {
+        container.innerHTML = `
+            <div class="empty-ai">
+                Checking BestTime crowd activity...
+            </div>
+        `;
+    }
+
+    try {
+        const accessToken = localStorage.getItem("byondSpotAccessToken");
+        const headers = {
+            "Content-Type": "application/json"
+        };
+        if (accessToken) {
+            headers["Authorization"] = "Bearer " + accessToken;
+        }
+
+        let response;
+        if (trip && trip.id) {
+            const url = `${API_CONFIG.crowd.replace("{trip_id}", encodeURIComponent(trip.id))}?day=${encodeURIComponent(currentDay)}`;
+            response = await fetch(url, {
+                headers: headers,
+                credentials: "include"
+            });
+        } else {
+            response = await fetch(API_CONFIG.crowdGeneral, {
+                method: "POST",
+                headers: headers,
+                credentials: "include",
+                body: JSON.stringify({
+                    current_day: currentDay,
+                    places: currentPlaces
+                })
+            });
+        }
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(data.error || "Crowd API unavailable");
+        }
+
+        crowdData = Array.isArray(data.crowd_activity) ? data.crowd_activity : [];
+
+    } catch (error) {
+        console.warn("Crowd activity lookup notice:", error);
+        crowdData = (currentPlaces || []).map(p => ({
+            place_id: p.place_id || p.id,
+            name: p.name,
+            location: p.location,
+            crowd_level: "Unavailable",
+            available: false,
+            message: "Crowd data unavailable"
+        }));
+    }
+
+    renderCrowdData();
+    renderCurrentDay();
+    requestAISuggestions(false);
+}
+
+
+function renderCrowdData() {
+    const container = document.getElementById("crowdList");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!crowdData || !crowdData.length) {
+        container.innerHTML = `
+            <div class="empty-ai">
+                Crowd data unavailable
+            </div>
+        `;
+        return;
+    }
+
+    crowdData.slice(0, 5).forEach(item => {
+        const levelStr = String(item.crowd_level || "").toLowerCase();
+        let className = "crowd-medium";
+        let displayLevel = item.crowd_level || "Unavailable";
+
+        if (!item.available || levelStr === "unavailable") {
+            className = "crowd-unavailable";
+            displayLevel = (item.message && item.message.toLowerCase().includes("temporarily"))
+                ? "Temporarily unavailable"
+                : "Data unavailable";
+        } else if (levelStr === "very busy" || levelStr === "busy" || levelStr === "high") {
+            className = "crowd-high";
+        } else if (levelStr === "low") {
+            className = "crowd-low";
+        } else {
+            className = "crowd-medium";
+        }
+
+        const subtitle = item.is_live
+            ? `Live activity${item.crowd_score != null ? ` · ${item.crowd_score}% busyness` : ""}`
+            : (item.available && item.forecast_busyness != null)
+                ? `Expected · ${item.forecast_busyness}% busyness`
+                : "Crowd data unavailable";
+
+        const row = document.createElement("div");
+        row.className = "crowd-item";
+        row.innerHTML = `
+            <div>
+                <div class="crowd-place">
+                    ${escapeHtml(item.name || "Place")}
+                </div>
+                <div class="crowd-distance">
+                    ${escapeHtml(subtitle)}
+                </div>
+            </div>
+            <div class="crowd-level ${className}">
+                ${escapeHtml(displayLevel)}
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+
+/* ============================================================
+   AI SUGGESTIONS
+============================================================ */
+
+async function requestAISuggestions(
+    showToastMessage = true
+) {
+
+    const container =
+        document.getElementById(
+            "aiSuggestions"
+        );
+
+    if (showToastMessage) {
+
+        container.innerHTML = `
+            <div class="empty-ai">
+                BYOND AI is considering your current trip context...
+            </div>
+        `;
+
+    }
+
+
+    const context =
+        buildAIContext();
+
+
+    try {
+
+        const accessToken =
+            localStorage.getItem(
+                "byondSpotAccessToken"
+            );
+
+        const headers = {
+            "Content-Type": "application/json"
+        };
+
+        if (accessToken) {
+            headers["Authorization"] = "Bearer " + accessToken;
+        }
+
+        const response =
+            await fetch(
+                API_CONFIG.aiSuggestions,
+                {
+                    method: "POST",
+                    headers: headers,
+                    credentials: "include",
+                    body: JSON.stringify(context)
+                }
+            );
+
+        const data =
+            await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(
+                data.error ||
+                "AI endpoint unavailable"
+            );
+        }
+
+        const suggestions =
+            data.suggestions || [];
+
+        if (suggestions.length > 0) {
+            renderAISuggestions(suggestions);
+        } else {
+            renderAISuggestions(generateDemoAISuggestions());
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "BYOND AI suggestion fallback:",
+            error
+        );
+
+        const fallback =
+            generateDemoAISuggestions();
+
+        renderAISuggestions(fallback);
+
+    }
+
+}
+
+
+/* ============================================================
+   AI CONTEXT
+============================================================ */
+
+function buildAIContext() {
+
+    const dayData =
+        getCurrentDayData();
+
+    const totalSpent =
+        calculateTotalSpent();
+
+    const remainingBudget =
+        Math.max(
+            0,
+            Number(
+                trip.budget || 0
+            ) -
+            totalSpent
+        );
+
+
+    return {
+
+        trip_id:
+            trip.id,
+
+        current_day:
+            currentDay,
+
+        current_location:
+            currentLocation
+                ? {
+                    lat:
+                        currentLocation.lat,
+
+                    lng:
+                        currentLocation.lng,
+
+                    accuracy:
+                        currentLocation.accuracy
+                }
+                : null,
+
+        current_time:
+            new Date().toISOString(),
+
+        weather:
+            weatherData,
+
+        crowd_activity:
+            crowdData,
+
+        remaining_budget:
+            remainingBudget,
+
+        today_spent:
+            calculateTodaySpent(),
+
+        total_spent:
+            totalSpent,
+
+        remaining_days:
+            Math.max(
+                0,
+                Number(
+                    trip.duration_days || 1
+                ) -
+                currentDay
+            ),
+
+        current_itinerary:
+            trip.itinerary || [],
+
+        today_itinerary:
+            dayData.places || [],
+
+        completed_places:
+            trip.completed_places || [],
+
+        skipped_places:
+            trip.skipped_places || [],
+
+        user_interests:
+            trip.interests || [],
+
+        travellers:
+            trip.travellers || 1
+
+    };
+
+}
+
+
+/* ============================================================
+   DEMO AI
+============================================================ */
+
+function generateDemoAISuggestions() {
+
+    const suggestions = [];
+
+
+    /*
+        Weather reasoning
+    */
+
+    if (
+        Number(
+            weatherData.rain_probability
+        ) >= 60
+    ) {
+
+        suggestions.push({
+
+            type: "Weather",
+
+            title:
+                "Consider an indoor cultural experience",
+
+            text:
+                "Rain is likely around your current travel window. An indoor cultural destination could make better use of the next couple of hours.",
+
+            why:
+                `Rain probability is ${weatherData.rain_probability}% and your current plan includes outdoor activities.`,
+
+            place_id:
+                "amaravati"
+
+        });
+
+    }
+
+
+    /*
+        Crowd reasoning
+    */
+
+    const crowdedPlace =
+        crowdData.find(
+            item =>
+                String(
+                    item.crowd_level
+                ).toLowerCase() ===
+                "high"
+        );
+
+    if (crowdedPlace) {
+
+        suggestions.push({
+
+            type: "Crowd",
+
+            title:
+                `Crowd is high at ${crowdedPlace.name}`,
+
+            text:
+                "You could explore a less crowded nearby experience first and return to the busier location later.",
+
+            why:
+                `${crowdedPlace.name} currently has high crowd activity.`,
+
+            place_id:
+                crowdedPlace.place_id
+
+        });
+
+    }
+
+
+    /*
+        Nearby reasoning
+    */
+
+    if (
+        nearbyPlaces.length
+    ) {
+
+        const nearby =
+            nearbyPlaces[0];
+
+        suggestions.push({
+
+            type: "Nearby",
+
+            title:
+                `Explore ${nearby.name}`,
+
+            text:
+                "This place is relatively close to your current location and matches the discovery context of your trip.",
+
+            why:
+                currentLocation
+                    ? `You are approximately ${
+                        nearby.distance_km?.toFixed(1) || "nearby"
+                    } km away.`
+                    : "It is a relevant destination in your current trip area.",
+
+            place_id:
+                nearby.id
+
+        });
+
+    }
+
+
+    /*
+        Budget reasoning
+    */
+
+    const budget =
+        Number(trip.budget || 0);
+
+    const spent =
+        calculateTotalSpent();
+
+    if (
+        budget > 0
+        &&
+        spent / budget >= 0.65
+    ) {
+
+        suggestions.push({
+
+            type: "Budget",
+
+            title:
+                "Consider a lower-cost experience",
+
+            text:
+                "Your actual spending is higher than the original pace. A nearby low-cost cultural or nature experience could help keep the remaining trip comfortable.",
+
+            why:
+                `You've used ${Math.round(
+                    (spent / budget) * 100
+                )}% of your trip budget.`,
+
+            place_id:
+                "mangalagiri"
+
+        });
+
+    }
+
+
+    /*
+        General fallback
+    */
+
+    if (!suggestions.length) {
+
+        suggestions.push({
+
+            type: "Explore",
+
+            title:
+                "Your trip is on track",
+
+            text:
+                "There are no major weather, crowd or budget concerns right now. Continue with your planned journey or explore a nearby experience.",
+
+            why:
+                "Your current trip conditions do not require a major adjustment.",
+
+            place_id:
+                null
+
+        });
+
+    }
+
+
+    return suggestions.slice(
+        0,
+        4
+    );
+
+}
+
+
+/* ============================================================
+   RENDER AI
+============================================================ */
+
+function renderAISuggestions(
+    suggestions
+) {
+
+    const container =
+        document.getElementById(
+            "aiSuggestions"
+        );
+
+    container.innerHTML = "";
+
+    if (!suggestions.length) {
+
+        container.innerHTML = `
+            <div class="empty-ai">
+                No suggestions right now.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    suggestions.forEach(
+        suggestion => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "ai-suggestion";
+
+            const validPlace =
+                findPlaceById(
+                    suggestion.place_id
+                );
+
+            card.innerHTML = `
+
+                <div class="suggestion-type">
+                    ${escapeHtml(
+                        suggestion.type ||
+                        "Suggestion"
+                    )}
+                </div>
+
+                <div class="suggestion-title">
+                    ${escapeHtml(
+                        suggestion.title
+                    )}
+                </div>
+
+                <div class="suggestion-text">
+                    ${escapeHtml(
+                        suggestion.text ||
+                        ""
+                    )}
+                </div>
+
+                ${
+                    suggestion.why
+                    ? `
+                        <div class="why-box">
+                            <strong>Why this suggestion?</strong><br>
+                            ${escapeHtml(
+                                suggestion.why
+                            )}
+                        </div>
+                    `
+                    : ""
+                }
+
+                ${
+                    validPlace
+                    ? `
+                        <div class="suggestion-actions">
+
+                            <button
+                                class="small-btn primary"
+                                onclick="addAISuggestionToPlan('${validPlace.id}')"
+                            >
+                                Add to Plan
+                            </button>
+
+                            <button
+                                class="small-btn"
+                                onclick="justExplore('${validPlace.id}')"
+                            >
+                                Just Explore
+                            </button>
+
+                            <button
+                                class="small-btn"
+                                onclick="dismissSuggestion(this)"
+                            >
+                                Dismiss
+                            </button>
+
+                        </div>
+                    `
+                    : `
+                        <div class="suggestion-actions">
+
+                            <button
+                                class="small-btn"
+                                onclick="dismissSuggestion(this)"
+                            >
+                                Dismiss
+                            </button>
+
+                        </div>
+                    `
+                }
+
+            `;
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   AI → ADD TO PLAN
+============================================================ */
+
+function addAISuggestionToPlan(
+    placeId
+) {
+
+    const place =
+        findPlaceById(
+            placeId
+        );
+
+    if (!place) {
+
+        showToast(
+            "This suggestion is not available in the Places database."
+        );
+
+        return;
+
+    }
+
+    const dayData =
+        getCurrentDayData();
+
+    const exists =
+        dayData.places.some(
+            item =>
+                item.place_id ===
+                place.id
+        );
+
+    if (exists) {
+
+        showToast(
+            "This place is already in today's plan."
+        );
+
+        return;
+
+    }
+
+    dayData.places.push({
+
+        place_id:
+            place.id,
+
+        name:
+            place.name,
+
+        location:
+            place.location,
+
+        start_time:
+            getNextAvailableTime(
+                dayData.places
+            ),
+
+        duration_minutes:
+            place.duration_minutes,
+
+        estimated_cost:
+            place.estimated_cost,
+
+        lat:
+            place.lat,
+
+        lng:
+            place.lng,
+
+        status:
+            "upcoming"
+
+    });
+
+    recordModification(
+        "ai_suggestion_added_by_user",
+        place
+    );
+
+    saveTrip();
+
+    syncItinerary();
+
+    renderAll();
+
+    showToast(
+        `${place.name} added to your plan.`
+    );
+
+}
+
+
+/* ============================================================
+   JUST EXPLORE
+============================================================ */
+
+function justExplore(
+    placeId
+) {
+
+    const place =
+        findPlaceById(
+            placeId
+        );
+
+    if (!place) return;
+
+    showToast(
+        `${place.name} saved as an exploration suggestion.`
+    );
+
+    /*
+        Future implementation:
+
+        Open place-details.html?id=...
+        without modifying the itinerary.
+    */
+
+}
+
+
+/* ============================================================
+   DISMISS
+============================================================ */
+
+function dismissSuggestion(
+    button
+) {
+
+    const card =
+        button.closest(
+            ".ai-suggestion"
+        );
+
+    if (card) {
+
+        card.remove();
+
+    }
+
+}
+
+
+/* ============================================================
+   FIND PLACE
+============================================================ */
+
+function findPlaceById(
+    id
+) {
+
+    if (!id) return null;
+
+    const allPlaces = [
+
+        ...DEMO_PLACES,
+
+        ...nearbyPlaces
+
+    ];
+
+    return allPlaces.find(
+        place =>
+            String(place.id || place.place_id) ===
+            String(id)
+    ) || null;
+
+}
+
+
+/* ============================================================
+   EXPENSES
+============================================================ */
+
+function showExpenseForm() {
+
+    document.getElementById(
+        "expenseForm"
+    ).classList.add(
+        "visible"
+    );
+
+    document.getElementById(
+        "expenseDayNumber"
+    ).textContent =
+        currentDay;
+
+}
+
+
+function saveDayExpenses() {
+
+    const total =
+        Number(
+            document.getElementById(
+                "expenseTotal"
+            ).value || 0
+        );
+
+    if (total < 0) {
+
+        showToast(
+            "Please enter a valid amount."
+        );
+
+        return;
+
+    }
+
+
+    const expense = {
+
+        day:
+            currentDay,
+
+        total,
+
+        breakdown: {
+
+            food:
+                Number(
+                    document.getElementById(
+                        "expenseFood"
+                    ).value || 0
+                ),
+
+            transport:
+                Number(
+                    document.getElementById(
+                        "expenseTransport"
+                    ).value || 0
+                ),
+
+            activities:
+                Number(
+                    document.getElementById(
+                        "expenseActivities"
+                    ).value || 0
+                ),
+
+            shopping:
+                Number(
+                    document.getElementById(
+                        "expenseShopping"
+                    ).value || 0
+                ),
+
+            other:
+                Number(
+                    document.getElementById(
+                        "expenseOther"
+                    ).value || 0
+                )
+
+        },
+
+        timestamp:
+            new Date().toISOString()
+
+    };
+
+
+    const existingIndex =
+        trip.expenses.findIndex(
+            item =>
+                Number(item.day) ===
+                Number(currentDay)
+        );
+
+
+    if (
+        existingIndex >= 0
+    ) {
+
+        trip.expenses[
+            existingIndex
+        ] = expense;
+
+    } else {
+
+        trip.expenses.push(
+            expense
+        );
+
+    }
+
+
+    saveTrip();
+
+    syncExpenses();
+
+    updateBudget();
+
+    document.getElementById(
+        "expenseForm"
+    ).classList.remove(
+        "visible"
+    );
+
+    showToast(
+        `Day ${currentDay} expenses saved.`
+    );
+
+    requestAISuggestions();
+
+}
+
+
+async function syncExpenses() {
+
+    if (!trip.id) return;
+
+    try {
+
+        const endpoint =
+            API_CONFIG.expenses
+                .replace(
+                    "{trip_id}",
+                    encodeURIComponent(
+                        trip.id
+                    )
+                );
+
+        await fetch(
+            endpoint,
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+                        expenses:
+                            trip.expenses
+                    })
+
+            }
+        );
+
+    } catch (error) {
+
+        console.info(
+            "Expenses remain locally saved."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   BUDGET
+============================================================ */
+
+function calculateTotalSpent() {
+
+    return (
+        trip.expenses || []
+    ).reduce(
+        (
+            total,
+            expense
+        ) =>
+            total +
+            Number(
+                expense.total || 0
+            ),
+        0
+    );
+
+}
+
+
+function calculateTodaySpent() {
+
+    const expense =
+        (trip.expenses || [])
+            .find(
+                item =>
+                    Number(item.day) ===
+                    Number(currentDay)
+            );
+
+    return Number(
+        expense?.total || 0
+    );
+
+}
+
+
+function calculateEstimatedRemainingCost() {
+
+    let estimated = 0;
+
+    const todayAndFuture =
+        (trip.itinerary || [])
+            .filter(
+                day =>
+                    Number(day.day) >=
+                    Number(currentDay)
+            );
+
+    todayAndFuture.forEach(day => {
+
+        (day.places || []).forEach(
+            place => {
+
+                if (
+                    place.status !==
+                    "completed"
+                    &&
+                    place.status !==
+                    "skipped"
+                ) {
+
+                    estimated +=
+                        Number(
+                            place.estimated_cost ||
+                            0
+                        );
+
+                }
+
+            }
+        );
+
+    });
+
+    return estimated;
+
+}
+
+
+function updateBudget() {
+
+    const budget =
+        Number(
+            trip.budget || 0
+        );
+
+    const spent =
+        calculateTotalSpent();
+
+    const remaining =
+        Math.max(
+            0,
+            budget - spent
+        );
+
+    const percentage =
+        budget > 0
+            ? Math.round(
+                (remaining / budget) * 100
+            )
+            : 0;
+
+    const estimatedRemaining =
+        calculateEstimatedRemainingCost();
+
+    const projected =
+        spent +
+        estimatedRemaining;
+
+
+    document.getElementById(
+        "remainingBudget"
+    ).textContent =
+        formatCurrency(
+            remaining
+        );
+
+    document.getElementById(
+        "totalBudget"
+    ).textContent =
+        formatCurrency(
+            budget
+        );
+
+    document.getElementById(
+        "spentBudget"
+    ).textContent =
+        formatCurrency(
+            spent
+        );
+
+    document.getElementById(
+        "todaySpentBudget"
+    ).textContent =
+        formatCurrency(
+            calculateTodaySpent()
+        );
+
+    document.getElementById(
+        "projectedBudget"
+    ).textContent =
+        formatCurrency(
+            projected
+        );
+
+    document.getElementById(
+        "budgetPercent"
+    ).textContent =
+        `${percentage}% remaining`;
+
+    document.getElementById(
+        "budgetFill"
+    ).style.width =
+        `${Math.min(
+            100,
+            Math.max(
+                0,
+                100 - percentage
+            )
+        )}%`;
+
+
+    const warning =
+        document.getElementById(
+            "budgetWarning"
+        );
+
+    if (
+        projected > budget
+    ) {
+
+        warning.style.display =
+            "block";
+
+    } else {
+
+        warning.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+
+function updateTodayProgress() {
+
+    const dayData =
+        getCurrentDayData();
+
+    const places =
+        dayData.places || [];
+
+    const completed =
+        places.filter(
+            place =>
+                place.status ===
+                "completed"
+        ).length;
+
+    const progress =
+        places.length
+            ? Math.round(
+                (completed /
+                    places.length) *
+                100
+            )
+            : 0;
+
+    document.getElementById(
+        "todayProgressText"
+    ).textContent =
+        `${progress}%`;
+
+    document.getElementById(
+        "todayProgressFill"
+    ).style.width =
+        `${progress}%`;
+
+
+    /*
+        End-of-day prompt.
+
+        We don't force the user to enter expenses
+        immediately because the browser cannot reliably
+        know that the day has physically ended.
+    */
+
+    if (
+        places.length > 0
+        &&
+        completed === places.length
+    ) {
+
+        showExpenseForm();
+
+    }
+
+}
+
+
+function updateOverallProgress() {
+
+    let allPlaces = [];
+
+    (trip.itinerary || [])
+        .forEach(
+            day => {
+
+                allPlaces.push(
+                    ...(day.places || [])
+                );
+
+            }
+        );
+
+
+    const completed =
+        allPlaces.filter(
+            place =>
+                place.status ===
+                "completed"
+        ).length;
+
+    const progress =
+        allPlaces.length
+            ? Math.round(
+                (completed /
+                    allPlaces.length) *
+                100
+            )
+            : 0;
+
+    document.getElementById(
+        "completedStatus"
+    ).textContent =
+        `${completed} / ${allPlaces.length}`;
+
+    document.getElementById(
+        "tripProgressStatus"
+    ).textContent =
+        `${progress}%`;
+
+}
+
+
+/* ============================================================
+   BACKEND PROGRESS
+============================================================ */
+
+async function syncProgress() {
+
+    if (!trip.id) {
+
+        return;
+
+    }
+
+    try {
+
+        const endpoint =
+            API_CONFIG.progress
+                .replace(
+                    "{trip_id}",
+                    encodeURIComponent(
+                        trip.id
+                    )
+                );
+
+        await fetch(
+            endpoint,
+            {
+
+                method: "PATCH",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+
+                        current_day:
+                            currentDay,
+
+                        completed_places:
+                            trip.completed_places,
+
+                        skipped_places:
+                            trip.skipped_places,
+
+                        current_location:
+                            currentLocation
+
+                    })
+
+            }
+        );
+
+    } catch (error) {
+
+        console.info(
+            "Progress remains locally saved."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   NEARBY MODAL
+============================================================ */
+
+function openNearbyModal() {
+
+    document.getElementById(
+        "nearbyModal"
+    ).classList.add(
+        "show"
+    );
+
+    renderNearbyModal();
+
+}
+
+
+function closeNearbyModal() {
+
+    document.getElementById(
+        "nearbyModal"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+function renderNearbyModal() {
+
+    const container =
+        document.getElementById(
+            "nearbyModalResults"
+        );
+
+    if (!nearbyPlaces.length) {
+
+        container.innerHTML = `
+            <div class="empty-ai">
+                Enable location and refresh nearby places.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    container.innerHTML =
+        nearbyPlaces.map(
+            place => `
+
+                <div class="result-item">
+
+                    <div>
+
+                        <strong>
+                            ${escapeHtml(
+                                place.name
+                            )}
+                        </strong>
+
+                        <span>
+                            ${
+                                place.distance_km
+                                    ? `${place.distance_km.toFixed(1)} km away`
+                                    : "Nearby"
+                            }
+                            ${
+                                place.category?.length
+                                    ? ` · ${escapeHtml(
+                                        place.category.join(", ")
+                                    )}`
+                                    : ""
+                            }
+                        </span>
+
+                    </div>
+
+                    <button
+                        class="small-btn primary"
+                        onclick="openPlaceFromNearby('${place.id || place.place_id}')"
+                    >
+                        View
+                    </button>
+
+                </div>
+
+            `
+        )
+        .join("");
+
+}
+
+
+function openPlaceFromNearby(
+    id
+) {
+
+    const place =
+        findPlaceById(id);
+
+    if (!place) return;
+
+    /*
+        Later this can become:
+
+        window.location.href =
+            `place-details.html?id=${place.id}`;
+    */
+
+    showToast(
+        `${place.name} selected.`
+    );
+
+}
+
+
+/* ============================================================
+   SAFETY
+============================================================ */
+
+function shareLocation() {
+
+    if (!currentLocation) {
+
+        showToast(
+            "Enable location first."
+        );
+
+        return;
+
+    }
+
+    const text =
+        `My current location: https://www.google.com/maps?q=${currentLocation.lat},${currentLocation.lng}`;
+
+    if (
+        navigator.share
+    ) {
+
+        navigator.share({
+
+            title:
+                "My BYOND Spot location",
+
+            text
+
+        }).catch(
+            () => {}
+        );
+
+    } else {
+
+        navigator.clipboard
+            ?.writeText(text);
+
+        showToast(
+            "Location link copied."
+        );
+
+    }
+
+}
+
+
+function callEmergency() {
+
+    window.location.href =
+        "tel:112";
+
+}
+
+
+function findHospitals() {
+
+    if (currentLocation) {
+
+        window.open(
+            `https://www.google.com/maps/search/hospitals/@${currentLocation.lat},${currentLocation.lng},14z`,
+            "_blank"
+        );
+
+    } else {
+
+        window.open(
+            "https://www.google.com/maps/search/hospitals",
+            "_blank"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   HOME
+============================================================ */
+
+function goHome() {
+
+    saveTrip();
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+function formatTime(
+    time
+) {
+
+    if (!time) {
+
+        return "—";
+
+    }
+
+    const [hours, minutes] =
+        time.split(":")
+            .map(Number);
+
+    const suffix =
+        hours >= 12
+            ? "PM"
+            : "AM";
+
+    const displayHour =
+        hours % 12 || 12;
+
+    return `${displayHour}:${String(minutes).padStart(2, "0")} ${suffix}`;
+
+}
+
+
+function formatCurrency(
+    value
+) {
+
+    return (
+        "₹" +
+        Number(
+            value || 0
+        ).toLocaleString(
+            "en-IN"
+        )
+    );
+
+}
+
+
+function distanceKm(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+
+    const earthRadius =
+        6371;
+
+    const dLat =
+        (lat2 - lat1) *
+        Math.PI / 180;
+
+    const dLon =
+        (lon2 - lon1) *
+        Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) ** 2
+        +
+        Math.cos(
+            lat1 * Math.PI / 180
+        )
+        *
+        Math.cos(
+            lat2 * Math.PI / 180
+        )
+        *
+        Math.sin(dLon / 2) ** 2;
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        );
+
+    return earthRadius * c;
+
+}
+
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+function showToast(
+    message
+) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+    toast.textContent =
+        message;
+
+    toast.classList.add(
+        "show"
+    );
+
+    clearTimeout(
+        window.toastTimeout
+    );
+
+    window.toastTimeout =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2600
+        );
+
+}
+
+
+/* ============================================================
+   WEATHER INITIAL LOAD
+============================================================ */
+
+refreshWeather();
+
+
+/* ============================================================
+   CROWD INITIAL LOAD
+============================================================ */
+
+refreshCrowdData();
+
+
+/* ============================================================
+   CLEANUP
+============================================================ */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if (
+            locationWatchId !== null
+        ) {
+
+            navigator.geolocation.clearWatch(
+                locationWatchId
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

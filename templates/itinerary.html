@@ -1,0 +1,3050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Your Itinerary | BYOND Spot</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --off-white: #F7F3ED;
+            --cream: #FCFAF7;
+            --beige: #E8D8C3;
+            --champagne: #DCC6A8;
+            --cabernet: #5D1932;
+            --dark-wine: #4D172B;
+            --wine-light: #7A304B;
+
+            --text: #302A27;
+            --muted: #756B65;
+            --border: #E5DDD3;
+            --white: #FFFDFC;
+
+            --success: #54745C;
+            --danger: #9A4D4D;
+            --warning: #A77742;
+
+            --shadow: 0 12px 35px rgba(77, 23, 43, 0.08);
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--off-white);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================
+           NAVBAR
+        ========================= */
+
+        .navbar {
+            height: 82px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            background: rgba(247, 243, 237, 0.96);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo img {
+            width: 145px;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--cabernet);
+        }
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--cabernet);
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .profile-button:hover {
+            background: var(--cabernet);
+            color: white;
+        }
+
+        /* =========================
+           PAGE HEADER
+        ========================= */
+
+        .page-wrapper {
+            width: min(1180px, 90%);
+            margin: 0 auto;
+            padding: 55px 0 80px;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 35px;
+        }
+
+        .eyebrow {
+            color: var(--cabernet);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .page-title {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(34px, 5vw, 54px);
+            color: var(--dark-wine);
+            line-height: 1.05;
+            margin-bottom: 12px;
+        }
+
+        .page-subtitle {
+            max-width: 650px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .exit-button {
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--cabernet);
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: 0.2s ease;
+        }
+
+        .exit-button:hover {
+            background: var(--beige);
+        }
+
+        /* =========================
+           TRIP SUMMARY
+        ========================= */
+
+        .trip-summary {
+            display: grid;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 35px;
+        }
+
+        .summary-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card.main {
+            background: var(--dark-wine);
+            color: white;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.3px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .main .summary-label {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .summary-value {
+            font-size: 21px;
+            font-weight: 700;
+            color: var(--dark-wine);
+        }
+
+        .main .summary-value {
+            color: white;
+            font-size: 25px;
+        }
+
+        /* =========================
+           MAIN LAYOUT
+        ========================= */
+
+        .content-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 310px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        /* =========================
+           ITINERARY
+        ========================= */
+
+        .itinerary-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .section-heading h2 {
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--dark-wine);
+            font-size: 27px;
+        }
+
+        .section-heading span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .day-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 19px 22px;
+            background: #FBF7F1;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .day-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .day-number {
+            width: 37px;
+            height: 37px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--cabernet);
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .day-title h3 {
+            font-size: 17px;
+            color: var(--dark-wine);
+        }
+
+        .day-date {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .day-budget {
+            text-align: right;
+        }
+
+        .day-budget small {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 3px;
+        }
+
+        .day-budget strong {
+            color: var(--cabernet);
+            font-size: 15px;
+        }
+
+        .places-list {
+            padding: 10px 22px 16px;
+        }
+
+        .place-item {
+            display: grid;
+            grid-template-columns: 75px 1fr auto;
+            gap: 15px;
+            align-items: center;
+            padding: 17px 0;
+            border-bottom: 1px solid #EEE8E1;
+        }
+
+        .place-item:last-child {
+            border-bottom: none;
+        }
+
+        .place-time {
+            color: var(--cabernet);
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .place-info h4 {
+            font-size: 15px;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .place-meta {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .place-description {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+    margin-top: 7px;
+    max-width: 620px;
+}
+
+.place-reason {
+    color: var(--cabernet);
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 6px;
+    padding-left: 10px;
+    border-left: 2px solid var(--champagne);
+}
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: #F1E9DF;
+            color: var(--cabernet);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .place-cost {
+            color: var(--muted);
+            font-size: 12px;
+            margin-left: 4px;
+        }
+
+        .place-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .icon-button {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--muted);
+            transition: 0.2s ease;
+        }
+
+        .icon-button:hover {
+            border-color: var(--cabernet);
+            color: var(--cabernet);
+            background: #FBF7F1;
+        }
+
+        .remove-button:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .add-place-button {
+            width: calc(100% - 44px);
+            margin: 0 22px 19px;
+            border: 1px dashed #CDBEAE;
+            background: transparent;
+            color: var(--cabernet);
+            border-radius: 10px;
+            padding: 11px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .add-place-button:hover {
+            background: #FBF7F1;
+            border-color: var(--cabernet);
+        }
+
+        /* =========================
+           SIDE PANEL
+        ========================= */
+
+        .side-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            position: sticky;
+            top: 105px;
+        }
+
+        .side-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 21px;
+            box-shadow: var(--shadow);
+        }
+
+        .side-card h3 {
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--dark-wine);
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .budget-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #EEE8E1;
+            font-size: 13px;
+        }
+
+        .budget-row:last-child {
+            border-bottom: none;
+        }
+
+        .budget-row span:first-child {
+            color: var(--muted);
+        }
+
+        .budget-row strong {
+            color: var(--text);
+        }
+
+        .budget-progress {
+            height: 8px;
+            background: #EEE6DD;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 15px 0 8px;
+        }
+
+        .budget-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--cabernet);
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .budget-note {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .edit-note {
+            background: #F6EFE7;
+            border-radius: 12px;
+            padding: 13px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .start-card {
+            background: var(--dark-wine);
+            color: white;
+            border-radius: 17px;
+            padding: 23px;
+            box-shadow: 0 14px 40px rgba(77, 23, 43, 0.18);
+        }
+
+        .start-card h3 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 21px;
+            margin-bottom: 9px;
+        }
+
+        .start-card p {
+            color: rgba(255,255,255,0.72);
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 17px;
+        }
+
+        .start-button {
+            width: 100%;
+            border: none;
+            background: var(--champagne);
+            color: var(--dark-wine);
+            padding: 13px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 13px;
+            transition: 0.2s ease;
+        }
+
+        .start-button:hover {
+            background: #E7D3B4;
+            transform: translateY(-1px);
+        }
+
+        .start-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* =========================
+           EMPTY / LOADING
+        ========================= */
+
+        .loading-box,
+        .empty-box {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 45px 25px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .loading-box strong,
+        .empty-box strong {
+            display: block;
+            color: var(--dark-wine);
+            font-size: 17px;
+            margin-bottom: 7px;
+        }
+
+        /* =========================
+           MODAL
+        ========================= */
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(48, 30, 35, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 300;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            width: min(620px, 100%);
+            max-height: 85vh;
+            overflow-y: auto;
+            background: var(--white);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.2);
+            padding: 25px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--dark-wine);
+            font-size: 24px;
+        }
+
+        .modal-header p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .close-modal {
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-size: 23px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: 1px solid var(--border);
+            background: #FBF9F6;
+            padding: 12px 13px;
+            border-radius: 10px;
+            outline: none;
+            color: var(--text);
+        }
+
+        .search-box input:focus {
+            border-color: var(--cabernet);
+        }
+
+        .search-button {
+            border: none;
+            background: var(--cabernet);
+            color: white;
+            border-radius: 10px;
+            padding: 0 16px;
+            font-weight: 700;
+        }
+
+        .place-options {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .place-option {
+            border: 1px solid var(--border);
+            background: var(--white);
+            padding: 14px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            text-align: left;
+            transition: 0.2s ease;
+        }
+
+        .place-option:hover {
+            border-color: var(--cabernet);
+            background: #FBF7F1;
+        }
+
+        .place-option h4 {
+            color: var(--dark-wine);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .place-option p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .select-place {
+            border: none;
+            background: var(--cabernet);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* =========================
+           TOAST
+        ========================= */
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 25px;
+            transform: translate(-50%, 100px);
+            background: var(--dark-wine);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            transition: 0.3s ease;
+            z-index: 500;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 950px) {
+            .trip-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .summary-card.main {
+                grid-column: span 2;
+            }
+
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .side-column {
+                position: static;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 0 5%;
+                height: 70px;
+            }
+
+            .logo img {
+                width: 120px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page-wrapper {
+                width: 92%;
+                padding-top: 35px;
+            }
+
+            .top-row {
+                flex-direction: column;
+                gap: 18px;
+            }
+
+            .trip-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .summary-card.main {
+                grid-column: span 2;
+            }
+
+            .day-header {
+                align-items: flex-start;
+            }
+
+            .day-budget {
+                display: none;
+            }
+
+            .place-item {
+                grid-template-columns: 55px 1fr;
+            }
+
+            .place-actions {
+                grid-column: 2;
+            }
+
+            .place-actions .icon-button {
+                width: auto;
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .trip-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card.main {
+                grid-column: span 1;
+            }
+
+            .page-title {
+                font-size: 38px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html#explore">Explore</a>
+            <a href="index.html#hidden-gems" class="active">Hidden Gems</a>
+            <a href="index.html#plan-trip">Plan Trip</a>
+            <a href="index.html#safety">Safety</a>
+        </div>
+
+        <button class="profile-button" onclick="location.href='profile.html'">P</button>
+    </nav>
+
+
+    <main class="page-wrapper">
+
+        <!-- =========================
+             PAGE HEADER
+        ========================== -->
+
+        <div class="top-row">
+
+            <div>
+                <div class="eyebrow">Your Journey</div>
+
+                <h1 class="page-title">
+                    Your Itinerary
+                </h1>
+
+                <p class="page-subtitle">
+                    Review and personalize your journey before you start.
+                    You can change places, add stops, or remove activities.
+                    Once you're happy with the plan, start your trip.
+                </p>
+            </div>
+
+            <button class="exit-button" onclick="exitPlanning()">
+                ← Back to Home
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             TRIP SUMMARY
+        ========================== -->
+
+        <section class="trip-summary">
+
+            <div class="summary-card main">
+                <div class="summary-label">Destination</div>
+                <div class="summary-value" id="destinationName">
+                    Loading...
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-label">Duration</div>
+                <div class="summary-value" id="durationValue">
+                    —
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-label">Travellers</div>
+                <div class="summary-value" id="travellersValue">
+                    —
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-label">Trip Budget</div>
+                <div class="summary-value" id="budgetValue">
+                    ₹0
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CONTENT
+        ========================== -->
+
+        <div class="content-layout">
+
+            <!-- ITINERARY -->
+
+            <section class="itinerary-column">
+
+                <div class="section-heading">
+                    <h2>Planned Journey</h2>
+                    <span id="planStatus">AI-generated plan</span>
+                </div>
+
+                <div id="itineraryContainer">
+
+                    <div class="loading-box">
+                        <strong>Preparing your journey...</strong>
+                        <span>Loading your itinerary.</span>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SIDE PANEL -->
+
+            <aside class="side-column">
+
+                <div class="side-card">
+
+                    <h3>Budget Overview</h3>
+
+                    <div class="budget-row">
+                        <span>Total budget</span>
+                        <strong id="sideTotalBudget">₹0</strong>
+                    </div>
+
+                    <div class="budget-row">
+                        <span>Estimated trip cost</span>
+                        <strong id="sideEstimatedCost">₹0</strong>
+                    </div>
+
+                    <div class="budget-row">
+                        <span>Estimated remaining</span>
+                        <strong id="sideRemaining">₹0</strong>
+                    </div>
+
+                    <div class="budget-progress">
+                        <div
+                            class="budget-progress-fill"
+                            id="budgetProgress"
+                        ></div>
+                    </div>
+
+                    <div class="budget-note" id="budgetNote">
+                        Your estimated trip cost will update as you modify the itinerary.
+                    </div>
+
+                </div>
+
+
+                <div class="side-card">
+
+                    <h3>Edit Before Starting</h3>
+
+                    <div class="edit-note">
+                        This page is for planning only.
+                        You can replace or remove places before starting
+                        your trip. Live expenses, progress, routes and
+                        AI adjustments will be handled from
+                        <strong>Current Trip</strong> after you start.
+                    </div>
+
+                </div>
+
+
+                <div class="start-card">
+
+                    <h3>Ready to go?</h3>
+
+                    <p>
+                        Once you start your trip, this itinerary will become
+                        your original plan and your live trip will be managed
+                        separately.
+                    </p>
+
+                    <button
+                        class="start-button"
+                        id="startTripButton"
+                        onclick="startTrip()"
+                    >
+                        START MY TRIP
+                    </button>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         CHANGE PLACE MODAL
+    ========================== -->
+
+    <div class="modal-overlay" id="placeModal">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <h3 id="modalTitle">Change Place</h3>
+
+                    <p>
+                        Choose a place from the available destinations.
+                        Only places returned by the places service can be selected.
+                    </p>
+                </div>
+
+                <button
+                    class="close-modal"
+                    onclick="closePlaceModal()"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="search-box">
+
+                <input
+                    type="text"
+                    id="placeSearch"
+                    placeholder="Search places..."
+                    onkeydown="handleSearchKey(event)"
+                >
+
+                <button
+                    class="search-button"
+                    onclick="searchPlaces()"
+                >
+                    Search
+                </button>
+
+            </div>
+
+
+            <div
+                class="place-options"
+                id="placeOptions"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         TOAST
+    ========================== -->
+
+    <div class="toast" id="toast"></div>
+
+
+<script>
+
+    /* ============================================================
+       API CONFIGURATION
+       ============================================================
+
+       Replace these paths with your actual Flask API routes.
+
+       Expected backend responsibilities:
+
+       GET  /api/places
+            → return valid places
+
+       PATCH /api/trips/<trip_id>/itinerary
+            → save itinerary changes
+
+       POST /api/trips/<trip_id>/start
+            → change trip status from planned → active
+
+       GET /api/trips/<trip_id>
+            → return latest trip state
+
+       ============================================================ */
+
+    const API_CONFIG = {
+
+        places: "/api/places",
+
+        updateItinerary: "/api/trips/{trip_id}/itinerary",
+
+        startTrip: "/api/trips/{trip_id}/start"
+
+    };
+
+
+    /* ============================================================
+       LOCAL DEMO DATA
+       ============================================================
+
+       Temporary fallback until Flask + database are connected.
+
+       These should eventually come from your database.
+       ============================================================ */
+
+    const DEMO_PLACES = [
+
+        {
+            id: "undavalli",
+            name: "Undavalli Caves",
+            location: "Vijayawada, Andhra Pradesh",
+            category: ["Heritage", "Culture"],
+            rating: 4.8,
+            estimated_cost: 200,
+            duration_minutes: 120
+        },
+
+        {
+            id: "amaravati",
+            name: "Amaravati Historical Site",
+            location: "Amaravati, Andhra Pradesh",
+            category: ["History", "Culture"],
+            rating: 4.7,
+            estimated_cost: 300,
+            duration_minutes: 150
+        },
+
+        {
+            id: "kondaveedu",
+            name: "Kondaveedu Fort",
+            location: "Guntur, Andhra Pradesh",
+            category: ["Heritage", "Adventure"],
+            rating: 4.8,
+            estimated_cost: 250,
+            duration_minutes: 180
+        },
+
+        {
+            id: "kondapalli",
+            name: "Kondapalli",
+            location: "Krishna District, Andhra Pradesh",
+            category: ["Culture", "Shopping"],
+            rating: 4.7,
+            estimated_cost: 350,
+            duration_minutes: 150
+        },
+
+        {
+            id: "bhavani",
+            name: "Bhavani Island",
+            location: "Vijayawada, Andhra Pradesh",
+            category: ["Nature", "Adventure"],
+            rating: 4.6,
+            estimated_cost: 500,
+            duration_minutes: 180
+        },
+
+        {
+            id: "mangalagiri",
+            name: "Mangalagiri",
+            location: "Guntur, Andhra Pradesh",
+            category: ["Culture", "History"],
+            rating: 4.6,
+            estimated_cost: 200,
+            duration_minutes: 120
+        }
+
+    ];
+
+
+    /* ============================================================
+       STATE
+       ============================================================ */
+
+    let trip = null;
+
+    let currentItinerary = [];
+
+    let originalItinerary = [];
+
+    let editingDayIndex = null;
+
+    let editingPlaceIndex = null;
+
+    let addingToDayIndex = null;
+
+
+    /* ============================================================
+       INITIALIZATION
+       ============================================================ */
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        await loadTrip();
+
+    });
+
+
+    /* ============================================================
+       LOAD TRIP
+       ============================================================ */
+
+    async function loadTrip() {
+
+        const savedTrip =
+            localStorage.getItem("byondSpotTrip");
+
+        if (!savedTrip) {
+
+            showEmptyState(
+                "No trip found",
+                "Please create a trip from the planner first."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            trip = JSON.parse(savedTrip);
+            if (
+    trip.itinerary &&
+    !Array.isArray(trip.itinerary) &&
+    trip.itinerary.estimated_total_cost !== undefined
+) {
+
+    trip.ai_estimated_total_cost =
+        Number(
+            trip.itinerary.estimated_total_cost
+        ) || 0;
+
+}
+
+        } catch (error) {
+
+            console.error("Invalid trip data:", error);
+
+            showEmptyState(
+                "Trip data could not be loaded",
+                "Please create your trip again."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * If a trip has already been started,
+         * don't allow itinerary.html to become
+         * the live trip editor.
+         */
+
+        if (trip.status === "active") {
+
+            document.getElementById("planStatus").textContent =
+                "Trip already active";
+
+            showEmptyState(
+                "Your trip is already active",
+                "Open Current Trip to manage your live journey."
+            );
+
+            return;
+
+        }
+
+
+        populateTripSummary();
+
+
+        /*
+ * The AI-generated trip is already stored
+ * in localStorage by planner.html.
+ *
+ * We will connect the GET trip endpoint later
+ * when the live-trip backend is implemented.
+ */
+
+        /*
+         * Generate itinerary if one isn't
+         * already present.
+         */
+
+        if (!trip.itinerary) {
+
+    showEmptyState(
+        "Your itinerary could not be loaded",
+        "Please return to the planner and create your journey again."
+    );
+
+    return;
+
+}
+
+
+currentItinerary =
+    normalizeItinerary(
+        trip.itinerary
+    );
+
+
+if (!currentItinerary.length) {
+
+    showEmptyState(
+        "Your itinerary is empty",
+        "Please return to the planner and create your journey again."
+    );
+
+    return;
+
+}
+
+
+        originalItinerary =
+            deepClone(currentItinerary);
+
+
+        renderItinerary();
+
+    }
+
+
+    /* ============================================================
+       BACKEND: FETCH TRIP
+       ============================================================ */
+
+    async function fetchTripFromBackend(tripId) {
+
+        try {
+
+            const response =
+                await fetch(`/api/trips/${encodeURIComponent(tripId)}`);
+
+            if (!response.ok) {
+
+                return null;
+
+            }
+
+            return await response.json();
+
+        } catch (error) {
+
+            /*
+             * Backend is not connected yet.
+             * Continue using localStorage.
+             */
+
+            console.info(
+                "Backend unavailable. Using local trip data."
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       TRIP SUMMARY
+       ============================================================ */
+
+    function populateTripSummary() {
+
+        const destination =
+            trip?.destination?.name ||
+            trip?.destination ||
+            "Your Destination";
+
+
+        document.getElementById("destinationName")
+            .textContent = destination;
+
+
+        const duration =
+            Number(trip.duration_days) ||
+            calculateDuration(
+                trip.start_date,
+                trip.end_date
+            );
+
+
+        document.getElementById("durationValue")
+            .textContent =
+            `${duration} ${duration === 1 ? "Day" : "Days"}`;
+
+
+        const travellers =
+            Number(trip.travellers) || 1;
+
+
+        document.getElementById("travellersValue")
+            .textContent =
+            `${travellers} ${travellers === 1 ? "Traveller" : "Travellers"}`;
+
+
+        const budget =
+            Number(trip.budget) || 0;
+
+
+        document.getElementById("budgetValue")
+            .textContent =
+            formatCurrency(budget);
+
+    }
+
+
+    /* ============================================================
+       DEMO ITINERARY
+       ============================================================
+
+       Temporary itinerary generation.
+
+       Once the AI/backend is ready, this section should be replaced
+       by the itinerary returned from POST /api/trips/plan.
+       ============================================================ */
+
+    function generateDemoItinerary() {
+
+        const duration =
+            Number(trip.duration_days) ||
+            calculateDuration(
+                trip.start_date,
+                trip.end_date
+            ) ||
+            3;
+
+
+        const available =
+            DEMO_PLACES;
+
+
+        const selected =
+            available.slice(
+                0,
+                Math.min(6, duration * 2)
+            );
+
+
+        const itinerary = [];
+
+
+        for (let day = 0; day < duration; day++) {
+
+            const first =
+                selected[(day * 2) % selected.length];
+
+            const second =
+                selected[(day * 2 + 1) % selected.length];
+
+
+            const places = [];
+
+
+            if (first) {
+
+                places.push(
+                    createItineraryPlace(
+                        first,
+                        "09:00 AM"
+                    )
+                );
+
+            }
+
+
+            if (second && second.id !== first?.id) {
+
+                places.push(
+                    createItineraryPlace(
+                        second,
+                        "03:00 PM"
+                    )
+                );
+
+            }
+
+
+            itinerary.push({
+
+                day: day + 1,
+
+                date:
+                    getDateForDay(
+                        trip.start_date,
+                        day
+                    ),
+
+                places
+
+            });
+
+        }
+
+
+        return itinerary;
+
+    }
+
+
+    function createItineraryPlace(place, time) {
+
+        return {
+
+            id: place.id,
+
+            name: place.name,
+
+            location: place.location,
+
+            category: place.category || [],
+
+            rating: place.rating || null,
+
+            estimated_cost:
+                Number(place.estimated_cost) || 0,
+
+            duration_minutes:
+                Number(place.duration_minutes) || 120,
+
+            time
+
+        };
+
+    }
+
+
+    /* ============================================================
+       NORMALIZE ITINERARY
+       ============================================================ */
+
+    function normalizeItinerary(data) {
+
+    /*
+     * Gemini returns:
+     *
+     * {
+     *     destination: "...",
+     *     duration_days: 3,
+     *     estimated_total_cost: 4500,
+     *     days: [...]
+     * }
+     *
+     * Older/demo data may already be an array.
+     */
+
+    let days = [];
+
+    if (Array.isArray(data)) {
+
+        days = data;
+
+    } else if (
+        data &&
+        Array.isArray(data.days)
+    ) {
+
+        days = data.days;
+
+    }
+
+    return days.map((day, index) => {
+
+        return {
+
+            day:
+                Number(day.day) ||
+                index + 1,
+
+            date:
+                day.date ||
+                getDateForDay(
+                    trip.start_date,
+                    index
+                ),
+
+            places:
+                Array.isArray(day.places)
+                    ? day.places.map(place => {
+
+                        return {
+
+                            ...place,
+
+                            estimated_cost:
+                                Number(
+                                    place.estimated_cost
+                                ) || 0,
+
+                            category:
+                                Array.isArray(
+                                    place.category
+                                )
+                                    ? place.category
+                                    : place.category
+                                        ? [place.category]
+                                        : ["Experience"]
+
+                        };
+
+                    })
+                    : []
+
+        };
+
+    });
+
+}
+
+
+    /* ============================================================
+       RENDER ITINERARY
+       ============================================================ */
+
+    function renderItinerary() {
+
+        const container =
+            document.getElementById("itineraryContainer");
+
+
+        if (!currentItinerary.length) {
+
+            showEmptyState(
+                "Your itinerary is empty",
+                "Add a place to start building your journey."
+            );
+
+            updateBudget();
+
+            return;
+
+        }
+
+
+        container.innerHTML = "";
+
+
+        currentItinerary.forEach(
+            (day, dayIndex) => {
+
+                const dayCard =
+                    document.createElement("article");
+
+                dayCard.className = "day-card";
+
+
+                const dayCost =
+                    day.places.reduce(
+                        (sum, place) =>
+                            sum +
+                            Number(place.estimated_cost || 0),
+                        0
+                    );
+
+
+                dayCard.innerHTML = `
+
+                    <div class="day-header">
+
+                        <div class="day-title">
+
+                            <div class="day-number">
+                                ${day.day}
+                            </div>
+
+                            <div>
+                                <h3>
+                                    Day ${day.day}
+                                </h3>
+
+                                <div class="day-date">
+                                    ${formatDate(day.date)}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="day-budget">
+
+                            <small>
+                                Estimated
+                            </small>
+
+                            <strong>
+                                ${formatCurrency(dayCost)}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="places-list">
+
+                        ${
+                            day.places.length
+                                ? day.places.map(
+                                    (place, placeIndex) =>
+                                        renderPlace(
+                                            place,
+                                            dayIndex,
+                                            placeIndex
+                                        )
+                                  ).join("")
+                                : `
+                                    <div class="empty-box">
+                                        <strong>No places planned</strong>
+                                        Add a destination to this day.
+                                    </div>
+                                  `
+                        }
+
+                    </div>
+
+
+                    <button
+                        class="add-place-button"
+                        onclick="openAddPlaceModal(${dayIndex})"
+                    >
+                        + Add Place to Day ${day.day}
+                    </button>
+
+                `;
+
+
+                container.appendChild(dayCard);
+
+            }
+        );
+
+
+        updateBudget();
+
+        saveLocalTrip();
+
+    }
+
+
+    /* ============================================================
+       RENDER PLACE
+       ============================================================ */
+
+    function renderPlace(
+    place,
+    dayIndex,
+    placeIndex
+) {
+
+    const categories =
+        Array.isArray(place.category)
+            ? place.category
+            : [place.category || "Experience"];
+
+
+    const description =
+        place.description ||
+        "";
+
+
+    const reason =
+        place.reason ||
+        "";
+
+
+    return `
+
+        <div class="place-item">
+
+            <div class="place-time">
+                ${escapeHtml(
+                    place.time || "Flexible"
+                )}
+            </div>
+
+
+            <div class="place-info">
+
+                <h4>
+                    ${escapeHtml(
+                        place.name || "Unnamed Place"
+                    )}
+                </h4>
+
+
+                <div class="place-meta">
+
+                    ${categories
+                        .slice(0, 2)
+                        .map(
+                            category => `
+                                <span class="tag">
+                                    ${escapeHtml(category)}
+                                </span>
+                            `
+                        )
+                        .join("")
+                    }
+
+
+                    <span class="place-cost">
+
+                        ${formatCurrency(
+                            Number(
+                                place.estimated_cost
+                            ) || 0
+                        )}
+
+                    </span>
+
+                </div>
+
+
+                ${
+                    description
+                        ? `
+                            <div class="place-description">
+                                ${escapeHtml(description)}
+                            </div>
+                          `
+                        : ""
+                }
+
+
+                ${
+                    reason
+                        ? `
+                            <div class="place-reason">
+                                ${escapeHtml(reason)}
+                            </div>
+                          `
+                        : ""
+                }
+
+                ${
+                    place.crowd_activity &&
+                    place.crowd_activity.available
+                        ? `
+                            <div style="margin-top:10px;font-size:12px;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:#f5f1eb;color:#5d1932;font-weight:600;">
+                                Crowd: ${escapeHtml(place.crowd_activity.level || "Available")}
+                                ${place.crowd_activity.forecast_busyness != null ? `· ${place.crowd_activity.forecast_busyness}% expected` : ""}
+                            </div>
+                          `
+                        : `
+                            <div style="margin-top:10px;font-size:11px;color:#81756d;">
+                                Crowd forecast unavailable for this place
+                            </div>
+                          `
+                }
+
+            </div>
+
+
+            <div class="place-actions">
+
+                <button
+                    class="icon-button"
+                    title="Change place"
+                    onclick="openChangePlaceModal(
+                        ${dayIndex},
+                        ${placeIndex}
+                    )"
+                >
+                    ↻
+                </button>
+
+
+                <button
+                    class="icon-button remove-button"
+                    title="Remove place"
+                    onclick="removePlace(
+                        ${dayIndex},
+                        ${placeIndex}
+                    )"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+    /* ============================================================
+       CHANGE PLACE
+       ============================================================ */
+
+    function openChangePlaceModal(
+        dayIndex,
+        placeIndex
+    ) {
+
+        editingDayIndex = dayIndex;
+
+        editingPlaceIndex = placeIndex;
+
+        addingToDayIndex = null;
+
+
+        document.getElementById("modalTitle")
+            .textContent = "Change Place";
+
+
+        document.getElementById("placeSearch")
+            .value = "";
+
+
+        document.getElementById("placeModal")
+            .classList.add("show");
+
+
+        loadAvailablePlaces();
+
+    }
+
+
+    /* ============================================================
+       ADD PLACE
+       ============================================================ */
+
+    function openAddPlaceModal(dayIndex) {
+
+        addingToDayIndex = dayIndex;
+
+        editingDayIndex = null;
+
+        editingPlaceIndex = null;
+
+
+        document.getElementById("modalTitle")
+            .textContent =
+            `Add Place to Day ${currentItinerary[dayIndex].day}`;
+
+
+        document.getElementById("placeSearch")
+            .value = "";
+
+
+        document.getElementById("placeModal")
+            .classList.add("show");
+
+
+        loadAvailablePlaces();
+
+    }
+
+
+    /* ============================================================
+       CLOSE MODAL
+       ============================================================ */
+
+    function closePlaceModal() {
+
+        document.getElementById("placeModal")
+            .classList.remove("show");
+
+
+        editingDayIndex = null;
+
+        editingPlaceIndex = null;
+
+        addingToDayIndex = null;
+
+    }
+
+
+    /* ============================================================
+       LOAD AVAILABLE PLACES
+       ============================================================ */
+
+    async function loadAvailablePlaces(
+        search = ""
+    ) {
+
+        let places = null;
+
+
+        /*
+         * IMPORTANT:
+         *
+         * We first ask the backend.
+         *
+         * This ensures that production suggestions
+         * come from the actual Places database.
+         */
+
+        try {
+
+            const url =
+                search
+                    ? `${API_CONFIG.places}?search=${encodeURIComponent(search)}`
+                    : API_CONFIG.places;
+
+
+            const response =
+                await fetch(url);
+
+
+            if (response.ok) {
+
+                const data =
+                    await response.json();
+
+
+                places =
+                    Array.isArray(data)
+                        ? data
+                        : data.places;
+
+            }
+
+        } catch (error) {
+
+            console.info(
+                "Places API unavailable. Using demo places."
+            );
+
+        }
+
+
+        /*
+         * Temporary fallback.
+         */
+
+        if (!Array.isArray(places)) {
+
+            places =
+                DEMO_PLACES.filter(place => {
+
+                    if (!search) {
+                        return true;
+                    }
+
+                    return (
+                        place.name
+                            .toLowerCase()
+                            .includes(search.toLowerCase())
+                        ||
+                        place.location
+                            .toLowerCase()
+                            .includes(search.toLowerCase())
+                    );
+
+                });
+
+        }
+
+
+        renderPlaceOptions(places);
+
+    }
+
+
+    /* ============================================================
+       SEARCH
+       ============================================================ */
+
+    function searchPlaces() {
+
+        const search =
+            document.getElementById("placeSearch")
+                .value
+                .trim();
+
+
+        loadAvailablePlaces(search);
+
+    }
+
+
+    function handleSearchKey(event) {
+
+        if (event.key === "Enter") {
+
+            searchPlaces();
+
+        }
+
+    }
+
+
+    /* ============================================================
+       RENDER PLACE OPTIONS
+       ============================================================ */
+
+    function renderPlaceOptions(places) {
+
+        const container =
+            document.getElementById("placeOptions");
+
+
+        /*
+         * Don't show places already present in the itinerary.
+         */
+
+        const usedIds =
+            new Set(
+                currentItinerary.flatMap(
+                    day =>
+                        day.places.map(
+                            place => place.id
+                        )
+                )
+            );
+
+
+        const filtered =
+            places.filter(
+                place => {
+
+                    /*
+                     * When changing a place, allow the
+                     * currently selected place to appear.
+                     */
+
+                    const currentPlaceId =
+                        editingDayIndex !== null &&
+                        editingPlaceIndex !== null
+                            ? currentItinerary[
+                                editingDayIndex
+                              ].places[
+                                editingPlaceIndex
+                              ].id
+                            : null;
+
+
+                    return (
+                        !usedIds.has(place.id)
+                        ||
+                        place.id === currentPlaceId
+                    );
+
+                }
+            );
+
+
+        if (!filtered.length) {
+
+            container.innerHTML = `
+
+                <div class="empty-box">
+
+                    <strong>
+                        No available places found
+                    </strong>
+
+                    <span>
+                        Try another search.
+                    </span>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            filtered.map(
+                place => `
+
+                    <div class="place-option">
+
+                        <div>
+
+                            <h4>
+                                ${escapeHtml(place.name)}
+                            </h4>
+
+                            <p>
+                                ${escapeHtml(
+                                    place.location || ""
+                                )}
+                                ·
+                                ${
+                                    place.rating
+                                        ? `${place.rating} ★`
+                                        : "No rating"
+                                }
+                                ·
+                                ${formatCurrency(
+                                    Number(place.estimated_cost) || 0
+                                )}
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            class="select-place"
+                            onclick='selectPlace(
+                                ${JSON.stringify(place)
+                                    .replace(/'/g, "&#39;")}
+                            )'
+                        >
+                            Select
+                        </button>
+
+                    </div>
+
+                `
+            ).join("");
+
+    }
+
+
+    /* ============================================================
+       SELECT PLACE
+       ============================================================ */
+
+    async function selectPlace(place) {
+
+        if (
+            editingDayIndex !== null &&
+            editingPlaceIndex !== null
+        ) {
+
+            /*
+             * REPLACE EXISTING PLACE
+             */
+
+            const oldPlace =
+                currentItinerary[
+                    editingDayIndex
+                ].places[
+                    editingPlaceIndex
+                ];
+
+
+            currentItinerary[
+                editingDayIndex
+            ].places[
+                editingPlaceIndex
+            ] = {
+
+                ...oldPlace,
+
+                id: place.id,
+
+                name: place.name,
+
+                location: place.location,
+
+                category:
+                    place.category || [],
+
+                rating:
+                    place.rating || null,
+
+                estimated_cost:
+                    Number(place.estimated_cost) || 0,
+
+                duration_minutes:
+                    Number(place.duration_minutes) || 120
+
+            };
+
+
+            showToast(
+                `${place.name} added to your plan`
+            );
+
+        }
+
+
+        else if (addingToDayIndex !== null) {
+
+            /*
+             * ADD NEW PLACE
+             */
+
+            const newPlace =
+                createItineraryPlace(
+                    place,
+                    getNextTime(
+                        currentItinerary[
+                            addingToDayIndex
+                        ].places
+                    )
+                );
+
+
+            currentItinerary[
+                addingToDayIndex
+            ].places.push(newPlace);
+
+
+            showToast(
+                `${place.name} added to Day ${
+                    currentItinerary[addingToDayIndex].day
+                }`
+            );
+
+        }
+
+
+        closePlaceModal();
+
+
+        renderItinerary();
+
+
+        /*
+         * Save to backend.
+         */
+
+        await saveItineraryToBackend();
+
+    }
+
+
+    /* ============================================================
+       REMOVE PLACE
+       ============================================================ */
+
+    async function removePlace(
+        dayIndex,
+        placeIndex
+    ) {
+
+        const place =
+            currentItinerary[
+                dayIndex
+            ].places[
+                placeIndex
+            ];
+
+
+        const confirmed =
+            confirm(
+                `Remove "${place.name}" from Day ${
+                    currentItinerary[dayIndex].day
+                }?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        currentItinerary[
+            dayIndex
+        ].places.splice(
+            placeIndex,
+            1
+        );
+
+
+        renderItinerary();
+
+
+        showToast(
+            `${place.name} removed from your plan`
+        );
+
+
+        await saveItineraryToBackend();
+
+    }
+
+
+    /* ============================================================
+       BACKEND: SAVE ITINERARY
+       ============================================================ */
+
+    async function saveItineraryToBackend() {
+
+        saveLocalTrip();
+
+
+        if (!trip?.id) {
+
+            /*
+             * No backend trip ID yet.
+             * Local state is enough for prototype.
+             */
+
+            return;
+
+        }
+
+
+        const endpoint =
+            API_CONFIG.updateItinerary
+                .replace(
+                    "{trip_id}",
+                    encodeURIComponent(trip.id)
+                );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    endpoint,
+                    {
+                        method: "PATCH",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            itinerary:
+                                currentItinerary
+                        })
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to save itinerary"
+                );
+
+            }
+
+
+            console.info(
+                "Itinerary saved to backend."
+            );
+
+
+        } catch (error) {
+
+            /*
+             * Backend unavailable.
+             *
+             * LocalStorage still keeps the user's
+             * planning changes.
+             */
+
+            console.info(
+                "Backend save unavailable. Local copy retained."
+            );
+
+        }
+
+    }
+
+
+    /* ============================================================
+       START TRIP
+       ============================================================ */
+
+    async function startTrip() {
+
+        if (!trip) {
+
+            showToast(
+                "No trip is available.",
+                true
+            );
+
+            return;
+
+        }
+
+
+        const button =
+            document.getElementById(
+                "startTripButton"
+            );
+
+
+        /*
+         * Prevent accidental double clicks.
+         */
+
+        button.disabled = true;
+
+        button.textContent =
+            "STARTING TRIP...";
+
+
+        /*
+         * Save the final edited itinerary
+         * before changing status.
+         */
+
+        await saveItineraryToBackend();
+
+
+        let backendStarted = false;
+
+
+        /*
+         * BACKEND
+         */
+
+        if (trip.id) {
+
+            const endpoint =
+                API_CONFIG.startTrip
+                    .replace(
+                        "{trip_id}",
+                        encodeURIComponent(trip.id)
+                    );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        endpoint,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                itinerary:
+                                    currentItinerary
+
+                            })
+                        }
+                    );
+
+
+                if (response.ok) {
+
+                    const updatedTrip =
+                        await response.json();
+
+
+                    trip = {
+                        ...trip,
+                        ...updatedTrip,
+                        status: "active",
+                        itinerary:
+                            currentItinerary,
+                        original_itinerary:
+                            originalItinerary
+                    };
+
+
+                    backendStarted = true;
+
+                }
+
+            } catch (error) {
+
+                console.info(
+                    "Start-trip backend unavailable."
+                );
+
+            }
+
+        }
+
+
+        /*
+         * LOCAL STATE
+         *
+         * Even before backend integration,
+         * the application behaves correctly.
+         */
+
+        trip.status = "active";
+
+        trip.started_at =
+            new Date().toISOString();
+
+        trip.itinerary =
+            currentItinerary;
+
+        trip.original_itinerary =
+            originalItinerary;
+
+
+        /*
+         * These fields will be useful to
+         * current-trip.html.
+         */
+
+        trip.current_day = 1;
+
+        trip.total_spent = 0;
+
+        trip.expenses = [];
+
+        trip.completed_places = [];
+
+        trip.live_modifications = [];
+
+
+        localStorage.setItem(
+            "byondSpotTrip",
+            JSON.stringify(trip)
+        );
+
+
+        /*
+         * Optional flag that the home page can
+         * use to show Current Trip.
+         */
+
+        localStorage.setItem(
+            "byondSpotActiveTrip",
+            "true"
+        );
+
+
+        /*
+         * GO TO LIVE TRIP
+         */
+
+        window.location.href =
+            "current-trip.html";
+
+    }
+
+
+    /* ============================================================
+       LOCAL STORAGE
+       ============================================================ */
+
+    function saveLocalTrip() {
+
+        if (!trip) {
+            return;
+        }
+
+
+        trip.itinerary =
+            currentItinerary;
+
+
+        trip.estimated_total =
+            calculateTotalCost();
+
+
+        localStorage.setItem(
+            "byondSpotTrip",
+            JSON.stringify(trip)
+        );
+
+    }
+
+
+    /* ============================================================
+       BUDGET
+       ============================================================ */
+
+    function calculateTotalCost() {
+
+        return currentItinerary.reduce(
+            (total, day) => {
+
+                return total +
+                    day.places.reduce(
+                        (dayTotal, place) =>
+                            dayTotal +
+                            Number(
+                                place.estimated_cost || 0
+                            ),
+                        0
+                    );
+
+            },
+            0
+        );
+
+    }
+
+
+    function updateBudget() {
+
+        const totalBudget =
+            Number(trip?.budget) || 0;
+
+
+        const estimated =
+            calculateTotalCost();
+
+
+        const remaining =
+            totalBudget - estimated;
+
+
+        document.getElementById(
+            "sideTotalBudget"
+        ).textContent =
+            formatCurrency(totalBudget);
+
+
+        document.getElementById(
+            "sideEstimatedCost"
+        ).textContent =
+            formatCurrency(estimated);
+
+
+        document.getElementById(
+            "sideRemaining"
+        ).textContent =
+            formatCurrency(
+                Math.max(0, remaining)
+            );
+
+
+        const percentage =
+            totalBudget > 0
+                ? Math.min(
+                    100,
+                    (estimated / totalBudget) * 100
+                )
+                : 0;
+
+
+        document.getElementById(
+            "budgetProgress"
+        ).style.width =
+            `${percentage}%`;
+
+
+        const note =
+            document.getElementById(
+                "budgetNote"
+            );
+
+
+        if (remaining < 0) {
+
+            note.textContent =
+                `Your current plan is ${formatCurrency(
+                    Math.abs(remaining)
+                )} above your budget.`;
+
+        } else {
+
+            note.textContent =
+                `${formatCurrency(
+                    remaining
+                )} remains from your planned budget.`;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       EXIT PLANNING
+       ============================================================ */
+
+    function exitPlanning() {
+
+        /*
+         * We don't mark the trip as active.
+         *
+         * The user is simply leaving the planning page.
+         */
+
+        saveLocalTrip();
+
+
+        window.location.href =
+            "index.html";
+
+    }
+
+
+    /* ============================================================
+       HELPERS
+       ============================================================ */
+
+    function calculateDuration(
+        start,
+        end
+    ) {
+
+        if (!start || !end) {
+            return 0;
+        }
+
+
+        const startDate =
+            new Date(start);
+
+
+        const endDate =
+            new Date(end);
+
+
+        if (
+            isNaN(startDate) ||
+            isNaN(endDate)
+        ) {
+            return 0;
+        }
+
+
+        const difference =
+            endDate - startDate;
+
+
+        return Math.max(
+            1,
+            Math.ceil(
+                difference /
+                (1000 * 60 * 60 * 24)
+            ) + 1
+        );
+
+    }
+
+
+    function getDateForDay(
+        startDate,
+        offset
+    ) {
+
+        if (!startDate) {
+            return null;
+        }
+
+
+        const date =
+            new Date(startDate);
+
+
+        date.setDate(
+            date.getDate() + offset
+        );
+
+
+        return date
+            .toISOString()
+            .split("T")[0];
+
+    }
+
+
+    function formatDate(dateString) {
+
+        if (!dateString) {
+            return "Date not specified";
+        }
+
+
+        const date =
+            new Date(
+                `${dateString}T00:00:00`
+            );
+
+
+        if (isNaN(date)) {
+            return dateString;
+        }
+
+
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    function formatCurrency(amount) {
+
+        return new Intl.NumberFormat(
+            "en-IN",
+            {
+                style: "currency",
+                currency: "INR",
+                maximumFractionDigits: 0
+            }
+        ).format(
+            Number(amount) || 0
+        );
+
+    }
+
+
+    function getNextTime(places) {
+
+        const times = [
+            "09:00 AM",
+            "11:30 AM",
+            "02:00 PM",
+            "04:30 PM",
+            "07:00 PM"
+        ];
+
+
+        return (
+            times[
+                Math.min(
+                    places.length,
+                    times.length - 1
+                )
+            ]
+            || "Flexible"
+        );
+
+    }
+
+
+    function deepClone(object) {
+
+        return JSON.parse(
+            JSON.stringify(object)
+        );
+
+    }
+
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    function showEmptyState(
+        title,
+        message
+    ) {
+
+        document.getElementById(
+            "itineraryContainer"
+        ).innerHTML = `
+
+            <div class="empty-box">
+
+                <strong>
+                    ${escapeHtml(title)}
+                </strong>
+
+                <span>
+                    ${escapeHtml(message)}
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    function showToast(
+        message,
+        error = false
+    ) {
+
+        const toast =
+            document.getElementById("toast");
+
+
+        toast.textContent =
+            message;
+
+
+        toast.classList.toggle(
+            "error",
+            error
+        );
+
+
+        toast.classList.add("show");
+
+
+        setTimeout(() => {
+
+            toast.classList.remove("show");
+
+        }, 2500);
+
+    }
+
+
+    /* ============================================================
+       CLOSE MODAL WHEN CLICKING OUTSIDE
+       ============================================================ */
+
+    document.getElementById(
+        "placeModal"
+    ).addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.id ===
+                "placeModal"
+            ) {
+
+                closePlaceModal();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

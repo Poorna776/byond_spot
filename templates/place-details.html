@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Place Details | BYOND Spot</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #F7F3ED;
+            color: #332C29;
+            overflow-x: hidden;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .navbar {
+            height: 72px;
+            background: #FFFDFC;
+            border-bottom: 1px solid #E5DDD3;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 6%;
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #332C29;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #5D1932;
+        }
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: #EFE5D8;
+            color: #5D1932;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+
+        /* =====================================================
+           PAGE
+        ===================================================== */
+
+        .page {
+            max-width: 1450px;
+            margin: auto;
+            padding: 34px 5% 70px;
+        }
+
+
+        /* =====================================================
+           BACK BUTTON
+        ===================================================== */
+
+        .back-btn {
+            border: none;
+            background: transparent;
+
+            color: #5D1932;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            margin-bottom: 24px;
+
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            color: #4D172B;
+        }
+
+
+        /* =====================================================
+           PLACE HEADER
+        ===================================================== */
+
+        .place-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+
+            gap: 25px;
+            margin-bottom: 24px;
+        }
+
+        .place-title-area h1 {
+            font-size: 34px;
+            line-height: 1.2;
+
+            color: #4D172B;
+
+            margin-bottom: 9px;
+        }
+
+        .location {
+            color: #756B65;
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .rating {
+            background: #FFFDFC;
+            border: 1px solid #E5DDD3;
+
+            border-radius: 10px;
+
+            padding: 10px 14px;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            color: #4D172B;
+        }
+
+        .activity-badge {
+            padding: 10px 14px;
+
+            border-radius: 10px;
+
+            background: #EFE5D8;
+            color: #6E1D38;
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           MAIN CONTENT
+        ===================================================== */
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 400px;
+
+            gap: 22px;
+
+            align-items: start;
+
+            transition: 0.3s ease;
+        }
+
+        .main-layout.ai-closed {
+            grid-template-columns: 1fr;
+        }
+
+        .left-content {
+            min-width: 0;
+        }
+
+
+        /* =====================================================
+           MAP
+        ===================================================== */
+
+        .map-card {
+            height: 530px;
+
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+            border-radius: 20px;
+
+            overflow: hidden;
+
+            position: relative;
+
+            box-shadow: 0 8px 25px rgba(77, 23, 43, 0.05);
+        }
+
+        /*
+            =====================================================
+            MAP PLACEHOLDER
+
+            This is intentionally a clean placeholder.
+
+            Later, replace the .map element with your actual
+            map implementation and use:
+
+            - user's latitude / longitude
+            - destination latitude / longitude
+            - routing API
+
+            The rest of the page does not need to change.
+            =====================================================
+        */
+
+        .map {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #E7DED1;
+        }
+
+        /* Map controls */
+
+        .map-controls {
+            position: absolute;
+
+            top: 18px;
+            right: 18px;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+
+            z-index: 1000;
+        }
+
+        .map-control {
+            width: 38px;
+            height: 38px;
+
+            border: 1px solid #E5DDD3;
+
+            background: #FFFDFC;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            font-size: 17px;
+
+            color: #4D172B;
+
+            box-shadow:
+                0 4px 12px rgba(77,23,43,0.08);
+        }
+
+        .map-control:hover {
+            background: #F7F3ED;
+        }
+
+        /* Route information */
+
+        .route-panel {
+            position: absolute;
+
+            bottom: 18px;
+            left: 18px;
+            right: 18px;
+
+            background: rgba(255,253,250,0.97);
+
+            border: 1px solid #E5DDD3;
+
+            border-radius: 15px;
+
+            padding: 15px 16px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 15px;
+
+            z-index: 1000;
+
+            box-shadow:
+                0 8px 25px rgba(77,23,43,0.08);
+        }
+
+        .route-info h3 {
+            font-size: 14px;
+
+            color: #332C29;
+
+            margin-bottom: 5px;
+        }
+
+        .route-info p {
+            color: #756B65;
+            font-size: 12px;
+        }
+
+        .directions-btn {
+            border: none;
+
+            background: #5D1932;
+            color: #FFFDFC;
+
+            padding: 11px 16px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+        .directions-btn:hover {
+            background: #4D172B;
+        }
+
+
+
+        /* =====================================================
+           ABOUT
+        ===================================================== */
+
+        .info-card {
+            margin-top: 18px;
+
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+
+            border-radius: 17px;
+
+            padding: 23px;
+
+            box-shadow:
+                0 6px 20px rgba(77,23,43,0.035);
+        }
+
+        .info-card h2 {
+            font-size: 20px;
+
+            color: #4D172B;
+
+            margin-bottom: 12px;
+        }
+
+        .info-card p {
+            color: #756B65;
+
+            line-height: 1.75;
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           AI PANEL
+        ===================================================== */
+
+        .ai-panel {
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+
+            border-radius: 20px;
+
+            height: 670px;
+
+            display: flex;
+            flex-direction: column;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 10px 30px rgba(77,23,43,0.07);
+
+            position: sticky;
+            top: 94px;
+
+            transition:
+                opacity 0.25s ease,
+                transform 0.3s ease;
+        }
+
+        .ai-panel.closed {
+            display: none;
+        }
+
+
+        /* =====================================================
+           AI HEADER
+        ===================================================== */
+
+        .ai-header {
+            padding: 17px 18px;
+
+            border-bottom: 1px solid #E5DDD3;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background: #FFFDFC;
+        }
+
+        .ai-title {
+            display: flex;
+            align-items: center;
+
+            gap: 11px;
+        }
+
+        .ai-icon {
+            width: 38px;
+            height: 38px;
+
+            border-radius: 11px;
+
+            background: #EFE5D8;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: #5D1932;
+
+            font-size: 18px;
+        }
+
+        .ai-title h2 {
+            font-size: 15px;
+
+            color: #4D172B;
+
+            margin-bottom: 2px;
+        }
+
+        .ai-title p {
+            font-size: 10px;
+
+            color: #81756D;
+        }
+
+        .close-ai {
+            border: none;
+
+            background: transparent;
+
+            width: 32px;
+            height: 32px;
+
+            border-radius: 8px;
+
+            font-size: 22px;
+
+            color: #81756D;
+
+            cursor: pointer;
+        }
+
+        .close-ai:hover {
+            background: #F7F3ED;
+            color: #4D172B;
+        }
+
+
+        /* =====================================================
+           AI STATUS
+        ===================================================== */
+
+        .ai-status {
+            display: flex;
+            align-items: center;
+
+            gap: 7px;
+
+            padding: 10px 17px;
+
+            border-bottom: 1px solid #E5DDD3;
+
+            background: #F7F3ED;
+
+            font-size: 10px;
+
+            color: #756B65;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #6E1D38;
+        }
+
+
+        /* =====================================================
+           AI CHAT
+        ===================================================== */
+
+        .chat-messages {
+            flex: 1;
+
+            padding: 17px;
+
+            overflow-y: auto;
+
+            background: #FBF8F3;
+        }
+
+        .message {
+            max-width: 88%;
+
+            padding: 11px 13px;
+
+            border-radius: 13px;
+
+            margin-bottom: 10px;
+
+            font-size: 12px;
+
+            line-height: 1.6;
+
+            word-wrap: break-word;
+        }
+
+        .ai-message {
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+
+            color: #443B36;
+
+            border-top-left-radius: 5px;
+        }
+
+        .user-message {
+            background: #5D1932;
+
+            color: #FFFDFC;
+
+            margin-left: auto;
+
+            border-top-right-radius: 5px;
+        }
+
+        .message-label {
+            font-size: 9px;
+
+            font-weight: 700;
+
+            color: #8A7E76;
+
+            margin-bottom: 4px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.5px;
+        }
+
+        .user-message .message-label {
+            color: rgba(255,255,255,0.7);
+        }
+
+
+        /* =====================================================
+           TYPING INDICATOR
+        ===================================================== */
+
+        .typing {
+            display: none;
+
+            max-width: 75px;
+
+            padding: 10px 13px;
+
+            border-radius: 13px;
+
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+
+            margin-bottom: 10px;
+        }
+
+        .typing.show {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing span {
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background: #81756D;
+
+            animation: typing 1.2s infinite;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes typing {
+
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.45;
+            }
+
+            30% {
+                transform: translateY(-3px);
+                opacity: 1;
+            }
+        }
+
+
+        /* =====================================================
+           CHAT INPUT
+        ===================================================== */
+
+        .chat-input-area {
+            border-top: 1px solid #E5DDD3;
+
+            padding: 11px;
+
+            background: #FFFDFC;
+        }
+
+        .chat-input {
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            border: 1px solid #DCD2C8;
+
+            border-radius: 11px;
+
+            padding: 5px 5px 5px 12px;
+
+            background: #FBF8F3;
+        }
+
+        .chat-input:focus-within {
+            border-color: #8A5A6A;
+        }
+
+        .chat-input input {
+            flex: 1;
+
+            min-width: 0;
+
+            border: none;
+
+            outline: none;
+
+            background: transparent;
+
+            color: #332C29;
+
+            font-size: 12px;
+
+            padding: 8px 0;
+        }
+
+        .chat-input input::placeholder {
+            color: #9A8E85;
+        }
+
+        .send-btn {
+            width: 34px;
+            height: 34px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #5D1932;
+
+            color: #FFFDFC;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: #4D172B;
+        }
+
+
+        /* =====================================================
+           FLOATING AI BUTTON
+        ===================================================== */
+
+        .floating-ai {
+            position: fixed;
+
+            right: 25px;
+            bottom: 25px;
+
+            width: 56px;
+            height: 56px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #5D1932;
+
+            color: #FFFDFC;
+
+            font-size: 21px;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 8px 25px rgba(77,23,43,0.25);
+
+            display: none;
+
+            z-index: 200;
+        }
+
+        .floating-ai.visible {
+            display: block;
+        }
+
+        .floating-ai:hover {
+            background: #4D172B;
+
+            transform: translateY(-2px);
+        }
+
+
+        /* =====================================================
+           ADD TO TRIP MODAL
+        ===================================================== */
+
+        .modal {
+            position: fixed;
+
+            inset: 0;
+
+            background: rgba(52,38,35,0.42);
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            z-index: 500;
+
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 430px;
+
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+
+            border-radius: 18px;
+
+            padding: 25px;
+
+            position: relative;
+
+            box-shadow:
+                0 20px 50px rgba(52,38,35,0.18);
+        }
+
+        .modal-card h2 {
+            color: #4D172B;
+
+            font-size: 21px;
+
+            margin-bottom: 8px;
+        }
+
+        .modal-card p {
+            color: #756B65;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            margin-bottom: 18px;
+        }
+
+        .close-modal {
+            position: absolute;
+
+            right: 17px;
+            top: 14px;
+
+            width: 32px;
+            height: 32px;
+
+            border: none;
+
+            background: transparent;
+
+            border-radius: 8px;
+
+            font-size: 21px;
+
+            color: #81756D;
+
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            background: #F7F3ED;
+        }
+
+        .trip-success {
+            padding: 13px;
+
+            border-radius: 10px;
+
+            background: #EFE5D8;
+
+            color: #5D1932;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            display: none;
+        }
+
+        .trip-success.show {
+            display: block;
+        }
+
+
+        /* =====================================================
+           MOBILE AI TOGGLE
+        ===================================================== */
+
+        .mobile-ai-toggle {
+            display: none;
+
+            width: 100%;
+
+            border: 1px solid #E5DDD3;
+
+            background: #FFFDFC;
+
+            color: #4D172B;
+
+            padding: 14px 16px;
+
+            border-radius: 13px;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            justify-content: space-between;
+            align-items: center;
+
+            margin-top: 18px;
+        }
+
+        .mobile-ai-toggle span:last-child {
+            font-size: 17px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-panel {
+                position: relative;
+                top: auto;
+
+                height: 620px;
+            }
+
+            .main-layout.ai-closed {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        @media (max-width: 700px) {
+
+            .navbar {
+                padding: 0 4%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page {
+                padding: 25px 4% 50px;
+            }
+
+            .place-header {
+                flex-direction: column;
+
+                gap: 15px;
+            }
+
+            .place-title-area h1 {
+                font-size: 27px;
+            }
+
+            .header-right {
+                width: 100%;
+            }
+
+            .rating,
+            .activity-badge {
+                flex: 1;
+                text-align: center;
+            }
+
+            .map-card {
+                height: 460px;
+            }
+
+            .route-panel {
+                flex-direction: column;
+
+                align-items: stretch;
+
+                padding: 14px;
+            }
+
+            .directions-btn {
+                width: 100%;
+            }
+
+            .add-trip-btn {
+                padding: 14px;
+            }
+
+            .mobile-ai-toggle {
+                display: flex;
+            }
+
+            .main-layout {
+                display: block;
+            }
+
+            .ai-panel {
+                margin-top: 12px;
+
+                height: 600px;
+
+                position: relative;
+
+                top: auto;
+            }
+
+            .ai-panel.closed {
+                display: none;
+            }
+
+            .floating-ai {
+                width: 52px;
+                height: 52px;
+
+                right: 18px;
+                bottom: 18px;
+            }
+
+            .info-card {
+                padding: 19px;
+            }
+        }
+
+
+        @media (max-width: 420px) {
+
+            .map-card {
+                height: 420px;
+            }
+
+            .place-title-area h1 {
+                font-size: 24px;
+            }
+
+            .header-right {
+                gap: 7px;
+            }
+
+            .rating,
+            .activity-badge {
+                padding: 9px 8px;
+
+                font-size: 12px;
+            }
+        }
+
+        /* =========================
+           PAGE TOAST
+        ========================= */
+
+        .page-toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1000;
+            background: #4D172B;
+            color: #FFFDFC;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(77,23,43,0.16);
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: 0.25s ease;
+        }
+
+        .page-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         NAVBAR
+    ===================================================== -->
+
+    <nav class="navbar">
+
+        <a href="index.html" class="logo">
+            <img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+        </a>
+
+        <div class="nav-links">
+
+            <a href="index.html#explore">
+                Explore
+            </a>
+
+            <a href="index.html#hidden-gems" class="active">
+                Hidden Gems
+            </a>
+
+            <a href="index.html#plan-trip">
+                Plan Trip
+            </a>
+
+            <a href="index.html#safety">
+                Safety
+            </a>
+
+        </div>
+
+        <button
+            class="profile-button"
+            onclick="location.href='profile.html'"
+        >
+            P
+        </button>
+
+    </nav>
+
+
+    <!-- =====================================================
+         PAGE
+    ===================================================== -->
+
+    <main class="page">
+
+
+        <button
+            class="back-btn"
+            onclick="window.location.href='places.html'"
+        >
+            ← Back to Places
+        </button>
+
+
+        <!-- =================================================
+             PLACE HEADER
+        ================================================= -->
+
+        <section class="place-header">
+
+            <div class="place-title-area">
+
+                <h1 id="placeName">
+                    Amaravati Historical Site
+                </h1>
+
+                <div
+                    class="location"
+                    id="placeLocation"
+                >
+                    📍 Amaravati, Andhra Pradesh
+                </div>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <div
+                    class="rating"
+                    id="placeRating"
+                >
+                    ★ 4.7
+                </div>
+
+                <div
+                    class="activity-badge"
+                    id="placeActivity"
+                >
+                    ● High Activity
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MAIN LAYOUT
+        ================================================= -->
+
+        <div
+            class="main-layout"
+            id="mainLayout"
+        >
+
+
+            <!-- =================================================
+                 LEFT CONTENT
+            ================================================= -->
+
+            <section class="left-content">
+
+
+                <!-- =================================================
+                     MAP
+                ================================================= -->
+
+                <div class="map-card">
+
+                    <div
+                        class="map"
+                        id="map"
+                    ></div>
+
+                    <!-- MAP CONTROLS -->
+                    <div class="map-controls">
+
+                        <button
+                            class="map-control"
+                            onclick="zoomMap('+')"
+                            aria-label="Zoom in"
+                        >
+                            +
+                        </button>
+
+                        <button
+                            class="map-control"
+                            onclick="zoomMap('-')"
+                            aria-label="Zoom out"
+                        >
+                            −
+                        </button>
+
+                        <button
+                            class="map-control"
+                            onclick="locateUser()"
+                            aria-label="Locate me"
+                        >
+                            ◎
+                        </button>
+
+                    </div>
+
+                    <!-- ROUTE INFORMATION -->
+                    <div class="route-panel">
+
+                        <div class="route-info">
+
+                            <h3>
+                                Route to destination
+                            </h3>
+
+                            <p>
+
+                                <span id="distance">
+                                    Calculating distance...
+                                </span>
+
+                                ·
+
+                                <span id="travelTime">
+                                    Route unavailable
+                                </span>
+
+                                · Car / Cab
+
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="directions-btn"
+                            onclick="getDirections()"
+                        >
+                            Get Directions
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     MOBILE AI TOGGLE
+                ================================================= -->
+
+                <button
+                    class="mobile-ai-toggle"
+                    id="mobileAIToggle"
+                    onclick="toggleMobileAI()"
+                >
+
+                    <span>
+                        ✦ AI Travel Guide
+                    </span>
+
+                    <span id="mobileAIToggleIcon">
+                        ↑
+                    </span>
+
+                </button>
+
+
+                <!-- =================================================
+                     ABOUT
+                ================================================= -->
+
+                <div class="info-card">
+
+                    <h2>
+                        About this place
+                    </h2>
+
+                    <p id="placeDescription">
+
+                        Amaravati is a historically important destination
+                        known for its heritage, ancient Buddhist connections
+                        and cultural significance. Explore the site while
+                        discovering nearby local experiences and
+                        lesser-known destinations.
+
+                    </p>
+
+                </div>
+
+                <!-- =================================================
+                     LIVE CONDITIONS & INSIGHTS
+                ================================================= -->
+                <div class="info-card" id="insightsCard" style="display: none;">
+
+                    <h2>
+                        Live Conditions & Insights
+                    </h2>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-top: 14px;">
+
+                        <div style="background: #F7F3ED; padding: 14px 16px; border-radius: 12px; border: 1px solid #E5DDD3;">
+                            <div style="font-size: 11px; color: #756B65; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Weather</div>
+                            <div id="weatherDisplay" style="font-size: 18px; font-weight: 700; color: #5D1932; margin-top: 4px;">--°C</div>
+                            <div id="weatherCondition" style="font-size: 12px; color: #756B65; margin-top: 2px;">Checking forecast...</div>
+                        </div>
+
+                        <div style="background: #F7F3ED; padding: 14px 16px; border-radius: 12px; border: 1px solid #E5DDD3;">
+                            <div style="font-size: 11px; color: #756B65; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Crowd Density</div>
+                            <div id="crowdDisplay" style="font-size: 18px; font-weight: 700; color: #5D1932; margin-top: 4px;">Normal</div>
+                            <div id="crowdDetail" style="font-size: 12px; color: #756B65; margin-top: 2px;">BestTime live status</div>
+                        </div>
+
+                        <div style="background: #F7F3ED; padding: 14px 16px; border-radius: 12px; border: 1px solid #E5DDD3;">
+                            <div style="font-size: 11px; color: #756B65; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Peak Hours</div>
+                            <div id="bestTimeDisplay" style="font-size: 18px; font-weight: 700; color: #5D1932; margin-top: 4px;">10 AM - 4 PM</div>
+                            <div id="bestTimeDetail" style="font-size: 12px; color: #756B65; margin-top: 2px;">Forecast analysis</div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 AI TRAVEL GUIDE
+            ================================================= -->
+
+            <aside
+                class="ai-panel"
+                id="aiPanel"
+            >
+
+
+                <!-- AI HEADER -->
+
+                <div class="ai-header">
+
+                    <div class="ai-title">
+
+                        <div class="ai-icon">
+                            ✦
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                AI Travel Guide
+                            </h2>
+
+                            <p>
+                                Ask anything about this destination
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        class="close-ai"
+                        onclick="closeAI()"
+                        aria-label="Close AI Travel Guide"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <!-- AI STATUS -->
+
+                <div class="ai-status">
+
+                    <span class="status-dot"></span>
+
+                    <span id="aiStatusText">
+                        Ready to help with this destination
+                    </span>
+
+                </div>
+
+
+                <!-- CHAT -->
+
+                <div
+                    class="chat-messages"
+                    id="chatMessages"
+                >
+
+<div class="chat-messages" id="chatMessages">
+
+    <div
+        class="typing"
+        id="typingIndicator"
+    >
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CHAT INPUT -->
+
+                <div class="chat-input-area">
+
+                    <div class="chat-input">
+
+                        <input
+                            type="text"
+                            id="chatInput"
+                            placeholder="Ask about this place..."
+                            autocomplete="off"
+                            onkeydown="handleEnter(event)"
+                        >
+
+                        <button
+                            class="send-btn"
+                            onclick="sendMessage()"
+                            aria-label="Send message"
+                        >
+                            ↑
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         FLOATING AI
+    ===================================================== -->
+
+    <button
+        class="floating-ai"
+        id="floatingAI"
+        onclick="openAI()"
+        title="Open AI Travel Guide"
+        aria-label="Open AI Travel Guide"
+    >
+        ✦
+    </button>
+
+
+    <!-- =====================================================
+         ADD TO TRIP MODAL
+    ===================================================== -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+
+        /* =====================================================
+           API CONFIGURATION
+        ===================================================== */
+
+        const API_CONFIG = {
+
+            placeEndpoint: "/api/places",
+
+            aiEndpoint: "/api/ai/chat",
+
+            aiRecommendationEndpoint:
+                "/api/ai/place-recommendation",
+
+            routeEndpoint: "/api/route"
+
+        };
+
+
+        /* =====================================================
+           CURRENT PLACE STATE
+
+           The backend can now return either:
+           - OpenStreetMap places
+           - Curated SQLite places (db_1, db_2, ...)
+        ===================================================== */
+
+        let currentPlace = null;
+        let placeContext = null;
+        let currentRoute = null;
+
+
+        /* =====================================================
+           GET PLACE ID
+        ===================================================== */
+
+        function getPlaceId() {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            return params.get("place");
+
+        }
+
+
+        /* =====================================================
+           LOAD PLACE
+
+           IMPORTANT:
+           Do not create a frontend fallback here.
+           The backend is responsible for resolving both
+           OSM IDs and database IDs.
+        ===================================================== */
+
+        async function loadPlace() {
+
+            const placeId = getPlaceId();
+
+            if (!placeId) {
+
+                showPlaceError(
+                    "No place was selected. Please return to Places and select a destination."
+                );
+
+                return;
+
+            }
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_CONFIG.placeEndpoint}/${encodeURIComponent(placeId)}`
+                    );
+
+                const data =
+                    await response.json().catch(
+                        () => ({})
+                    );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Place could not be loaded."
+                    );
+
+                }
+
+                /*
+                    Current Flask response structure:
+
+                    {
+                        "place": {...},
+                        "context": {...}
+                    }
+                */
+
+                currentPlace =
+                    data.place || null;
+
+                placeContext =
+                    data.context || null;
+
+                if (!currentPlace) {
+
+                    throw new Error(
+                        "Place data is missing from the server response."
+                    );
+
+                }
+
+                renderPlace();
+
+                requestInitialAI();
+
+            } catch (error) {
+
+                console.error(
+                    "Load place error:",
+                    error
+                );
+
+                showPlaceError(
+                    error.message ||
+                    "Unable to load this place right now."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           PLACE ERROR
+        ===================================================== */
+
+        function showPlaceError(message) {
+
+            const placeName =
+                document.getElementById(
+                    "placeName"
+                );
+
+            const placeLocation =
+                document.getElementById(
+                    "placeLocation"
+                );
+
+            const placeDescription =
+                document.getElementById(
+                    "placeDescription"
+                );
+
+            const placeRating =
+                document.getElementById(
+                    "placeRating"
+                );
+
+            const placeActivity =
+                document.getElementById(
+                    "placeActivity"
+                );
+
+            if (placeName) {
+                placeName.innerText =
+                    "Place Unavailable";
+            }
+
+            if (placeLocation) {
+                placeLocation.innerText =
+                    "Unable to load destination information";
+            }
+
+            if (placeRating) {
+                placeRating.innerText =
+                    "★ —";
+            }
+
+            if (placeActivity) {
+                placeActivity.innerText =
+                    "● Unavailable";
+            }
+
+            if (placeDescription) {
+                placeDescription.innerText =
+                    message;
+            }
+
+            document.title =
+                "Place Unavailable | BYOND Spot";
+
+        }
+
+
+        /* =====================================================
+           RENDER PLACE
+        ===================================================== */
+
+        function renderPlace() {
+
+            if (!currentPlace) {
+                return;
+            }
+
+            const place =
+                currentPlace;
+
+            const context =
+                placeContext || {};
+
+            const el = id => document.getElementById(id);
+
+            /* =========================
+               BASIC INFORMATION
+            ========================= */
+
+            if (el("placeName")) {
+                el("placeName").innerText =
+                    place.name ||
+                    "Destination";
+            }
+
+            if (el("placeLocation")) {
+                el("placeLocation").innerText =
+                    place.location ||
+                    "Location unavailable";
+            }
+
+            if (el("placeDescription")) {
+                el("placeDescription").innerText =
+                    place.description ||
+                    "Information about this destination is unavailable.";
+            }
+
+
+            /* =========================
+               RATING
+            ========================= */
+
+            const rating =
+                place.rating;
+
+            if (el("placeRating")) {
+                el("placeRating").innerText =
+                    rating != null && rating !== ""
+                        ? `★ ${rating}`
+                        : "★ —";
+            }
+
+
+            /* =========================
+               CATEGORY / ACTIVITY
+            ========================= */
+
+            const crowd =
+                context.crowd || {};
+
+            const badge =
+                el("placeActivity");
+
+            if (badge) {
+                const status =
+                    crowd.live_status ||
+                    crowd.status ||
+                    (crowd.crowd_level ? `${crowd.crowd_level.toUpperCase()} CROWD` : "NORMAL ACTIVITY");
+
+                badge.innerText = `● ${status}`;
+
+                if (crowd.crowd_level === 'low') {
+                    badge.style.background = '#E8F5E9';
+                    badge.style.color = '#2E7D32';
+                } else if (crowd.crowd_level === 'high') {
+                    badge.style.background = '#FFEBEE';
+                    badge.style.color = '#C62828';
+                }
+            }
+
+
+            /* =========================
+               INSIGHTS (WEATHER & CROWD)
+            ========================= */
+
+            const weather = context.weather;
+
+            if (weather || crowd.crowd_level) {
+                if (el("insightsCard")) {
+                    el("insightsCard").style.display = "block";
+                }
+
+                if (weather) {
+                    if (el("weatherDisplay") && weather.temperature != null) {
+                        el("weatherDisplay").innerText = `${Math.round(weather.temperature)}°C`;
+                    }
+
+                    if (el("weatherCondition")) {
+                        el("weatherCondition").innerText =
+                            `${weather.condition || 'Clear'} · Humidity ${weather.humidity || 0}%`;
+                    }
+                }
+
+                if (el("crowdDisplay")) {
+                    el("crowdDisplay").innerText =
+                        crowd.crowd_level
+                            ? (crowd.crowd_level.charAt(0).toUpperCase() + crowd.crowd_level.slice(1))
+                            : "Normal";
+                }
+
+                if (el("crowdDetail")) {
+                    el("crowdDetail").innerText =
+                        crowd.live_status ||
+                        (crowd.busyness_score != null ? `${crowd.busyness_score}% busyness index` : "BestTime live status");
+                }
+
+                if (el("bestTimeDisplay") && crowd.peak_hours) {
+                    el("bestTimeDisplay").innerText = crowd.peak_hours;
+                }
+            }
+
+
+            /* =========================
+               DISTANCE
+            ========================= */
+
+            const userDistance =
+                context.user?.distance_km;
+
+            const placeDistance =
+                place.distance_km;
+
+            const distance =
+                userDistance != null
+                    ? userDistance
+                    : placeDistance;
+
+            if (el("distance")) {
+                el("distance").innerText =
+                    distance != null
+                        ? `${Number(distance).toFixed(1)} km`
+                        : "Enable location";
+            }
+
+
+            /* =========================
+               TRAVEL TIME
+            ========================= */
+
+            if (el("travelTime")) {
+                el("travelTime").innerText =
+                    "Calculate route";
+            }
+
+
+            /* =========================
+               LEAFLET MAP
+            ========================= */
+
+            if (place.latitude != null && place.longitude != null) {
+                initOrUpdateMap(
+                    parseFloat(place.latitude),
+                    parseFloat(place.longitude),
+                    place.name
+                );
+            }
+
+
+            /* =========================
+               DOCUMENT TITLE
+            ========================= */
+
+            document.title =
+                `${place.name || "Place Details"} | BYOND Spot`;
+
+        }
+
+
+        function formatCategory(category) {
+
+            if (Array.isArray(category)) {
+
+                return category
+                    .map(item =>
+                        String(item)
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, letter =>
+                                letter.toUpperCase()
+                            )
+                    )
+                    .join(" · ");
+
+            }
+
+            return String(category)
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, letter =>
+                    letter.toUpperCase()
+                );
+
+        }
+
+
+        /* =====================================================
+           INITIAL AI RECOMMENDATION
+
+           Uses currentPlace.id so both db_* and OSM IDs work.
+        ===================================================== */
+
+        async function requestInitialAI() {
+
+            if (!currentPlace) {
+                return;
+            }
+
+            const placeId =
+                currentPlace.id ||
+                currentPlace.osm_id ||
+                getPlaceId();
+
+            if (!placeId) {
+                return;
+            }
+
+            showTyping();
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_CONFIG.aiRecommendationEndpoint}` +
+                        `?place=${encodeURIComponent(placeId)}`
+                    );
+
+                const data =
+                    await response.json().catch(
+                        () => ({})
+                    );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI recommendation request failed."
+                    );
+
+                }
+
+                hideTyping();
+
+                if (data.recommendation) {
+
+                    addMessage(
+                        "ai",
+                        data.recommendation
+                    );
+
+                } else {
+
+                    addMessage(
+                        "ai",
+                        "I’m ready to help you explore this destination."
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Initial AI recommendation error:",
+                    error
+                );
+
+                hideTyping();
+
+                addMessage(
+                    "ai",
+                    "I’m ready to help you explore this destination."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           AI PANEL
+        ===================================================== */
+
+        function closeAI() {
+
+            document
+                .getElementById("aiPanel")
+                .classList.add("closed");
+
+            document
+                .getElementById("mainLayout")
+                .classList.add("ai-closed");
+
+            document
+                .getElementById("floatingAI")
+                .classList.add("visible");
+
+            document
+                .getElementById("mobileAIToggleIcon")
+                .innerText = "↑";
+
+        }
+
+
+        function openAI() {
+
+            document
+                .getElementById("aiPanel")
+                .classList.remove("closed");
+
+            document
+                .getElementById("mainLayout")
+                .classList.remove("ai-closed");
+
+            document
+                .getElementById("floatingAI")
+                .classList.remove("visible");
+
+            document
+                .getElementById("mobileAIToggleIcon")
+                .innerText = "↓";
+
+        }
+
+
+        function toggleMobileAI() {
+
+            const panel =
+                document.getElementById("aiPanel");
+
+            if (panel.classList.contains("closed")) {
+                openAI();
+            } else {
+                closeAI();
+            }
+
+        }
+
+
+        /* =====================================================
+           CHAT
+        ===================================================== */
+
+        function handleEnter(event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+                sendMessage();
+
+            }
+
+        }
+
+
+        async function sendMessage() {
+
+            const input =
+                document.getElementById("chatInput");
+
+            const message =
+                input.value.trim();
+
+            if (!message) {
+                return;
+            }
+
+            const placeId =
+                currentPlace?.id ||
+                currentPlace?.osm_id ||
+                getPlaceId();
+
+            if (!placeId) {
+
+                addMessage(
+                    "ai",
+                    "I couldn't identify this destination."
+                );
+
+                return;
+
+            }
+
+            addMessage(
+                "user",
+                message
+            );
+
+            input.value = "";
+
+            showTyping();
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_CONFIG.aiEndpoint,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                place_id:
+                                    placeId,
+
+                                message:
+                                    message
+
+                            })
+
+                        }
+                    );
+
+                const data =
+                    await response.json().catch(
+                        () => ({})
+                    );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "AI backend unavailable."
+                    );
+
+                }
+
+                hideTyping();
+
+                addMessage(
+                    "ai",
+                    data.response ||
+                    data.message ||
+                    "I couldn't generate a response right now."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "AI chat error:",
+                    error
+                );
+
+                hideTyping();
+
+                addMessage(
+                    "ai",
+                    "I'm unable to connect to the AI Travel Guide right now. Please try again."
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ADD CHAT MESSAGE
+        ===================================================== */
+
+        function addMessage(type, text) {
+
+            const chat =
+                document.getElementById("chatMessages");
+
+            if (!chat) {
+                return;
+            }
+
+            const message =
+                document.createElement("div");
+
+            message.className =
+                `message ${type === "user"
+                    ? "user-message"
+                    : "ai-message"}`;
+
+            const label =
+                document.createElement("div");
+
+            label.className =
+                "message-label";
+
+            label.innerText =
+                type === "user"
+                    ? "You"
+                    : "AI Travel Guide";
+
+            const content =
+                document.createElement("div");
+
+            content.innerHTML =
+                type === "user"
+                    ? escapeHTML(text)
+                    : formatAIResponse(text);
+
+            message.appendChild(label);
+            message.appendChild(content);
+
+            const typingIndicator =
+                document.getElementById(
+                    "typingIndicator"
+                );
+
+            if (typingIndicator) {
+
+                chat.insertBefore(
+                    message,
+                    typingIndicator
+                );
+
+            } else {
+
+                chat.appendChild(message);
+
+            }
+
+            chat.scrollTop =
+                chat.scrollHeight;
+
+        }
+
+
+        function formatAIResponse(text) {
+
+            return escapeHTML(
+                String(text || "")
+            ).replace(
+                /\n/g,
+                "<br>"
+            );
+
+        }
+
+
+        /* =====================================================
+           TYPING INDICATOR
+        ===================================================== */
+
+        function showTyping() {
+
+            const indicator =
+                document.getElementById(
+                    "typingIndicator"
+                );
+
+            if (!indicator) {
+                return;
+            }
+
+            indicator.classList.add("show");
+
+            const chat =
+                document.getElementById("chatMessages");
+
+            if (chat) {
+                chat.scrollTop =
+                    chat.scrollHeight;
+            }
+
+        }
+
+
+        function hideTyping() {
+
+            const indicator =
+                document.getElementById(
+                    "typingIndicator"
+                );
+
+            if (indicator) {
+                indicator.classList.remove("show");
+            }
+
+        }
+
+
+        /* =====================================================
+           LEAFLET MAP & ROUTING
+        ===================================================== */
+
+        let leafletMap = null;
+        let destMarker = null;
+        let userMarker = null;
+        let routePolyline = null;
+        let userCoords = null;
+
+        function initOrUpdateMap(lat, lng, name) {
+            const mapEl = document.getElementById("map");
+            if (!mapEl || isNaN(lat) || isNaN(lng)) return;
+
+            if (!leafletMap) {
+                leafletMap = L.map("map", { zoomControl: false }).setView([lat, lng], 14);
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(leafletMap);
+            } else {
+                leafletMap.setView([lat, lng], 14);
+            }
+
+            if (destMarker) {
+                leafletMap.removeLayer(destMarker);
+            }
+
+            const destIcon = L.divIcon({
+                className: "custom-dest-pin",
+                html: `<div style="background:#5D1932;color:#FFFDFC;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #FFFDFC;box-shadow:0 4px 12px rgba(93,25,50,0.4);font-size:16px;">📍</div>`,
+                iconSize: [34, 34],
+                iconAnchor: [17, 17],
+                popupAnchor: [0, -18]
+            });
+
+            destMarker = L.marker([lat, lng], { icon: destIcon })
+                .addTo(leafletMap)
+                .bindPopup(`<b>${escapeHTML(name || "Destination")}</b>`)
+                .openPopup();
+
+            setTimeout(() => {
+                if (leafletMap) leafletMap.invalidateSize();
+            }, 300);
+        }
+
+        function formatTravelTime(minutes) {
+            if (minutes == null) {
+                return "Time unavailable";
+            }
+
+            const totalMinutes = Math.max(0, Math.round(Number(minutes)));
+            if (totalMinutes < 60) {
+                return `${totalMinutes} min`;
+            }
+
+            const hours = Math.floor(totalMinutes / 60);
+            const remainingMinutes = totalMinutes % 60;
+            if (remainingMinutes === 0) {
+                return `${hours} hr`;
+            }
+            return `${hours} hr ${remainingMinutes} min`;
+        }
+
+        async function getDirections() {
+            if (!currentPlace) {
+                showToast("Place information is unavailable.");
+                return;
+            }
+
+            if (currentPlace.latitude == null || currentPlace.longitude == null) {
+                showToast("Destination coordinates are unavailable.");
+                return;
+            }
+
+            const destLat = parseFloat(currentPlace.latitude);
+            const destLng = parseFloat(currentPlace.longitude);
+
+            function executeRoute(userLat, userLng) {
+                userCoords = [userLat, userLng];
+
+                if (leafletMap) {
+                    if (userMarker) {
+                        userMarker.setLatLng([userLat, userLng]);
+                    } else {
+                        const userIcon = L.divIcon({
+                            className: "custom-user-pin",
+                            html: `<div style="background:#1976D2;width:18px;height:18px;border-radius:50%;border:3px solid #FFFDFC;box-shadow:0 0 0 5px rgba(25,118,210,0.35);"></div>`,
+                            iconSize: [18, 18],
+                            iconAnchor: [9, 9]
+                        });
+                        userMarker = L.marker([userLat, userLng], { icon: userIcon })
+                            .addTo(leafletMap)
+                            .bindPopup("Your Location");
+                    }
+                }
+
+                showToast("Calculating route...");
+
+                const params = new URLSearchParams({
+                    origin_lat: userLat,
+                    origin_lng: userLng,
+                    destination_lat: destLat,
+                    destination_lng: destLng
+                });
+
+                fetch(`${API_CONFIG.routeEndpoint}?${params.toString()}`)
+                    .then(r => r.json().catch(() => ({})))
+                    .then(data => {
+                        if (data.distance_km != null) {
+                            const dEl = document.getElementById("distance");
+                            if (dEl) dEl.innerText = `${Number(data.distance_km).toFixed(1)} km`;
+                        }
+
+                        if (data.duration_minutes != null) {
+                            const tEl = document.getElementById("travelTime");
+                            if (tEl) tEl.innerText = formatTravelTime(data.duration_minutes);
+                        }
+
+                        if (data.route && data.route.coordinates && leafletMap) {
+                            if (routePolyline) leafletMap.removeLayer(routePolyline);
+
+                            const latlngs = data.route.coordinates.map(pt => [pt[1], pt[0]]);
+                            routePolyline = L.polyline(latlngs, {
+                                color: "#5D1932",
+                                weight: 5,
+                                opacity: 0.85
+                            }).addTo(leafletMap);
+
+                            leafletMap.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
+                        }
+
+                        showToast("Route loaded on map.");
+                    })
+                    .catch(err => {
+                        console.error("Route error:", err);
+                        showToast("Unable to calculate route.");
+                    });
+            }
+
+            if (userCoords) {
+                executeRoute(userCoords[0], userCoords[1]);
+            } else if (navigator.geolocation) {
+                showToast("Getting your location...");
+                navigator.geolocation.getCurrentPosition(
+                    pos => executeRoute(pos.coords.latitude, pos.coords.longitude),
+                    err => {
+                        console.warn("Geolocation denied/failed. Using center fallback:", err);
+                        showToast("Using nearby hub location for route.");
+                        executeRoute(16.5062, 80.6480);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+                );
+            } else {
+                executeRoute(16.5062, 80.6480);
+            }
+        }
+
+        function zoomMap(direction) {
+            if (!leafletMap) return;
+            if (direction === "+") leafletMap.zoomIn();
+            else if (direction === "-") leafletMap.zoomOut();
+        }
+
+        function locateUser() {
+            if (!navigator.geolocation) {
+                showToast("Location services are not supported by this browser.");
+                return;
+            }
+
+            showToast("Locating...");
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    userCoords = [lat, lng];
+
+                    if (leafletMap) {
+                        if (userMarker) {
+                            userMarker.setLatLng([lat, lng]);
+                        } else {
+                            const userIcon = L.divIcon({
+                                className: "custom-user-pin",
+                                html: `<div style="background:#1976D2;width:18px;height:18px;border-radius:50%;border:3px solid #FFFDFC;box-shadow:0 0 0 5px rgba(25,118,210,0.35);"></div>`,
+                                iconSize: [18, 18],
+                                iconAnchor: [9, 9]
+                            });
+                            userMarker = L.marker([lat, lng], { icon: userIcon })
+                                .addTo(leafletMap)
+                                .bindPopup("Your Location");
+                        }
+                        leafletMap.setView([lat, lng], 14);
+                    }
+
+                    showToast("Your location has been detected.");
+                },
+                function(error) {
+                    console.error("Location error:", error);
+                    showToast("Location permission was not available.");
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+            );
+        }
+
+        /* =====================================================
+           TOAST
+        ===================================================== */
+
+        function showToast(message) {
+            let toast = document.getElementById("pageToast");
+
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "pageToast";
+                toast.className = "page-toast";
+                document.body.appendChild(toast);
+            }
+
+            toast.innerText = message;
+            toast.classList.add("show");
+
+            clearTimeout(window.__byondToastTimer);
+            window.__byondToastTimer = setTimeout(
+                () => toast.classList.remove("show"),
+                3000
+            );
+        }
+
+        /* =====================================================
+           SECURITY
+        ===================================================== */
+
+        function escapeHTML(text) {
+            const div = document.createElement("div");
+            div.textContent = text == null ? "" : String(text);
+            return div.innerHTML;
+        }
+
+
+        /* =====================================================
+           INITIALIZE
+        ===================================================== */
+
+        loadPlace();
+
+    </script>
+
+</body>
+</html>

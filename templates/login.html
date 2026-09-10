@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>BYOND Spot | Welcome</title>
+
+<style>
+    /* =========================================================
+       BYOND SPOT GREEN / TEAL COLOR PALETTE
+    ========================================================= */
+
+    :root {
+        --off-white: #F7F8F6;
+        --beige: #E8E4D9;
+        --champagne: #D9D6C8;
+
+        --teal: #159A9C;
+        --dark-teal: #0B6869;
+        --light-teal: #EAF6F5;
+
+        --charcoal: #2D3333;
+        --muted: #788181;
+        --white: #FFFFFF;
+
+        --border: #DDE5E3;
+
+        --success: #47745A;
+        --error: #A34848;
+    }
+
+
+    /* =========================================================
+       RESET
+    ========================================================= */
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+
+    body {
+        font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+
+        background: var(--off-white);
+        color: var(--charcoal);
+
+        min-height: 100vh;
+    }
+
+
+    /* =========================================================
+       MAIN CONTAINER
+    ========================================================= */
+
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+    }
+
+
+    /* =========================================================
+       LEFT WELCOME SECTION
+    ========================================================= */
+
+    .welcome-section {
+        width: 48%;
+
+        background: var(--teal);
+
+        position: relative;
+        overflow: hidden;
+
+        padding: 55px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        color: var(--white);
+    }
+
+
+    /* =========================================================
+       BRAND
+    ========================================================= */
+
+    .brand {
+        font-size: 27px;
+        font-weight: 700;
+        letter-spacing: -0.6px;
+
+        position: relative;
+        z-index: 2;
+    }
+
+    .brand span {
+        color: var(--beige);
+    }
+
+
+    /* =========================================================
+       WELCOME CONTENT
+    ========================================================= */
+
+    .welcome-content {
+        max-width: 500px;
+
+        position: relative;
+        z-index: 2;
+    }
+
+    .welcome-content .small-text {
+        font-size: 13px;
+        letter-spacing: 1.7px;
+
+        text-transform: uppercase;
+
+        margin-bottom: 18px;
+
+        color: var(--beige);
+
+        font-weight: 600;
+    }
+
+    .welcome-content h1 {
+        font-size: 52px;
+        line-height: 1.08;
+
+        margin-bottom: 22px;
+
+        letter-spacing: -1.7px;
+    }
+
+    .welcome-content h1 span {
+        color: var(--beige);
+    }
+
+    .welcome-content p {
+        font-size: 16px;
+        line-height: 1.75;
+
+        max-width: 450px;
+
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+
+    /* =========================================================
+       TRAVEL TAGS
+    ========================================================= */
+
+    .travel-tags {
+        display: flex;
+
+        gap: 10px;
+        flex-wrap: wrap;
+
+        margin-top: 30px;
+    }
+
+    .travel-tag {
+        border: 1px solid rgba(255, 255, 255, 0.25);
+
+        padding: 9px 15px;
+
+        border-radius: 30px;
+
+        font-size: 12px;
+
+        background: rgba(255, 255, 255, 0.07);
+
+        color: var(--white);
+    }
+
+
+    /* =========================================================
+       DECORATIVE SHAPES
+    ========================================================= */
+
+    .shape-one {
+        position: absolute;
+
+        width: 340px;
+        height: 340px;
+
+        border-radius: 50%;
+
+        background: rgba(232, 228, 217, 0.10);
+
+        right: -130px;
+        top: 80px;
+    }
+
+    .shape-two {
+        position: absolute;
+
+        width: 230px;
+        height: 230px;
+
+        border-radius: 50%;
+
+        background: rgba(217, 214, 200, 0.09);
+
+        bottom: -100px;
+        left: -70px;
+    }
+
+    .shape-three {
+        position: absolute;
+
+        width: 110px;
+        height: 110px;
+
+        border-radius: 50%;
+
+        border: 1px solid rgba(255, 255, 255, 0.10);
+
+        right: 18%;
+        bottom: 15%;
+    }
+
+
+    /* =========================================================
+       FOOTER
+    ========================================================= */
+
+    .footer-text {
+        font-size: 12px;
+
+        color: rgba(255, 255, 255, 0.6);
+
+        position: relative;
+        z-index: 2;
+    }
+
+
+    /* =========================================================
+       RIGHT FORM SECTION
+    ========================================================= */
+
+    .form-section {
+        width: 52%;
+
+        display: flex;
+
+        justify-content: center;
+        align-items: center;
+
+        padding: 40px;
+
+        background: var(--off-white);
+    }
+
+
+    /* =========================================================
+       AUTH CARD
+    ========================================================= */
+
+    .auth-card {
+        width: 100%;
+        max-width: 440px;
+
+        background: var(--white);
+
+        border: 1px solid rgba(221, 229, 227, 0.85);
+
+        border-radius: 20px;
+
+        padding: 42px;
+
+        box-shadow:
+            0 18px 50px rgba(21, 154, 156, 0.08);
+    }
+
+
+    /* =========================================================
+       TABS
+    ========================================================= */
+
+    .auth-tabs {
+        display: flex;
+
+        background: var(--light-teal);
+
+        padding: 5px;
+
+        border-radius: 12px;
+
+        margin-bottom: 30px;
+    }
+
+    .auth-tab {
+        flex: 1;
+
+        border: none;
+
+        background: transparent;
+
+        padding: 11px;
+
+        border-radius: 9px;
+
+        cursor: pointer;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        color: var(--muted);
+
+        transition: 0.25s ease;
+    }
+
+    .auth-tab:hover {
+        color: var(--teal);
+    }
+
+    .auth-tab.active {
+        background: var(--white);
+
+        color: var(--teal);
+
+        box-shadow:
+            0 3px 12px rgba(21, 154, 156, 0.08);
+    }
+
+
+    /* =========================================================
+       FORM HEADER
+    ========================================================= */
+
+    .form-header {
+        margin-bottom: 27px;
+    }
+
+    .form-header h2 {
+        font-size: 29px;
+
+        color: var(--charcoal);
+
+        margin-bottom: 9px;
+
+        letter-spacing: -0.5px;
+    }
+
+    .form-header p {
+        color: var(--muted);
+
+        font-size: 14px;
+
+        line-height: 1.6;
+    }
+
+
+    /* =========================================================
+       FORM GROUP
+    ========================================================= */
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        margin-bottom: 8px;
+
+        color: var(--charcoal);
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+
+        padding: 13px 14px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 10px;
+
+        outline: none;
+
+        font-size: 14px;
+
+        color: var(--charcoal);
+
+        background: var(--white);
+
+        transition: 0.2s ease;
+    }
+
+    .input-wrapper input::placeholder {
+        color: #A1AAA8;
+    }
+
+    .input-wrapper input:focus {
+        border-color: var(--teal);
+
+        box-shadow:
+            0 0 0 3px rgba(21, 154, 156, 0.10);
+    }
+
+
+    /* =========================================================
+       PASSWORD TOGGLE
+    ========================================================= */
+
+    .password-toggle {
+        position: absolute;
+
+        right: 13px;
+        top: 50%;
+
+        transform: translateY(-50%);
+
+        border: none;
+
+        background: transparent;
+
+        color: var(--muted);
+
+        cursor: pointer;
+
+        font-size: 12px;
+
+        font-weight: 600;
+    }
+
+    .password-toggle:hover {
+        color: var(--teal);
+    }
+
+
+    /* =========================================================
+       OPTIONS
+    ========================================================= */
+
+    .form-options {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        margin-bottom: 22px;
+
+        font-size: 12px;
+    }
+
+    .remember {
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        color: var(--muted);
+
+        cursor: pointer;
+    }
+
+    .remember input {
+        accent-color: var(--teal);
+
+        cursor: pointer;
+    }
+
+    .forgot-password {
+        color: var(--teal);
+
+        text-decoration: none;
+
+        font-weight: 600;
+    }
+
+    .forgot-password:hover {
+        color: var(--dark-teal);
+
+        text-decoration: underline;
+    }
+
+
+    /* =========================================================
+       SUBMIT BUTTON
+    ========================================================= */
+
+    .submit-button {
+        width: 100%;
+
+        padding: 14px;
+
+        border: none;
+
+        border-radius: 10px;
+
+        background: var(--teal);
+
+        color: var(--white);
+
+        font-size: 14px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition: 0.25s ease;
+
+        position: relative;
+    }
+
+    .submit-button:hover {
+        background: var(--dark-teal);
+
+        transform: translateY(-1px);
+    }
+
+    .submit-button:disabled {
+        opacity: 0.65;
+
+        cursor: not-allowed;
+
+        transform: none;
+    }
+
+
+    /* =========================================================
+       LOADING STATE
+    ========================================================= */
+
+    .submit-button.loading {
+        pointer-events: none;
+    }
+
+    .submit-button.loading::after {
+        content: "";
+
+        display: inline-block;
+
+        width: 13px;
+        height: 13px;
+
+        margin-left: 8px;
+
+        vertical-align: -2px;
+
+        border: 2px solid rgba(255, 255, 255, 0.4);
+
+        border-top-color: white;
+
+        border-radius: 50%;
+
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+
+    /* =========================================================
+       DIVIDER
+    ========================================================= */
+
+    .divider {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        margin: 25px 0;
+
+        color: var(--muted);
+
+        font-size: 11px;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: "";
+
+        height: 1px;
+
+        flex: 1;
+
+        background: var(--border);
+    }
+
+
+    /* =========================================================
+       NOTICE
+    ========================================================= */
+
+    .demo-notice {
+        text-align: center;
+
+        font-size: 11px;
+
+        color: var(--muted);
+
+        line-height: 1.6;
+    }
+
+    .demo-notice span {
+        color: var(--teal);
+
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       MESSAGE
+    ========================================================= */
+
+    .form-message {
+        display: none;
+
+        padding: 11px 13px;
+
+        border-radius: 9px;
+
+        margin-bottom: 18px;
+
+        font-size: 12px;
+
+        line-height: 1.5;
+    }
+
+    .form-message.show {
+        display: block;
+    }
+
+    .form-message.error {
+        background: #FFF2F2;
+
+        border: 1px solid #E9CACA;
+
+        color: var(--error);
+    }
+
+    .form-message.success {
+        background: #F1F8F3;
+
+        border: 1px solid #CFE1D4;
+
+        color: var(--success);
+    }
+
+
+    /* =========================================================
+       REGISTER FORM
+    ========================================================= */
+
+    #registerForm {
+        display: none;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE DESIGN
+    ========================================================= */
+
+    @media (max-width: 850px) {
+
+        .auth-container {
+            flex-direction: column;
+        }
+
+        .welcome-section {
+            width: 100%;
+
+            min-height: 390px;
+
+            padding: 35px;
+        }
+
+        .welcome-content h1 {
+            font-size: 40px;
+        }
+
+        .form-section {
+            width: 100%;
+
+            padding: 30px 20px;
+        }
+
+        .auth-card {
+            padding: 30px;
+
+            max-width: 470px;
+        }
+
+        .footer-text {
+            display: none;
+        }
+    }
+
+
+    @media (max-width: 500px) {
+
+        .welcome-section {
+            min-height: 350px;
+
+            padding: 28px;
+        }
+
+        .welcome-content h1 {
+            font-size: 33px;
+        }
+
+        .welcome-content p {
+            font-size: 14px;
+        }
+
+        .travel-tags {
+            margin-top: 22px;
+        }
+
+        .auth-card {
+            padding: 25px 20px;
+        }
+
+        .form-header h2 {
+            font-size: 26px;
+        }
+
+        .form-options {
+            align-items: flex-start;
+
+            gap: 12px;
+        }
+    }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="auth-container">
+
+<!-- =========================================================
+     LEFT WELCOME SECTION
+========================================================== -->
+
+<section class="welcome-section">
+
+    <div class="shape-one"></div>
+    <div class="shape-two"></div>
+    <div class="shape-three"></div>
+
+
+    <div class="brand">
+        BYOND<span> Spot</span>
+    </div>
+
+
+    <div class="welcome-content">
+
+        <div class="small-text">
+            Discover • Plan • Explore
+        </div>
+
+
+        <h1>
+            Your journey<br>
+            starts <span>here.</span>
+        </h1>
+
+
+        <p>
+            Discover remarkable places, plan smarter trips,
+            find hidden gems and experience destinations
+            beyond the usual tourist path.
+        </p>
+
+
+        <div class="travel-tags">
+
+            <div class="travel-tag">
+                Hidden Gems
+            </div>
+
+            <div class="travel-tag">
+                Smart Planning
+            </div>
+
+            <div class="travel-tag">
+                Local Experiences
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-text">
+        Travel smarter. Explore deeper. Experience more.
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     RIGHT FORM SECTION
+========================================================== -->
+
+<section class="form-section">
+
+    <div class="auth-card">
+
+
+        <!-- =================================================
+             TABS
+        ================================================== -->
+
+        <div class="auth-tabs">
+
+            <button
+                class="auth-tab active"
+                id="loginTab"
+                type="button"
+                onclick="showLogin()"
+            >
+                Login
+            </button>
+
+
+            <button
+                class="auth-tab"
+                id="registerTab"
+                type="button"
+                onclick="showRegister()"
+            >
+                Create Account
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             MESSAGE AREA
+        ================================================== -->
+
+        <div
+            class="form-message"
+            id="formMessage"
+            role="alert"
+        ></div>
+
+
+        <!-- =================================================
+             LOGIN FORM
+        ================================================== -->
+
+        <form
+            id="loginForm"
+            novalidate
+        >
+
+            <div class="form-header">
+
+                <h2>
+                    Welcome back
+                </h2>
+
+                <p>
+                    Sign in to continue planning your
+                    next journey.
+                </p>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="loginEmail">
+                    Email address
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="email"
+                        id="loginEmail"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="loginPassword">
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        onclick="togglePassword(
+                            'loginPassword',
+                            this
+                        )"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-options">
+
+                <label class="remember">
+
+                    <input
+                        type="checkbox"
+                        id="rememberMe"
+                    >
+
+                    Remember me
+
+                </label>
+
+
+                <a
+                    href="#"
+                    class="forgot-password"
+                    onclick="handleForgotPassword(event)"
+                >
+                    Forgot password?
+                </a>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="submit-button"
+                id="loginButton"
+            >
+                Sign In
+            </button>
+
+        </form>
+
+
+        <!-- =================================================
+             REGISTER FORM
+        ================================================== -->
+
+        <form
+            id="registerForm"
+            novalidate
+        >
+
+            <div class="form-header">
+
+                <h2>
+                    Create your account
+                </h2>
+
+                <p>
+                    Join BYOND Spot and start discovering
+                    better ways to travel.
+                </p>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="registerName">
+                    Full name
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="text"
+                        id="registerName"
+                        name="name"
+                        placeholder="Your full name"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="registerEmail">
+                    Email address
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="email"
+                        id="registerEmail"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="registerPassword">
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        name="password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        onclick="togglePassword(
+                            'registerPassword',
+                            this
+                        )"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirmPassword">
+                    Confirm password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirm_password"
+                        placeholder="Confirm your password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="submit-button"
+                id="registerButton"
+            >
+                Create Account
+            </button>
+
+        </form>
+
+
+        <!-- =================================================
+             FOOTER MESSAGE
+        ================================================== -->
+
+        <div class="divider">
+
+            <span>
+                Travel smarter
+            </span>
+
+        </div>
+
+
+        <div class="demo-notice">
+
+            Your travel preferences will help us
+
+            <span>
+                personalize your experience.
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+```
+
+</div>
+
+<script>
+
+    /* =========================================================
+       API CONFIGURATION
+    ========================================================== */
+
+    const API_CONFIG = {
+
+        login: "/api/auth/login",
+
+        register: "/api/auth/register",
+
+        me: "/api/auth/me",
+
+        logout: "/api/auth/logout"
+
+    };
+
+
+    /* =========================================================
+       FORM ELEMENTS
+    ========================================================== */
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const registerForm =
+        document.getElementById("registerForm");
+
+    const loginTab =
+        document.getElementById("loginTab");
+
+    const registerTab =
+        document.getElementById("registerTab");
+
+    const formMessage =
+        document.getElementById("formMessage");
+
+
+    /* =========================================================
+       SHOW LOGIN
+    ========================================================== */
+
+    function showLogin() {
+
+        loginForm.style.display = "block";
+
+        registerForm.style.display = "none";
+
+        loginTab.classList.add("active");
+
+        registerTab.classList.remove("active");
+
+        clearMessage();
+    }
+
+
+    /* =========================================================
+       SHOW REGISTER
+    ========================================================== */
+
+    function showRegister() {
+
+        loginForm.style.display = "none";
+
+        registerForm.style.display = "block";
+
+        loginTab.classList.remove("active");
+
+        registerTab.classList.add("active");
+
+        clearMessage();
+    }
+
+
+    /* =========================================================
+       PASSWORD VISIBILITY
+    ========================================================== */
+
+    function togglePassword(inputId, button) {
+
+        const input =
+            document.getElementById(inputId);
+
+        if (input.type === "password") {
+
+            input.type = "text";
+
+            button.textContent = "Hide";
+
+        } else {
+
+            input.type = "password";
+
+            button.textContent = "Show";
+        }
+    }
+
+
+    /* =========================================================
+       MESSAGE HANDLING
+    ========================================================== */
+
+    function showMessage(message, type = "error") {
+
+        formMessage.textContent = message;
+
+        formMessage.className =
+            "form-message show " + type;
+    }
+
+
+    function clearMessage() {
+
+        formMessage.textContent = "";
+
+        formMessage.className =
+            "form-message";
+    }
+
+
+    /* =========================================================
+       BUTTON LOADING STATE
+    ========================================================== */
+
+    function setButtonLoading(button, loading, text) {
+
+        if (loading) {
+
+            button.disabled = true;
+
+            button.classList.add("loading");
+
+            button.dataset.originalText =
+                button.textContent;
+
+            button.textContent = text;
+
+        } else {
+
+            button.disabled = false;
+
+            button.classList.remove("loading");
+
+            button.textContent =
+                button.dataset.originalText || text;
+        }
+    }
+
+
+    /* =========================================================
+       API REQUEST HELPER
+    ========================================================== */
+
+    async function apiRequest(url, options = {}) {
+
+        const response = await fetch(url, {
+
+            ...options,
+
+            headers: {
+
+                "Content-Type": "application/json",
+
+                ...(options.headers || {})
+            },
+
+            credentials: "include"
+        });
+
+
+        let data = null;
+
+
+        try {
+
+            data = await response.json();
+
+        } catch (error) {
+
+            data = null;
+        }
+
+
+        if (!response.ok) {
+
+            const message =
+                data?.detail ||
+                data?.message ||
+                data?.error ||
+                "Something went wrong. Please try again.";
+
+            throw new Error(message);
+        }
+
+
+        return data;
+    }
+
+
+    /* =========================================================
+       STORE AUTHENTICATION DATA
+    ========================================================== */
+
+    function storeAuthData(data) {
+
+        if (!data) {
+            return;
+        }
+
+
+        if (data.access_token) {
+
+            localStorage.setItem(
+                "byondSpotAccessToken",
+                data.access_token
+            );
+        }
+
+
+        if (data.token) {
+
+            localStorage.setItem(
+                "byondSpotAccessToken",
+                data.token
+            );
+        }
+
+
+        if (data.user) {
+
+            localStorage.setItem(
+                "byondSpotUser",
+                JSON.stringify(data.user)
+            );
+        }
+    }
+
+
+    /* =========================================================
+       LOGIN
+    ========================================================== */
+
+    loginForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            clearMessage();
+
+
+            const email =
+                document.getElementById(
+                    "loginEmail"
+                ).value.trim();
+
+
+            const password =
+                document.getElementById(
+                    "loginPassword"
+                ).value;
+
+
+            const rememberMe =
+                document.getElementById(
+                    "rememberMe"
+                ).checked;
+
+
+            if (!email || !password) {
+
+                showMessage(
+                    "Please enter your email and password."
+                );
+
+                return;
+            }
+
+
+            if (!isValidEmail(email)) {
+
+                showMessage(
+                    "Please enter a valid email address."
+                );
+
+                return;
+            }
+
+
+            const loginButton =
+                document.getElementById(
+                    "loginButton"
+                );
+
+
+            setButtonLoading(
+                loginButton,
+                true,
+                "Signing In"
+            );
+
+
+            try {
+
+                const data = await apiRequest(
+                    API_CONFIG.login,
+                    {
+                        method: "POST",
+
+                        body: JSON.stringify({
+
+                            email: email,
+
+                            password: password,
+
+                            remember_me: rememberMe
+
+                        })
+                    }
+                );
+
+
+                storeAuthData(data);
+
+
+                showMessage(
+                    "Login successful. Redirecting...",
+                    "success"
+                );
+
+
+                setTimeout(
+                    function() {
+
+                        window.location.href =
+                            "index.html";
+
+                    },
+                    500
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Login error:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message ||
+                    "Unable to login. Please try again."
+                );
+
+
+            } finally {
+
+                setButtonLoading(
+                    loginButton,
+                    false,
+                    "Sign In"
+                );
+            }
+        }
+    );
+
+
+    /* =========================================================
+       REGISTER
+    ========================================================== */
+
+    registerForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            clearMessage();
+
+
+            const name =
+                document.getElementById(
+                    "registerName"
+                ).value.trim();
+
+
+            const email =
+                document.getElementById(
+                    "registerEmail"
+                ).value.trim();
+
+
+            const password =
+                document.getElementById(
+                    "registerPassword"
+                ).value;
+
+
+            const confirmPassword =
+                document.getElementById(
+                    "confirmPassword"
+                ).value;
+
+
+            if (
+                !name ||
+                !email ||
+                !password ||
+                !confirmPassword
+            ) {
+
+                showMessage(
+                    "Please fill in all the required fields."
+                );
+
+                return;
+            }
+
+
+            if (name.length < 2) {
+
+                showMessage(
+                    "Please enter your full name."
+                );
+
+                return;
+            }
+
+
+            if (!isValidEmail(email)) {
+
+                showMessage(
+                    "Please enter a valid email address."
+                );
+
+                return;
+            }
+
+
+            if (password.length < 8) {
+
+                showMessage(
+                    "Password must contain at least 8 characters."
+                );
+
+                return;
+            }
+
+
+            if (password !== confirmPassword) {
+
+                showMessage(
+                    "Passwords do not match."
+                );
+
+                return;
+            }
+
+
+            const registerButton =
+                document.getElementById(
+                    "registerButton"
+                );
+
+
+            setButtonLoading(
+                registerButton,
+                true,
+                "Creating Account"
+            );
+
+
+            try {
+
+                const data = await apiRequest(
+                    API_CONFIG.register,
+                    {
+                        method: "POST",
+
+                        body: JSON.stringify({
+
+                            name: name,
+
+                            email: email,
+
+                            password: password
+
+                        })
+                    }
+                );
+
+
+  showMessage(
+    "Account created successfully. Please log in.",
+    "success"
+);
+
+setTimeout(function() {
+    showLogin();
+
+    document.getElementById(
+        "loginEmail"
+    ).value = email;
+
+    document.getElementById(
+        "loginPassword"
+    ).focus();
+
+}, 800);
+            } catch (error) {
+
+                console.error(
+                    "Registration error:",
+                    error
+                );
+
+
+                showMessage(
+                    error.message ||
+                    "Unable to create your account."
+                );
+
+
+            } finally {
+
+                setButtonLoading(
+                    registerButton,
+                    false,
+                    "Create Account"
+                );
+            }
+        }
+    );
+
+
+    /* =========================================================
+       EMAIL VALIDATION
+    ========================================================== */
+
+   function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+
+    /* =========================================================
+       FORGOT PASSWORD
+    ========================================================== */
+
+    function handleForgotPassword(event) {
+
+        event.preventDefault();
+
+        showMessage(
+            "Password recovery will be available once the reset service is connected."
+        );
+    }
+
+
+    /* =========================================================
+       CHECK EXISTING LOGIN
+    ========================================================== */
+
+    async function checkExistingSession() {
+
+        const token =
+            localStorage.getItem(
+                "byondSpotAccessToken"
+            );
+
+
+        if (!token) {
+            return;
+        }
+
+
+        try {
+
+            const data = await apiRequest(
+                API_CONFIG.me,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+
+            if (data) {
+
+                if (data.user) {
+
+                    localStorage.setItem(
+                        "byondSpotUser",
+                        JSON.stringify(data.user)
+                    );
+                }
+
+
+                window.location.href =
+                    "index.html";
+            }
+
+
+        } catch (error) {
+
+            localStorage.removeItem(
+                "byondSpotAccessToken"
+            );
+
+            localStorage.removeItem(
+                "byondSpotUser"
+            );
+        }
+    }
+
+
+    /* =========================================================
+       INITIALIZATION
+    ========================================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            showLogin();
+
+            /*
+             * Enable this after the Flask
+             * /api/auth/me endpoint is available.
+             *
+             * checkExistingSession();
+             */
+        }
+    );
+
+</script>
+
+</body>
+</html>

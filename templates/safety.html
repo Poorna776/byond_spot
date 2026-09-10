@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Center | BYOND Spot</title>
+
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #FAF9F6;
+            color: #263238;
+            min-height: 100vh;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        nav {
+            height: 72px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E7E5E1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+
+            color: #0B6869;
+
+            font-size: 23px;
+            font-weight: 800;
+
+            letter-spacing: -0.6px;
+        }
+
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #263238;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #159A9C;
+        }
+
+        .profile-button{width:40px;height:40px;border:0;border-radius:50%;background:#E8F6F5;color:#0B6869;font-weight:700}
+        
+        /* ================= PAGE ================= */
+
+        .page {
+            max-width: 1300px;
+            margin: auto;
+            padding: 35px 6% 70px;
+        }
+
+        .back-btn {
+            border: none;
+            background: transparent;
+            color: #0B6869;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 24px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            color: #159A9C;
+            transform: translateX(-3px);
+        }
+
+        /* ================= HEADER ================= */
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 34px;
+            color: #0B6869;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #718096;
+            font-size: 15px;
+        }
+
+        /* ================= SOS ================= */
+
+        .sos-section {
+            background: #FFFFFF;
+            border: 1px solid #E7E5E1;
+            border-radius: 20px;
+            padding: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 25px rgba(38, 50, 56, 0.05);
+        }
+
+        .sos-content {
+            max-width: 650px;
+        }
+
+        .sos-content h2 {
+            color: #263238;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .sos-content p {
+            color: #718096;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .sos-note {
+            display: inline-flex;
+            margin-top: 15px;
+            background: #FFF2EF;
+            color: #C75B49;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .sos-button {
+            min-width: 210px;
+            height: 58px;
+            border: none;
+            border-radius: 12px;
+            background: #F28C7A;
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 7px 18px rgba(242, 140, 122, 0.28);
+            transition: 0.25s;
+        }
+
+        .sos-button:hover {
+            transform: translateY(-2px);
+            background: #e97b69;
+        }
+
+        /* ================= GRID ================= */
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: #FFFFFF;
+            border: 1px solid #E7E5E1;
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .card h2 {
+            color: #0B6869;
+            font-size: 19px;
+            margin-bottom: 6px;
+        }
+
+        .card-description {
+            color: #718096;
+            font-size: 13px;
+            margin-bottom: 22px;
+        }
+
+        /* ================= NEARBY HELP ================= */
+
+        .help-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 17px 0;
+            border-bottom: 1px solid #E7E5E1;
+        }
+
+        .help-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .help-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .help-icon {
+            width: 43px;
+            height: 43px;
+            border-radius: 11px;
+            background: #E8F6F5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .help-info h3 {
+            font-size: 14px;
+            color: #263238;
+            margin-bottom: 4px;
+        }
+
+        .help-info p {
+            color: #718096;
+            font-size: 12px;
+        }
+
+        .direction-btn {
+            border: 1px solid #159A9C;
+            background: transparent;
+            color: #0B6869;
+            border-radius: 8px;
+            padding: 8px 11px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .direction-btn:hover {
+            background: #E8F6F5;
+        }
+
+        /* ================= CONTACTS ================= */
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #E7E5E1;
+        }
+
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-person {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #F3E7D3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0B6869;
+            font-weight: 700;
+        }
+
+        .contact-info h3 {
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .contact-info p {
+            color: #718096;
+            font-size: 12px;
+        }
+
+        .contact-actions {
+            display: flex;
+            gap: 7px;
+        }
+
+        .small-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #E8F6F5;
+            color: #0B6869;
+        }
+
+        /* ================= ALERTS ================= */
+
+        .alerts-card {
+            margin-top: 24px;
+        }
+
+        .alert {
+            display: flex;
+            gap: 14px;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 11px;
+            background: #FAF9F6;
+            border: 1px solid #E7E5E1;
+        }
+
+        .alert:last-child {
+            margin-bottom: 0;
+        }
+
+        .alert-icon {
+            font-size: 19px;
+        }
+
+        .alert-content h3 {
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #263238;
+        }
+
+        .alert-content p {
+            font-size: 12px;
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        .alert-time {
+            margin-top: 5px;
+            font-size: 10px;
+            color: #9AA4AD;
+        }
+
+        /* ================= LOCATION ================= */
+
+        .location-box {
+            margin-top: 24px;
+            background: #E8F6F5;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .location-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0B6869;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .location-status {
+            font-size: 12px;
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        #locationText {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #263238;
+            font-weight: 600;
+        }
+
+        .location-btn {
+            margin-top: 12px;
+            border: none;
+            background: #159A9C;
+            color: #FFFFFF;
+            border-radius: 8px;
+            padding: 9px 13px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ================= SOS ACTIVE ================= */
+
+        .sos-active {
+            display: none;
+            margin-bottom: 28px;
+            background: #FFF2EF;
+            border: 1px solid #F28C7A;
+            border-radius: 18px;
+            padding: 25px;
+        }
+
+        .sos-active-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .active-icon {
+            width: 45px;
+            height: 45px;
+            background: #F28C7A;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+        }
+
+        .sos-active h2 {
+            color: #C75B49;
+            font-size: 20px;
+        }
+
+        .sos-active p {
+            color: #718096;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .shared-with {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .shared-item {
+            background: #FFFFFF;
+            border-radius: 10px;
+            padding: 13px;
+            text-align: center;
+            font-size: 12px;
+            color: #263238;
+            border: 1px solid #E7E5E1;
+        }
+
+        .shared-item span {
+            display: block;
+            color: #159A9C;
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .cancel-sos {
+            border: none;
+            background: #FFFFFF;
+            color: #C75B49;
+            border: 1px solid #F28C7A;
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* ================= MODAL ================= */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(38, 50, 56, 0.48);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 430px;
+            background: #FFFFFF;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        }
+
+        .modal-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #FFF2EF;
+            color: #F28C7A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            margin-bottom: 18px;
+        }
+
+        .modal h2 {
+            color: #263238;
+            font-size: 21px;
+            margin-bottom: 9px;
+        }
+
+        .modal p {
+            color: #718096;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .modal-warning {
+            background: #FAF9F6;
+            border: 1px solid #E7E5E1;
+            padding: 13px;
+            border-radius: 10px;
+            color: #718096;
+            font-size: 11px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-cancel,
+        .modal-confirm {
+            flex: 1;
+            height: 43px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .modal-cancel {
+            border: 1px solid #E7E5E1;
+            background: #FFFFFF;
+            color: #718096;
+        }
+
+        .modal-confirm {
+            border: none;
+            background: #F28C7A;
+            color: #FFFFFF;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 900px) {
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sos-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sos-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            nav {
+                padding: 0 5%;
+            }
+
+            .nav-links {
+                gap: 13px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .page {
+                padding: 25px 5% 50px;
+            }
+
+            .page-header h1 {
+                font-size: 28px;
+            }
+
+            .sos-section {
+                padding: 24px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .help-item {
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .shared-with {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav>
+
+         <a href="index.html" class="logo"><img
+               src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+               alt="BYOND Spot"
+        ></a>
+<div class="nav-links"><a href="index.html#explore">Explore</a><a href="index.html#hidden-gems" class="active">Hidden Gems</a><a href="index.html#plan-trip">Plan Trip</a><a href="index.html#safety">Safety</a></div>
+<button class="profile-button" onclick="location.href='profile.html'">P</button>
+
+    </nav>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="page">
+
+        <button class="back-btn" onclick="window.history.back()">
+            ← Back
+        </button>
+
+
+        <!-- HEADER -->
+
+        <header class="page-header">
+            <h1>Safety Center</h1>
+            <p>
+                Stay connected, informed, and prepared throughout your journey.
+            </p>
+        </header>
+
+
+        <!-- ================= SOS ACTIVE STATUS ================= -->
+
+        <section class="sos-active" id="sosActive">
+
+            <div class="sos-active-header">
+
+                <div class="active-icon">
+                    🚨
+                </div>
+
+                <div>
+                    <h2>SOS Alert Active</h2>
+                    <p id="sosActiveText">
+                        Your emergency GPS location link has been generated. Share it immediately with your contacts or call 112.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="shared-with">
+
+                <div class="shared-item" onclick="shareSOS()" style="cursor:pointer;">
+                    <span>📲</span>
+                    Share SOS Alert
+                </div>
+
+                <div class="shared-item" onclick="window.location.href='tel:112'" style="cursor:pointer;">
+                    <span>📞</span>
+                    Call Emergency (112)
+                </div>
+
+                <div class="shared-item" onclick="copySOSLink()" style="cursor:pointer;">
+                    <span>📋</span>
+                    Copy GPS Link
+                </div>
+
+            </div>
+
+
+            <button class="cancel-sos" onclick="cancelSOS()">
+                Dismiss SOS
+            </button>
+
+        </section>
+
+
+        <!-- ================= SOS ================= -->
+
+        <section class="sos-section">
+
+            <div class="sos-content">
+
+                <h2>Emergency Assistance</h2>
+
+                <p>
+                    If you need immediate help, tap Send SOS. Your live GPS coordinates will be captured and formatted into an instant shareable emergency alert link.
+                </p>
+
+                <div class="sos-note">
+                    Location permission is required to detect your coordinates.
+                </div>
+
+            </div>
+
+            <button class="sos-button" onclick="openSOSModal()">
+                🚨 SEND SOS
+            </button>
+
+        </section>
+
+
+        <!-- ================= MAIN GRID ================= -->
+
+        <div class="main-grid">
+
+
+            <!-- ================= NEARBY HELP ================= -->
+
+            <section class="card">
+
+                <h2>Nearby Help</h2>
+
+                <p class="card-description">
+                    Emergency services and essential facilities near your current location.
+                </p>
+
+                <!-- LEAFLET SAFETY MAP -->
+                <div id="safetyMap" style="height: 280px; width: 100%; border-radius: 14px; border: 1px solid #E7E5E1; margin: 16px 0; overflow: hidden; position: relative;"></div>
+
+                <!-- DYNAMIC FACILITIES LIST -->
+                <div id="facilitiesList">
+                    <div style="padding: 20px; text-align: center; color: #718096; font-size: 13px;">
+                        Loading nearby emergency facilities...
+                    </div>
+                </div>
+
+
+                <!-- LOCATION -->
+
+                <div class="location-box">
+
+                    <div class="location-title">
+                        📍 My Current Location
+                    </div>
+
+                    <div class="location-status">
+                        Your location is used to identify nearby help and provide travel assistance.
+                    </div>
+
+                    <div id="locationText">
+                        Location not detected yet.
+                    </div>
+
+                    <button class="location-btn" onclick="getLocation()">
+                        Detect My Location
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= EMERGENCY CONTACTS ================= -->
+
+            <section class="card">
+
+                <h2>Emergency Contacts</h2>
+
+                <p class="card-description">
+                    People who can receive your emergency location.
+                </p>
+
+
+                <div class="contact-item">
+
+                    <div class="contact-person">
+
+                        <div class="contact-avatar">
+                            F
+                        </div>
+
+                        <div class="contact-info">
+                            <h3>Family Contact</h3>
+                            <p>+91 XXXXX 12345</p>
+                        </div>
+
+                    </div>
+
+                    <div class="contact-actions">
+                        <button class="small-btn"
+                                onclick="callContact('Family Contact')">
+                            Call
+                        </button>
+
+                        <button class="small-btn"
+                                onclick="shareWithContact('Family Contact')">
+                            Share
+                        </button>
+                    </div>
+
+                </div>
+
+
+                <div class="contact-item">
+
+                    <div class="contact-person">
+
+                        <div class="contact-avatar">
+                            F
+                        </div>
+
+                        <div class="contact-info">
+                            <h3>Travel Friend</h3>
+                            <p>+91 XXXXX 67890</p>
+                        </div>
+
+                    </div>
+
+                    <div class="contact-actions">
+                        <button class="small-btn"
+                                onclick="callContact('Travel Friend')">
+                            Call
+                        </button>
+
+                        <button class="small-btn"
+                                onclick="shareWithContact('Travel Friend')">
+                            Share
+                        </button>
+                    </div>
+
+                </div>
+
+
+                <div class="contact-item">
+
+                    <div class="contact-person">
+
+                        <div class="contact-avatar">
+                            C
+                        </div>
+
+                        <div class="contact-info">
+                            <h3>Travel Companion</h3>
+                            <p>+91 XXXXX 45678</p>
+                        </div>
+
+                    </div>
+
+                    <div class="contact-actions">
+                        <button class="small-btn"
+                                onclick="callContact('Travel Companion')">
+                            Call
+                        </button>
+
+                        <button class="small-btn"
+                                onclick="shareWithContact('Travel Companion')">
+                            Share
+                        </button>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- ================= TRAVEL ALERTS ================= -->
+
+        <section class="card alerts-card">
+
+            <h2>Travel Alerts</h2>
+
+            <p class="card-description">
+                Important updates that may affect your journey.
+            </p>
+
+
+            <div class="alert">
+
+                <div class="alert-icon">
+                    🌧️
+                </div>
+
+                <div class="alert-content">
+
+                    <h3>Weather Advisory</h3>
+
+                    <p>
+                        Weather conditions may affect travel around your current destination.
+                        Check conditions before starting your journey.
+                    </p>
+
+                    <div class="alert-time">
+                        Updated recently
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="alert">
+
+                <div class="alert-icon">
+                    🚦
+                </div>
+
+                <div class="alert-content">
+
+                    <h3>Traffic & Route Update</h3>
+
+                    <p>
+                        Increased traffic activity may affect travel time on some routes.
+                    </p>
+
+                    <div class="alert-time">
+                        Updated recently
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="alert">
+
+                <div class="alert-icon">
+                    ⚠️
+                </div>
+
+                <div class="alert-content">
+
+                    <h3>Tourism Activity Alert</h3>
+
+                    <p>
+                        Some popular attractions may currently have higher tourism activity.
+                        Consider visiting during a less busy period or exploring nearby alternatives.
+                    </p>
+
+                    <div class="alert-time">
+                        Estimated activity
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= SOS CONFIRMATION MODAL ================= -->
+
+    <div class="modal-overlay" id="sosModal">
+
+        <div class="modal">
+
+            <div class="modal-icon">
+                🚨
+            </div>
+
+            <h2>Send Emergency SOS?</h2>
+
+            <p>
+                Your current GPS location will be captured and formatted into an emergency alert link to share with your contacts or emergency responders.
+            </p>
+
+            <div class="modal-warning">
+                Note: This tool formats and shares your coordinates. It does not automatically dispatch local emergency units. For urgent life-threatening emergencies, dial 112 directly.
+            </div>
+
+            <div class="modal-buttons">
+
+                <button class="modal-cancel" onclick="closeSOSModal()">
+                    Cancel
+                </button>
+
+                <button class="modal-confirm" onclick="activateSOS()">
+                    Share SOS
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+        let currentLatitude = 16.5062;
+        let currentLongitude = 80.6480;
+        let hasUserLocation = false;
+        let safetyMap = null;
+        let userMarker = null;
+        let facilityMarkers = [];
+        let facilities = [];
+
+        function initSafetyMap() {
+            if (safetyMap) return;
+            safetyMap = L.map('safetyMap', { zoomControl: true }).setView([currentLatitude, currentLongitude], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(safetyMap);
+
+            loadFacilities();
+        }
+
+        async function loadFacilities() {
+            const listEl = document.getElementById("facilitiesList");
+            try {
+                const res = await fetch("/api/safety/facilities");
+                if (!res.ok) throw new Error("Failed to load facilities");
+                facilities = await res.json();
+
+                listEl.innerHTML = "";
+                const bounds = [];
+
+                facilities.forEach((f) => {
+                    const iconChar = f.type === 'hospital' ? '🏥' : f.type === 'police' ? '👮' : '💊';
+                    const typeLabel = f.type === 'hospital' ? 'Hospital' : f.type === 'police' ? 'Police Station' : 'Pharmacy';
+                    const distStr = f.distance_km ? `${f.distance_km} km away` : 'Nearby';
+
+                    if (f.latitude && f.longitude) {
+                        const pinIcon = L.divIcon({
+                            className: 'facility-pin',
+                            html: `<div style="font-size:22px;line-height:1;text-shadow:0 2px 5px rgba(0,0,0,0.3);">${iconChar}</div>`,
+                            iconSize: [26, 26],
+                            iconAnchor: [13, 26]
+                        });
+                        const marker = L.marker([f.latitude, f.longitude], { icon: pinIcon })
+                            .addTo(safetyMap)
+                            .bindPopup(`
+                                <strong>${f.name}</strong><br>
+                                <span style="font-size:12px;color:#718096;">${typeLabel} • ${f.location}</span><br>
+                                ${f.phone ? `<b>📞 ${f.phone}</b><br>` : ''}
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=${f.latitude},${f.longitude}" target="_blank" style="color:#0B6869;font-weight:bold;font-size:12px;">Get Directions →</a>
+                            `);
+                        facilityMarkers.push(marker);
+                        bounds.push([f.latitude, f.longitude]);
+                    }
+
+                    const item = document.createElement("div");
+                    item.className = "help-item";
+                    item.innerHTML = `
+                        <div class="help-left">
+                            <div class="help-icon">${iconChar}</div>
+                            <div class="help-info">
+                                <h3>${f.name}</h3>
+                                <p>${distStr} · ${f.location}${f.phone ? ' · ' + f.phone : ''}</p>
+                            </div>
+                        </div>
+                        <button class="direction-btn" onclick="openDirections(${f.latitude}, ${f.longitude})">
+                            Directions
+                        </button>
+                    `;
+                    listEl.appendChild(item);
+                });
+
+                if (bounds.length > 0 && safetyMap) {
+                    safetyMap.fitBounds(bounds, { padding: [30, 30] });
+                }
+            } catch (e) {
+                console.error("Facilities error:", e);
+                listEl.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #718096; font-size: 13px;">
+                        Unable to load nearby facilities. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function openDirections(lat, lng) {
+            if (lat && lng) {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, "_blank");
+            } else {
+                alert("Coordinates not available for this facility.");
+            }
+        }
+
+        function getLocation() {
+            const locationText = document.getElementById("locationText");
+            if (!navigator.geolocation) {
+                locationText.innerText = "Location services are not supported by this browser.";
+                return;
+            }
+            locationText.innerText = "Detecting your current location...";
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    currentLatitude = pos.coords.latitude;
+                    currentLongitude = pos.coords.longitude;
+                    hasUserLocation = true;
+                    locationText.innerText = `Latitude: ${currentLatitude.toFixed(5)} | Longitude: ${currentLongitude.toFixed(5)}`;
+
+                    if (safetyMap) {
+                        safetyMap.flyTo([currentLatitude, currentLongitude], 14);
+                        if (!userMarker) {
+                            const userIcon = L.divIcon({
+                                className: 'safety-user-marker',
+                                html: `<div style="width:16px;height:16px;border-radius:50%;background:#0B6869;border:3px solid #FFFFFF;box-shadow:0 0 0 6px rgba(11,104,105,0.3);"></div>`,
+                                iconSize: [22, 22],
+                                iconAnchor: [11, 11]
+                            });
+                            userMarker = L.marker([currentLatitude, currentLongitude], { icon: userIcon })
+                                .addTo(safetyMap)
+                                .bindPopup("<b>Your Current Position</b>");
+                        } else {
+                            userMarker.setLatLng([currentLatitude, currentLongitude]);
+                        }
+                        userMarker.openPopup();
+                    }
+                },
+                function(err) {
+                    locationText.innerText = "Unable to access location. Please check browser permissions.";
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        function openSOSModal() {
+            document.getElementById("sosModal").style.display = "flex";
+        }
+
+        function closeSOSModal() {
+            document.getElementById("sosModal").style.display = "none";
+        }
+
+        function generateSOSPayload() {
+            const mapsUrl = `https://www.google.com/maps?q=${currentLatitude},${currentLongitude}`;
+            const sosMsg = `EMERGENCY SOS: I need help! My GPS location is: ${mapsUrl} (Lat: ${currentLatitude.toFixed(5)}, Lng: ${currentLongitude.toFixed(5)}). Sent via BYOND Spot.`;
+            return { mapsUrl, sosMsg };
+        }
+
+        async function activateSOS() {
+            closeSOSModal();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async function(pos) {
+                        currentLatitude = pos.coords.latitude;
+                        currentLongitude = pos.coords.longitude;
+                        hasUserLocation = true;
+                        handleSOSWithCoordinates();
+                    },
+                    function(err) {
+                        handleSOSWithCoordinates();
+                    },
+                    { enableHighAccuracy: true, timeout: 8000 }
+                );
+            } else {
+                handleSOSWithCoordinates();
+            }
+        }
+
+        async function handleSOSWithCoordinates() {
+            const activeSection = document.getElementById("sosActive");
+            activeSection.style.display = "block";
+            activeSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+            const { mapsUrl, sosMsg } = generateSOSPayload();
+
+            const statusMsg = document.getElementById("sosActiveText");
+            if (statusMsg) {
+                statusMsg.innerHTML = `GPS coordinates generated: <a href="${mapsUrl}" target="_blank" style="color:#F28C7A;font-weight:bold;text-decoration:underline;">View GPS Location</a>.<br>Share with your trusted contacts or dial 112 directly.`;
+            }
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: "EMERGENCY SOS - BYOND Spot",
+                        text: sosMsg,
+                        url: mapsUrl
+                    });
+                } catch (err) {
+                    copyToClipboardFallback(sosMsg);
+                }
+            } else {
+                copyToClipboardFallback(sosMsg);
+            }
+        }
+
+        function copyToClipboardFallback(msg) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(msg).then(() => {
+                    alert("Emergency SOS message copied to clipboard!\n\n" + msg + "\n\nSend this to your contacts or call 112 directly.");
+                }).catch(() => {
+                    alert("Your emergency message:\n\n" + msg);
+                });
+            } else {
+                alert("Your emergency message:\n\n" + msg);
+            }
+        }
+
+        function shareSOS() {
+            const { mapsUrl, sosMsg } = generateSOSPayload();
+            if (navigator.share) {
+                navigator.share({
+                    title: "EMERGENCY SOS - BYOND Spot",
+                    text: sosMsg,
+                    url: mapsUrl
+                }).catch(() => {});
+            } else {
+                copyToClipboardFallback(sosMsg);
+            }
+        }
+
+        function copySOSLink() {
+            const { sosMsg } = generateSOSPayload();
+            copyToClipboardFallback(sosMsg);
+        }
+
+        function cancelSOS() {
+            document.getElementById("sosActive").style.display = "none";
+            alert("SOS alert dismissed.");
+        }
+
+        function callContact(name) {
+            window.location.href = "tel:112";
+        }
+
+        function shareWithContact(name) {
+            const { mapsUrl, sosMsg } = generateSOSPayload();
+            const text = `Hi ${name}, sharing my location via BYOND Spot: ${mapsUrl}`;
+            if (navigator.share) {
+                navigator.share({ title: "My Location", text: text, url: mapsUrl }).catch(() => {});
+            } else {
+                copyToClipboardFallback(text);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initSafetyMap();
+        });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Places to Visit | BYOND Spot</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #F7F3ED;
+            color: #3A3030;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+            height: 72px;
+            background: #FFFDFC;
+            border-bottom: 1px solid #E5DDD3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #4D403F;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #6E1D38;
+        }
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: #EDE2D7;
+            color: #5D1932;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+
+        /* ================= PAGE HEADER ================= */
+
+        .page-header {
+            padding: 52px 6% 25px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #81756D;
+            font-size: 14px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: 0.2s;
+        }
+
+        .back-link:hover {
+            color: #6E1D38;
+        }
+
+        .page-header h1 {
+            font-size: 38px;
+            color: #5D1932;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: #756B65;
+            font-size: 16px;
+            max-width: 680px;
+            line-height: 1.6;
+        }
+
+
+        /* ================= SEARCH ================= */
+
+        .search-section {
+            padding: 10px 6% 25px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .search-box {
+            background: #FFFDFC;
+            border: 1px solid #E5DDD3;
+            border-radius: 14px;
+            padding: 15px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 700px;
+            transition: 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #A77A6C;
+            box-shadow: 0 0 0 3px rgba(110, 29, 56, 0.07);
+        }
+
+        .search-box span {
+            font-size: 20px;
+            color: #81756D;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            color: #3A3030;
+            background: transparent;
+        }
+
+        .search-box input::placeholder {
+            color: #9A9089;
+        }
+
+
+        /* ================= FILTERS ================= */
+
+        .filters {
+            padding: 0 6% 35px;
+            max-width: 1400px;
+            margin: auto;
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            border: 1px solid #DED3C8;
+            background: #FFFDFC;
+            color: #756B65;
+            padding: 9px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: #A77A6C;
+            color: #6E1D38;
+        }
+
+        .filter-btn.active {
+            background: #6E1D38;
+            color: #FFFDFC;
+            border-color: #6E1D38;
+        }
+
+
+        /* ================= MAIN CONTENT ================= */
+
+        .content {
+            max-width: 1400px;
+            margin: auto;
+            padding: 0 6% 70px;
+        }
+
+        .section-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-top h2 {
+            font-size: 22px;
+            color: #4D172B;
+        }
+
+        .result-count {
+            color: #81756D;
+            font-size: 13px;
+        }
+
+
+        /* ================= PLACES GRID ================= */
+
+        .places-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+
+        /* ================= PLACE CARD ================= */
+
+        .place-card {
+            background: #FFFDFC;
+            border: 1px solid #E5DDD3;
+            border-radius: 18px;
+            overflow: hidden;
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+        }
+
+        .place-card:hover {
+            transform: translateY(-4px);
+            border-color: #CDB9AE;
+            box-shadow: 0 14px 32px rgba(77, 23, 43, 0.08);
+        }
+
+
+        /* ================= PLACE IMAGE ================= */
+
+        .place-image {
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+            background: #EFE7DE;
+        }
+
+        .place-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.35s ease;
+        }
+
+        .place-card:hover .place-image img {
+            transform: scale(1.035);
+        }
+
+
+        /* ================= IMAGE CATEGORY ================= */
+
+        .category-badge {
+            position: absolute;
+            top: 13px;
+            left: 13px;
+
+            padding: 7px 11px;
+
+            border-radius: 20px;
+
+            background: rgba(255, 253, 250, 0.94);
+            color: #5D1932;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            letter-spacing: 0.2px;
+
+            box-shadow: 0 4px 12px rgba(40, 20, 20, 0.08);
+        }
+
+
+        /* ================= IMAGE MISSING ================= */
+
+        .image-missing {
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #EFE7DE,
+                    #E7DDD3
+                );
+
+            color: #81756D;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+
+        /* ================= PLACE INFO ================= */
+
+        .place-info {
+            padding: 19px 19px 18px;
+        }
+
+        .place-info h3 {
+            font-size: 18px;
+            line-height: 1.35;
+            color: #3A3030;
+            margin-bottom: 7px;
+        }
+
+
+        /* ================= LOCATION ================= */
+
+        .location {
+            color: #81756D;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+        /* ================= TAGS ================= */
+
+        .tags {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .tag {
+            background: #F3EBE3;
+            color: #6E1D38;
+
+            padding: 5px 9px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+
+        /* ================= CARD BOTTOM ================= */
+
+        .place-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+
+            padding-top: 13px;
+
+            border-top: 1px solid #EEE6DE;
+        }
+
+
+        /* ================= DISTANCE ================= */
+
+        .distance {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+
+            color: #756B65;
+
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .distance-icon {
+            width: 16px;
+            height: 16px;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #F0E5DA;
+            color: #6E1D38;
+
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+
+        /* ================= VIEW DETAILS ================= */
+
+        .view-details {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+
+            text-decoration: none;
+
+            color: #6E1D38;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            transition: 0.2s;
+        }
+
+        .view-details:hover {
+            color: #4D172B;
+            transform: translateX(2px);
+        }
+
+
+        /* ================= NO RESULTS ================= */
+
+        .no-results {
+            display: none;
+
+            text-align: center;
+
+            padding: 60px 20px;
+
+            background: #FFFDFC;
+
+            border: 1px solid #E5DDD3;
+
+            border-radius: 16px;
+        }
+
+        .no-results h3 {
+            color: #4D172B;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .no-results p {
+            color: #81756D;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .clear-btn {
+            border: none;
+
+            background: #6E1D38;
+            color: #FFFDFC;
+
+            padding: 9px 17px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .clear-btn:hover {
+            background: #4D172B;
+        }
+
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1000px) {
+
+            .places-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+
+        @media (max-width: 700px) {
+
+            .navbar {
+                padding: 0 4%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .page-header,
+            .search-section,
+            .filters,
+            .content {
+                padding-left: 4%;
+                padding-right: 4%;
+            }
+
+            .page-header {
+                padding-top: 38px;
+            }
+
+            .page-header h1 {
+                font-size: 30px;
+            }
+
+            .places-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-top {
+                align-items: flex-start;
+                gap: 10px;
+                flex-direction: column;
+            }
+
+            .place-image {
+                height: 215px;
+            }
+        }
+
+        /* ================= MAP CONTAINER ================= */
+
+        .places-map-container {
+            max-width: 1400px;
+            margin: 10px auto 30px;
+            padding: 0 6%;
+        }
+
+        #placesMap {
+            height: 380px;
+            width: 100%;
+            border-radius: 18px;
+            border: 1px solid #E5DDD3;
+            box-shadow: 0 6px 20px rgba(77,23,43,0.05);
+            z-index: 1;
+        }
+
+        .place-card.highlighted {
+            border-color: #5D1932;
+            box-shadow: 0 0 0 3px rgba(93,25,50,0.25), 0 10px 30px rgba(77,23,43,0.12);
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar">
+
+        <a href="index.html" class="logo">
+            <img
+                src="{{ url_for('static', filename='images/byond-spot-logo.png') }}"
+                alt="BYOND Spot"
+            >
+        </a>
+
+        <div class="nav-links">
+
+            <a href="index.html#explore">
+                Explore
+            </a>
+
+            <a href="index.html#hidden-gems" class="active">
+                Hidden Gems
+            </a>
+
+            <a href="index.html#plan-trip">
+                Plan Trip
+            </a>
+
+            <a href="index.html#safety">
+                Safety
+            </a>
+
+        </div>
+
+        <button
+            class="profile-button"
+            onclick="location.href='profile.html'"
+        >
+            P
+        </button>
+
+    </nav>
+
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <header class="page-header">
+
+        <a href="index.html" class="back-link">
+            ← Back to Explore
+        </a>
+
+        <h1>
+            Discover Places
+        </h1>
+
+        <p>
+            Discover hidden gems, cultural landmarks and memorable
+            destinations.
+        </p>
+
+    </header>
+
+
+    <!-- ================= SEARCH ================= -->
+
+    <section class="search-section">
+
+        <div class="search-box">
+
+            <span>⌕</span>
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Ask BYOND Spot about a place..."
+                onkeydown="handleSearchKey(event)"
+            >
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= FILTERS ================= -->
+
+    <div class="filters">
+
+        <button
+            class="filter-btn active"
+            onclick="filterPlaces('all', this)"
+        >
+            All
+        </button>
+
+        <button
+            class="filter-btn"
+            onclick="filterPlaces('history', this)"
+        >
+            History
+        </button>
+
+        <button
+            class="filter-btn"
+            onclick="filterPlaces('nature', this)"
+        >
+            Nature
+        </button>
+
+        <button
+            class="filter-btn"
+            onclick="filterPlaces('culture', this)"
+        >
+            Culture
+        </button>
+
+        <button
+            class="filter-btn"
+            onclick="filterPlaces('spiritual', this)"
+        >
+            Spiritual
+        </button>
+
+        <button
+            class="filter-btn"
+            onclick="filterPlaces('adventure', this)"
+        >
+            Adventure
+        </button>
+
+    </div>
+
+
+    <!-- ================= INTERACTIVE MAP ================= -->
+
+    <section class="places-map-container">
+        <div id="placesMap"></div>
+    </section>
+
+
+    <!-- ================= PLACES ================= -->
+
+    <main class="content">
+
+        <div class="section-top">
+
+            <h2>
+                Discover Places
+            </h2>
+
+            <span
+                class="result-count"
+                id="resultCount"
+            >
+                Search for a place
+            </span>
+
+        </div>
+
+
+        <div
+            class="places-grid"
+            id="placesGrid"
+        >
+        </div>
+
+
+        <!-- ================= NO RESULTS ================= -->
+
+        <div
+            class="no-results"
+            id="noResults"
+        >
+
+            <h3>
+                No places found
+            </h3>
+
+            <p>
+                We couldn't find a destination matching your search.
+                Try another place or category.
+            </p>
+
+            <button
+                class="clear-btn"
+                onclick="clearSearch()"
+            >
+                Clear Search
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+
+        /* =========================
+           API CONFIGURATION
+        ========================= */
+
+        const API_CONFIG = {
+            placesSearch: "/api/places/search"
+        };
+
+        let selectedCategory = "all";
+        let allPlaces = [];
+        let placesMap = null;
+        let placesMarkers = [];
+
+
+        /* =========================
+           CREATE DETAILS URL
+        ========================= */
+
+        function createDetailsUrl(place) {
+
+            const placeId =
+                place.osm_id ||
+                place.id;
+
+            if (!placeId) {
+
+                return "#";
+
+            }
+
+            return `place-details.html?place=${encodeURIComponent(placeId)}`;
+        }
+
+
+        /* =========================
+           ESCAPE HTML
+        ========================= */
+
+        function escapeHTML(value) {
+
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        /* =========================
+           CATEGORY LABEL
+        ========================= */
+
+        function getCategoryLabel(place) {
+
+            const category =
+                (
+                    place.ai_category ||
+                    place.category ||
+                    "culture"
+                ).toLowerCase();
+
+            const labels = {
+
+                history: "History",
+
+                nature: "Nature",
+
+                culture: "Culture",
+
+                spiritual: "Spiritual",
+
+                adventure: "Adventure",
+
+                tourism: "Tourism",
+
+                historic: "History",
+
+                natural: "Nature",
+
+                leisure: "Leisure",
+
+                amenity: "Local"
+
+            };
+
+            return labels[category] ||
+                category.charAt(0).toUpperCase() +
+                category.slice(1);
+        }
+
+
+        /* =========================
+           TAGS
+        ========================= */
+
+        function getTags(place) {
+
+            const aiCategory =
+                (
+                    place.ai_category ||
+                    ""
+                ).toLowerCase();
+
+            const osmCategory =
+                (
+                    place.category ||
+                    ""
+                ).toLowerCase();
+
+            const tags = [];
+
+
+            if (aiCategory) {
+
+                const categoryLabels = {
+
+                    history: "History",
+                    nature: "Nature",
+                    culture: "Culture",
+                    spiritual: "Spiritual",
+                    adventure: "Adventure"
+
+                };
+
+                if (categoryLabels[aiCategory]) {
+
+                    tags.push(
+                        categoryLabels[aiCategory]
+                    );
+
+                }
+
+            }
+
+
+            if (
+                osmCategory === "historic"
+                &&
+                !tags.includes("History")
+            ) {
+
+                tags.push("Heritage");
+
+            }
+
+            else if (
+                osmCategory === "natural"
+                &&
+                !tags.includes("Nature")
+            ) {
+
+                tags.push("Nature");
+
+            }
+
+            else if (
+                osmCategory === "tourism"
+                &&
+                !tags.includes("Tourism")
+            ) {
+
+                tags.push("Tourism");
+
+            }
+
+            else if (
+                osmCategory === "leisure"
+                &&
+                !tags.includes("Leisure")
+            ) {
+
+                tags.push("Leisure");
+
+            }
+
+            else if (
+                osmCategory === "amenity"
+                &&
+                !tags.includes("Local")
+            ) {
+
+                tags.push("Local");
+
+            }
+
+
+            if (tags.length === 0) {
+
+                tags.push("Travel");
+
+            }
+
+
+            return [
+                ...new Set(tags)
+            ].slice(0, 2);
+        }
+
+
+        /* =========================
+           MAP INTEGRATION
+        ========================= */
+
+        function updatePlacesMap(places) {
+            const mapEl = document.getElementById("placesMap");
+            if (!mapEl || !window.L) return;
+
+            if (!placesMap) {
+                placesMap = L.map("placesMap", { scrollWheelZoom: false }).setView([16.5062, 80.6480], 10);
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(placesMap);
+            }
+
+            placesMarkers.forEach(m => placesMap.removeLayer(m));
+            placesMarkers = [];
+
+            const bounds = [];
+
+            (places || []).forEach((place, idx) => {
+                if (place.latitude != null && place.longitude != null) {
+                    const lat = parseFloat(place.latitude);
+                    const lng = parseFloat(place.longitude);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        const markerIcon = L.divIcon({
+                            className: "places-map-pin",
+                            html: `<div style="background:#5D1932;color:#FFFDFC;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #FFFDFC;box-shadow:0 3px 10px rgba(93,25,50,0.4);font-size:12px;font-weight:700;cursor:pointer;">${idx + 1}</div>`,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15],
+                            popupAnchor: [0, -15]
+                        });
+
+                        const detailsUrl = createDetailsUrl(place);
+                        const marker = L.marker([lat, lng], { icon: markerIcon }).addTo(placesMap);
+
+                        const popupContent = `
+                            <div style="font-family: Arial, sans-serif; font-size: 13px; min-width: 170px;">
+                                <strong style="color: #5D1932; font-size: 14px;">${escapeHTML(place.name)}</strong><br>
+                                <span style="color: #81756D; font-size: 11px;">📍 ${escapeHTML(place.location || '')}</span><br>
+                                <div style="margin-top: 8px;">
+                                    <a href="${detailsUrl}" style="color: #5D1932; font-weight: bold; text-decoration: none;">View Details →</a>
+                                </div>
+                            </div>
+                        `;
+                        marker.bindPopup(popupContent);
+
+                        marker.on("click", () => {
+                            const cardId = `place-card-${place.id || place.osm_id || idx}`;
+                            const cardEl = document.getElementById(cardId);
+                            if (cardEl) {
+                                document.querySelectorAll(".place-card").forEach(c => c.classList.remove("highlighted"));
+                                cardEl.classList.add("highlighted");
+                                cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                        });
+
+                        placesMarkers.push(marker);
+                        bounds.push([lat, lng]);
+                    }
+                }
+            });
+
+            if (bounds.length > 0) {
+                placesMap.fitBounds(bounds, { padding: [40, 40] });
+            }
+
+            setTimeout(() => {
+                if (placesMap) placesMap.invalidateSize();
+            }, 300);
+        }
+
+
+        /* =========================
+           RENDER PLACES
+        ========================= */
+
+        function renderPlaces(places) {
+
+            const placesGrid =
+                document.getElementById("placesGrid");
+
+            const noResults =
+                document.getElementById("noResults");
+
+            const resultCount =
+                document.getElementById("resultCount");
+
+
+            placesGrid.innerHTML = "";
+
+
+            if (
+                !places ||
+                places.length === 0
+            ) {
+
+                resultCount.innerText =
+                    "0 places";
+
+                noResults.style.display =
+                    "block";
+
+                updatePlacesMap([]);
+                return;
+            }
+
+
+            noResults.style.display =
+                "none";
+
+
+            resultCount.innerText =
+                `${places.length} ${
+                    places.length === 1
+                        ? "place"
+                        : "places"
+                }`;
+
+
+            places.forEach((place, idx) => {
+
+                const categoryLabel =
+                    getCategoryLabel(place);
+
+
+                const image =
+                    place.image;
+
+
+                const tags =
+                    getTags(place);
+
+
+                const tagsHTML =
+                    tags
+                        .map(tag => `
+                            <span class="tag">
+                                ${escapeHTML(tag)}
+                            </span>
+                        `)
+                        .join("");
+
+
+                const distance =
+                    place.distance_km != null
+                        ? `${place.distance_km} km away`
+                        : "Distance unavailable";
+
+
+                const detailsUrl =
+                    createDetailsUrl(place);
+
+
+                const card =
+                    document.createElement("article");
+
+
+                card.className =
+                    "place-card";
+
+                card.id =
+                    `place-card-${place.id || place.osm_id || idx}`;
+
+                card.style.cursor =
+                    "pointer";
+
+
+                /* ================= IMAGE ================= */
+
+                const imageHTML = image
+
+                    ? `
+                        <img
+                            src="${escapeHTML(image)}"
+                            alt="${escapeHTML(
+                                place.name ||
+                                "Place"
+                            )}"
+                            loading="lazy"
+                            onerror="
+                                this.style.display='none';
+                                this.parentElement
+                                    .querySelector(
+                                        '.image-missing'
+                                    )
+                                    .style.display='flex';
+                            "
+                        >
+
+                        <div
+                            class="image-missing"
+                            style="display:none;"
+                        >
+                            Image unavailable
+                        </div>
+                    `
+
+                    : `
+                        <div class="image-missing">
+                            Image unavailable
+                        </div>
+                    `;
+
+
+                /* ================= CARD ================= */
+
+                card.innerHTML = `
+
+                    <div class="place-image">
+
+                        ${imageHTML}
+
+                        <span class="category-badge">
+                            ${escapeHTML(
+                                categoryLabel
+                            )}
+                        </span>
+
+                    </div>
+
+
+                    <div class="place-info">
+
+                        <h3>
+                            ${escapeHTML(
+                                place.name ||
+                                "Unnamed Place"
+                            )}
+                        </h3>
+
+
+                        <div class="location">
+                            ${escapeHTML(
+                                place.location ||
+                                "Location unavailable"
+                            )}
+                        </div>
+
+
+                        <div class="tags">
+                            ${tagsHTML}
+                        </div>
+
+
+                        <div class="place-bottom">
+
+                            <span class="distance">
+
+                                <span class="distance-icon">
+                                    •
+                                </span>
+
+                                ${escapeHTML(
+                                    distance
+                                )}
+
+                            </span>
+
+
+                            ${
+                                detailsUrl === "#"
+
+                                ? `
+                                    <span
+                                        class="view-details"
+                                        style="opacity:0.5;"
+                                    >
+                                        Details unavailable
+                                    </span>
+                                `
+
+                                : `
+                                    <a
+                                        href="${detailsUrl}"
+                                        class="view-details"
+                                    >
+                                        View Details
+                                        →
+                                    </a>
+                                `
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+                card.addEventListener("click", (e) => {
+                    if (e.target.tagName !== "A" && place.latitude != null && place.longitude != null) {
+                        const lat = parseFloat(place.latitude);
+                        const lng = parseFloat(place.longitude);
+                        if (!isNaN(lat) && !isNaN(lng) && placesMap) {
+                            placesMap.setView([lat, lng], 13);
+                            document.querySelectorAll(".place-card").forEach(c => c.classList.remove("highlighted"));
+                            card.classList.add("highlighted");
+                            const m = placesMarkers[idx];
+                            if (m) m.openPopup();
+                        }
+                    }
+                });
+
+                placesGrid.appendChild(card);
+
+            });
+
+            updatePlacesMap(places);
+
+        }
+
+
+        /* =========================
+           LOAD PLACES
+        ========================= */
+
+        async function loadPlaces() {
+
+            const searchInput =
+                document.getElementById(
+                    "searchInput"
+                );
+
+
+            const search =
+                searchInput ? searchInput.value.trim() : "";
+
+
+            if (!search) {
+
+                document.getElementById(
+                    "resultCount"
+                ).innerText =
+                    "Featured Destinations";
+
+            } else {
+
+                document.getElementById(
+                    "resultCount"
+                ).innerText =
+                    "BYOND AI is discovering places...";
+
+            }
+
+            document.getElementById(
+                "noResults"
+            ).style.display =
+                "none";
+
+
+            try {
+
+                const params =
+                    new URLSearchParams();
+
+
+                if (search) {
+                    params.append(
+                        "q",
+                        search
+                    );
+                }
+
+
+                if (
+                    selectedCategory !== "all"
+                ) {
+
+                    params.append(
+                        "category",
+                        selectedCategory
+                    );
+
+                }
+
+
+                console.log(
+                    "Searching:",
+                    `${API_CONFIG.placesSearch}?${params.toString()}`
+                );
+
+
+                const response =
+                    await fetch(
+                        `${API_CONFIG.placesSearch}?${params.toString()}`
+                    );
+
+
+                const data =
+                    await response.json().catch(() => ({}));
+
+
+                console.log(
+                    "AI Places Response:",
+                    data
+                );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error ||
+                        "Unable to discover places"
+                    );
+
+                }
+
+
+                allPlaces =
+                    data.places || [];
+
+
+                renderPlaces(
+                    allPlaces
+                );
+
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "AI Places Search Error:",
+                    error
+                );
+
+
+                document.getElementById(
+                    "placesGrid"
+                ).innerHTML = "";
+
+
+                document.getElementById(
+                    "resultCount"
+                ).innerText =
+                    "Unable to discover places";
+
+
+                document.getElementById(
+                    "noResults"
+                ).style.display =
+                    "block";
+
+                updatePlacesMap([]);
+
+            }
+
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        function handleSearchKey(event) {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+                loadPlaces();
+
+            }
+
+        }
+
+
+        /* =========================
+           FILTER
+        ========================= */
+
+        function filterPlaces(
+            category,
+            button
+        ) {
+
+            selectedCategory =
+                category;
+
+
+            document
+                .querySelectorAll(
+                    ".filter-btn"
+                )
+                .forEach(btn => {
+
+                    btn.classList.remove(
+                        "active"
+                    );
+
+                });
+
+
+            button.classList.add(
+                "active"
+            );
+
+
+            if (!allPlaces.length) {
+
+                return;
+
+            }
+
+
+            if (
+                category === "all"
+            ) {
+
+                renderPlaces(
+                    allPlaces
+                );
+
+                return;
+
+            }
+
+
+            const filteredPlaces =
+                allPlaces.filter(
+                    place => {
+
+                        const placeCategory =
+                            (
+                                place.ai_category ||
+                                ""
+                            ).toLowerCase();
+
+
+                        return (
+                            placeCategory ===
+                            category
+                        );
+
+                    }
+                );
+
+
+            renderPlaces(
+                filteredPlaces
+            );
+
+        }
+
+
+        /* =========================
+           CLEAR SEARCH
+        ========================= */
+
+        function clearSearch() {
+
+            document.getElementById(
+                "searchInput"
+            ).value = "";
+
+
+            selectedCategory =
+                "all";
+
+
+            document
+                .querySelectorAll(
+                    ".filter-btn"
+                )
+                .forEach(btn => {
+
+                    btn.classList.remove(
+                        "active"
+                    );
+
+                });
+
+
+            const firstBtn =
+                document.querySelector(
+                    ".filter-btn"
+                );
+
+            if (firstBtn) {
+                firstBtn.classList.add(
+                    "active"
+                );
+            }
+
+            loadPlaces();
+
+        }
+
+
+        /* =========================
+           INITIAL LOAD
+        ========================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                loadPlaces();
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
